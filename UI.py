@@ -59,7 +59,7 @@ class Ui_MainWindow(object):
         self.radCIFAR10.setObjectName("radCIFAR10")
         self.prgTrainingProgress = QtWidgets.QProgressBar(self.centralwidget)
         self.prgTrainingProgress.setGeometry(QtCore.QRect(50, 290, 319, 21))
-        self.prgTrainingProgress.setProperty("value", 24)
+        self.prgTrainingProgress.setProperty("value", 0)
         self.prgTrainingProgress.setObjectName("prgTrainingProgress")
         self.btnTrainNetwork = QtWidgets.QPushButton(self.centralwidget)
         self.btnTrainNetwork.setGeometry(QtCore.QRect(140, 220, 111, 31))
