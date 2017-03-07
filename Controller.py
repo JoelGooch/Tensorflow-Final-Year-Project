@@ -7,9 +7,9 @@ import os
 import pickle
 import datetime
 import cv2
-import cnn_gui as design
+import CNN_GUI_V5 as design
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
 
 
 class Worker(QObject):
@@ -17,22 +17,25 @@ class Worker(QObject):
     epochProgress = pyqtSignal(float)
     testSetAccuracy = pyqtSignal(float)
     logMessage = pyqtSignal(str)
+    workComplete = pyqtSignal()
 
-    def __init__(self, max_epochs: int, b_size: int, l_rate: float, opt: int):
+    def __init__(self, max_epochs: int, b_size: int, l_rate: float, opt: int, save_dir: str, save_every: int):
         super().__init__()
         self.__abort = False
         self.num_epochs = max_epochs
         self.batch_size = b_size
         self.learning_rate = l_rate
         self.optimizer = opt
+        self.save_directory = save_dir
+        self.save_interval = save_every
 
         
     @pyqtSlot()
     def work(self):
-        self.train_network(self.num_epochs, self.batch_size, self.learning_rate, self.optimizer)
+        self.train_network(self.num_epochs, self.batch_size, self.learning_rate, self.optimizer, self.save_directory, self.save_interval)
 
 
-    def train_network(self, num_epochs, batch_size, learning_rate, learning_algo):
+    def train_network(self, num_epochs, batch_size, learning_rate, learning_algo, save_path, save_interval):
         image_size = 32 # images are 32x32x3
         num_channels = 3 # RGB
         num_classes = 10 # 10 possible classes
@@ -55,7 +58,7 @@ class Worker(QObject):
 
         for i in range(num_training_files):
             pickle_file = pickle_directory + "data_batch_" + str(i + 1)
-        
+            
             with open(pickle_file, mode='rb') as file:
                 data = pickle.load(file, encoding='bytes')
                 images_batch = data[b'data']
@@ -74,7 +77,7 @@ class Worker(QObject):
 
         # convert training labels from integer format to one hot encoding
         training_labels = np.eye(num_classes, dtype=int)[training_classes]
-        
+            
         # testing class labels in one hot encoding
         testing_labels = np.zeros(shape=[num_testing_images_total, num_classes], dtype=int)
 
@@ -103,11 +106,13 @@ class Worker(QObject):
         graph = tf.Graph()
         with graph.as_default():
 
-            self.logMessage.emit('Initialising Tensorflow Variables...')
+
+            self.logMessage.emit('Initialising Tensorflow Variables... \n')
 
             # define placeholder variables
             x = tf.placeholder(tf.float32, shape=(None, image_size, image_size, num_channels))
             y = tf.placeholder(tf.float32, shape=(None, num_classes))
+            #tf_testing_set = tf.constant(testing_set)
 
             # stores the class integer values 
             labels_class = tf.argmax(y, dimension=1)
@@ -136,11 +141,11 @@ class Worker(QObject):
             def CIFAR10_CNN_Model(data, _dropout=1.0):
 
                 X = tf.reshape(data, shape=[-1, image_size, image_size, num_channels])
-                self.logMessage.emit('Shape of Input Data: {}'.format(str(X.get_shape())))
+                #self.logMessage.emit('Shape of Input Data: {}'.format(str(X.get_shape())))
 
                 # conv layer 1 
                 conv1 = tf.nn.relu(tf.nn.conv2d(X, conv1_weights, strides=[1, 1, 1, 1], padding='SAME') + conv1_biases)
-                self.logMessage.emit('Shape of Conv1: {}'.format(str(conv1.get_shape())))
+                #self.logMessage.emit('Shape of Conv1: {}'.format(str(conv1.get_shape())))
 
                 # max pooling 1 
                 pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
@@ -171,13 +176,14 @@ class Worker(QObject):
                 return output
 
 
+
             model_output = CIFAR10_CNN_Model(x, keep_prob)
 
             cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=model_output, labels=y)
 
             loss = tf.reduce_mean(cross_entropy, name='cross_entropy')
 
-        
+            
             #Adding the regularization terms to the loss
             #beta = 5e-4
             #loss += (beta * tf.nn.l2_loss(conv1_weights)) 
@@ -187,7 +193,7 @@ class Worker(QObject):
             #loss += (beta * tf.nn.l2_loss(dense1_weights))
             #loss += (beta * tf.nn.l2_loss(dense2_weights))
             #loss += (beta * tf.nn.l2_loss(output_weights))
-        
+            
 
             loss_summary = tf.summary.scalar("loss", loss)
 
@@ -198,77 +204,81 @@ class Worker(QObject):
 
             if (learning_algo == 0):
                 optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
-                self.logMessage.emit('Gradient Descent Optimizer Selected')
+                self.logMessage.emit('Optimizer: Gradient Descent')
             elif (learning_algo == 1):
                 optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss, global_step=global_step)
-                self.logMessage.emit('Adam Optimizer Selected')
+                self.logMessage.emit('Optimizer: Adam')
             elif (learning_algo == 2):
                 optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
-                self.logMessage.emit('Ada Grad Optimizer Selected')
-
+                self.logMessage.emit('Optimizer: Ada Grad')
             #optimizer = tf.train.MomentumOptimizer(learning_rate, 0.95).minimize(loss, global_step=global_step)
+
 
             network_pred_class = tf.argmax(model_output, dimension=1)
             correct_prediction = tf.equal(network_pred_class, labels_class)
+
             accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
+            accuracy_summary = tf.summary.scalar("accuracy", accuracy)
 
             saver = tf.train.Saver()
+            #saver = tf.train.Saver({"conv1_weights":conv1_weights, "conv1_biases":conv1_biases, "conv2_weights":conv2_weights, "conv2_biases":conv2_biases, 
+            #    "dense1_weights":dense1_weights, "dense1_biases":dense1_biases, "dense2_weights":dense2_weights, "dense2_biases":dense2_biases, 
+            #    "output_weights":output_weights, "output_biases":output_biases, "global_step":global_step})
 
-
-        with tf.Session(graph=graph) as session:
-            merged_summaries = tf.summary.merge_all()
-            now = datetime.datetime.now()
-            log_path = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/tmp/CIFAR10/log/" + str(now.hour) + str(now.minute) + str(now.second)
-            writer_summaries = tf.summary.FileWriter(log_path, graph)
-
-            save_path = 'C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/tmp/CIFAR10/checkpoints/'
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
-            try:
-                self.logMessage.emit('Trying to restore last checkpoint ...')
-                # Use TensorFlow to find the latest checkpoint - if any.
+            with tf.Session(graph=graph) as session:
+                merged_summaries = tf.summary.merge_all()
+                now = datetime.datetime.now()
+                log_path = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/tmp/CIFAR10/log/" + str(now.hour) + str(now.minute) + str(now.second)
+                #save_dir = os.path.join(save_dir, 'CIFAR10')
+                writer_summaries = tf.summary.FileWriter(log_path, graph)
+                 # Use TensorFlow to find the latest checkpoint - if any.
                 last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=save_path)
 
-                # Try and load the data in the checkpoint.
-                saver.restore(session, save_path=last_chk_path)
-                self.logMessage.emit('Restored checkpoint from: {} '.format(last_chk_path))
-            except:
-                self.logMessage.emit('Failed to restore checkpoint. Initializing variables instead.')
-                session.run(tf.global_variables_initializer())
+
+                self.logMessage.emit('Trying to restore last checkpoint ...')
+                try:
+                    # Try and load the data in the checkpoint.
+                    saver.restore(session, save_path=last_chk_path)
+                    self.logMessage.emit('Restored checkpoint from: {} '.format(last_chk_path))
+                except:
+                    self.logMessage.emit('Failed to restore checkpoint. Initializing variables instead.')
+                    session.run(tf.global_variables_initializer())
 
 
-            for epoch in range(num_epochs):
+                for epoch in range(num_epochs):
+                    offset = (epoch * batch_size) % (training_labels.shape[0] - batch_size)
+                    batch_data = training_set[offset:(offset + batch_size), :, :, :]
+                    batch_labels = training_labels[offset:(offset + batch_size)]
 
-                offset = (epoch * batch_size) % (training_labels.shape[0] - batch_size)
-                batch_data = training_set[offset:(offset + batch_size), :, :, :]
-                batch_labels = training_labels[offset:(offset + batch_size)]
+                    feed_dict = {x: batch_data, y: batch_labels, keep_prob: 0.5}
+                    _, l, predictions, my_summary, acc = session.run([optimizer, loss, model_output, merged_summaries, accuracy], 
+                                                    feed_dict=feed_dict)
+                    writer_summaries.add_summary(my_summary, epoch)
 
-                feed_dict = {x: batch_data, y: batch_labels, keep_prob: 0.5}
-                _, l, predictions, my_summary, acc = session.run([optimizer, loss, model_output, merged_summaries, accuracy], 
-                                                feed_dict=feed_dict)
-                writer_summaries.add_summary(my_summary, epoch)
+                    if (epoch % 100 == 0):
+                        self.logMessage.emit('')
+                        self.logMessage.emit('Loss at epoch: {} of {} is {}'.format(epoch, str(num_epochs), l))
+                        self.logMessage.emit('Global Step: {}'.format(str(global_step.eval())))
+                        self.logMessage.emit('Learning Rate: {}'.format(str(learning_rate)))
+                        self.logMessage.emit('Minibatch size: {}'.format(str(batch_labels.shape)))
+                        self.logMessage.emit('Batch Accuracy = {}'.format(str(acc)))
 
-                if (epoch % 100 == 0):
-                    self.logMessage.emit('')
-                    self.logMessage.emit('Loss at epoch: {} of {} is {}'.format(epoch, str(num_epochs), l))
-                    self.logMessage.emit('Global Step: {}'.format(str(global_step.eval())))
-                    self.logMessage.emit('Learning Rate: {}'.format(str(learning_rate)))
-                    self.logMessage.emit('Minibatch size: {}'.format(str(batch_labels.shape)))
-                    self.logMessage.emit('Batch Accuracy = {}'.format(str(acc)))
+                    epochProg = (epoch / num_epochs) * 100
+                    self.epochProgress.emit(epochProg)
 
-                epochProg = (epoch / num_epochs) * 100
-                self.epochProgress.emit(epochProg)
+                    if save_interval != 0:
+                        if (epoch % save_interval == 0):
+                            saver.save(sess=session, save_path=save_path)
+                            print("Saved Checkpoint")
 
-                #if (epoch % 10000 == 0):
-                #    saver.save(session, save_path=save_path, global_step=global_step)
-                #    print("Saved Checkpoint")
+                self.epochProgress.emit(100)
+                test_acc = session.run(accuracy, feed_dict={x: testing_set, y:testing_labels, keep_prob: 1.0})
+                self.testSetAccuracy.emit(test_acc)
+                saver.save(session, save_path=save_path, global_step=global_step)
+                self.logMessage.emit('\nTraining Complete')
+                self.logMessage.emit('Saved Checkpoint \n')
+                self.workComplete.emit()
 
-            self.epochProgress.emit(100)
-
-            test_acc = session.run(accuracy, feed_dict={x: testing_set, y:testing_labels, keep_prob: 1.0})
-            self.testSetAccuracy.emit(test_acc)
-            saver.save(session, save_path=save_path, global_step=global_step)
-            self.logMessage.emit('Saved Checkpoint')
 
 
     def abort(self):
@@ -282,8 +292,17 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
     def __init__(self):  
         super().__init__()
         self.setupUi(self)
+
+        self.txtSavePath.setText('C:/tmp/')
+
+        # when pressing Exit from File menu
+        self.actionExit.triggered.connect(self.close)
+        self.actionLoad.triggered.connect(self.loadModel)
         
+        self.btnChangeSavePath.clicked.connect(self.changeCheckpointSavePath)
         self.btnTrainNetwork.clicked.connect(self.trainButtonClicked)
+        #self.btnCancelTraining.clicked.connect(self.abort_workers)
+        self.btnCancelTraining.setDisabled = True
 
         self.__threads = None
 
@@ -294,22 +313,29 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
             batch_size = int(self.txtBatchSize. text())
             learning_rate = float(self.txtLearningRate.text())
             optimizer = int(self.cbxOptimizer.currentIndex())
+
             '''
             num_epochs = 400
             batch_size = 64
             learning_rate = 0.05
-            optimizer = 1
+            optimizer = 0
+            save_path = str(self.txtSavePath.text())
+            if self.cbxSaveInterval.currentIndex() == 0:
+                save_interval = 0
+            else:
+                save_interval = int(self.cbxSaveInterval.currentText())
             
 
         except ValueError:
-            self.textEdit.append('Number of Epochs, Batch Size and Learning Rate must be a number!')
+            self.txtOutputLog.append('Number of Epochs, Batch Size and Learning Rate must be a Numerical Value!')
         else:
             self.__threads = []
 
             self.btnTrainNetwork.setDisabled(True)
+            self.btnCancelTraining.setEnabled(True)
             self.prgTrainingProgress.setValue(0)
 
-            worker = Worker(num_epochs, batch_size, learning_rate, optimizer)
+            worker = Worker(num_epochs, batch_size, learning_rate, optimizer, save_path, save_interval)
             thread = QThread()
 
             # store reference to objects so they are not garbage collected
@@ -318,13 +344,52 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
             worker.testSetAccuracy.connect(self.updateTestSetAccuracy)
             worker.epochProgress.connect(self.updateProgressBar)
-            worker.logMessage.connect(self.textEdit.append)
+            worker.logMessage.connect(self.txtOutputLog.append)
+            worker.workComplete.connect(self.abort_workers)
 
             self.abortWorkers.connect(worker.abort)
 
             thread.started.connect(worker.work)
             thread.start()
-            
+
+    def changeCheckpointSavePath(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.txtSavePath.setText(path + "/")
+
+
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Message', "Are you sure you want to quit? All Unsaved Progress will be lost...", 
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+    
+
+    def loadModel(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file', '/home', "")
+        self.txtOutputLog.append(str(fname[0]))
+        if fname[0]:
+            f = open(fname[0], 'r')
+            #self.txtOutputLog.append(str(fname))
+
+            #with f:
+                #data = f.read()
+                #self.textEdit.setText(data)  
+            '''
+            try:
+                txtOutputLog.emit('Trying to restore last checkpoint ...')
+                # Use TensorFlow to find the latest checkpoint - if any.
+                last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=save_path)
+
+                # Try and load the data in the checkpoint.
+                saver.restore(session, save_path=last_chk_path)
+                self.logMessage.emit('Restored checkpoint from: {} '.format(last_chk_path))
+            except:
+                self.logMessage.emit('Failed to restore checkpoint. Initializing variables instead.')
+                session.run(tf.global_variables_initializer())
+            '''
 
     @pyqtSlot(float)
     def updateTestSetAccuracy(self, accuracy: float):
@@ -359,4 +424,3 @@ if __name__ == "__main__":
         print "CONFIRM: " + str(person_investment)
 
 '''
-    
