@@ -7,9 +7,14 @@ import os
 import pickle
 import datetime
 import cv2
-import CNN_GUI_V5 as design
+import matplotlib
+import CNN_GUI_V6 as design
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog, QAction, QSizePolicy
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
 
 
 class Worker(QObject):
@@ -18,6 +23,7 @@ class Worker(QObject):
     testSetAccuracy = pyqtSignal(float)
     logMessage = pyqtSignal(str)
     workComplete = pyqtSignal()
+    lossOverEpochs = pyqtSignal(float, int)
 
     def __init__(self, max_epochs: int, b_size: int, l_rate: float, opt: int, save_dir: str, save_every: int):
         super().__init__()
@@ -262,6 +268,7 @@ class Worker(QObject):
                         self.logMessage.emit('Learning Rate: {}'.format(str(learning_rate)))
                         self.logMessage.emit('Minibatch size: {}'.format(str(batch_labels.shape)))
                         self.logMessage.emit('Batch Accuracy = {}'.format(str(acc)))
+                        self.lossOverEpochs.emit(l, epoch)
 
                     epochProg = (epoch / num_epochs) * 100
                     self.epochProgress.emit(epochProg)
@@ -279,10 +286,58 @@ class Worker(QObject):
                 self.logMessage.emit('Saved Checkpoint \n')
                 self.workComplete.emit()
 
-
-
     def abort(self):
         self.__abort = True
+
+
+class MyMplCanvas(FigureCanvas):
+    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+    def __init__(self, parent=None, width=5, height=4, dpi=100, title='title'):
+        self.title = title
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        fig.suptitle(title)
+
+        # We want the axes cleared every time plot() is called
+        self.axes.hold(False)
+
+        self.compute_initial_figure()
+
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self,
+                QSizePolicy.Expanding,
+                QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+        self.losses = []
+        self.epochs = []
+
+
+
+class MyDynamicMplCanvas(MyMplCanvas):
+    """A canvas that updates itself every second with a new plot."""
+    def __init__(self, *args, **kwargs):
+        MyMplCanvas.__init__(self, *args, **kwargs)
+
+    def compute_initial_figure(self):
+        #self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        self.axes.set_ylabel('Loss')
+        self.axes.set_xlabel('Epoch')
+        self.axes.grid(True)
+
+    @pyqtSlot(float, int)
+    def update_figure(self, loss:float, epoch:int):
+        # Build a list of 4 random integers between 0 and 10 (both inclusive)
+        self.axes.set_ylabel('Loss')
+        self.axes.set_xlabel('Epoch')
+        self.losses.append(loss)
+        self.epochs.append(epoch)
+        self.axes.plot(self.epochs, self.losses, 'r')
+        self.axes.grid(True)
+        self.draw()
+
 
 
 class CNNApp(QMainWindow, design.Ui_MainWindow):
@@ -294,38 +349,49 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
         self.setupUi(self)
 
         self.txtSavePath.setText('C:/tmp/')
+        self.txtLoadCheckpoints.setText('C:/tmp/')
+        self.loadModelRadClicked()
 
-        # when pressing Exit from File menu
+        self.actionDesign.triggered.connect(self.openDesignTab)
+        self.actionVisualizations.triggered.connect(self.openVisualizationTab)
         self.actionExit.triggered.connect(self.close)
-        self.actionLoad.triggered.connect(self.loadModel)
+
+        self.chkSavePath.stateChanged.connect(self.checkpointCheckBoxStateChange)
+        self.radLoadModel.toggled.connect(self.loadModelRadClicked)
+        self.radCreateModel.toggled.connect(self.createModelRadClicked)
         
         self.btnChangeSavePath.clicked.connect(self.changeCheckpointSavePath)
+        self.btnChangeLoadCheckpoints.clicked.connect(self.changeCheckpointLoadPath)
+        self.btnChangeModelPath.clicked.connect(self.loadModel)
+        
         self.btnTrainNetwork.clicked.connect(self.trainButtonClicked)
         #self.btnCancelTraining.clicked.connect(self.abort_workers)
         self.btnCancelTraining.setDisabled = True
+
+        self.dc = MyDynamicMplCanvas(self.lossGraphWidget, width=5, height=4, dpi=100, title='Loss Over Epochs')
+        #self.graphWidget.addWidget(dc)
 
         self.__threads = None
 
     def trainButtonClicked(self):
         try:
-            '''
+            
             num_epochs = int(self.txtNumEpochs.text())
             batch_size = int(self.txtBatchSize. text())
             learning_rate = float(self.txtLearningRate.text())
             optimizer = int(self.cbxOptimizer.currentIndex())
-
             '''
             num_epochs = 400
             batch_size = 64
             learning_rate = 0.05
             optimizer = 0
+            '''
             save_path = str(self.txtSavePath.text())
             if self.cbxSaveInterval.currentIndex() == 0:
                 save_interval = 0
             else:
                 save_interval = int(self.cbxSaveInterval.currentText())
-            
-
+    
         except ValueError:
             self.txtOutputLog.append('Number of Epochs, Batch Size and Learning Rate must be a Numerical Value!')
         else:
@@ -344,6 +410,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
             worker.testSetAccuracy.connect(self.updateTestSetAccuracy)
             worker.epochProgress.connect(self.updateProgressBar)
+            worker.lossOverEpochs.connect(self.dc.update_figure)
             worker.logMessage.connect(self.txtOutputLog.append)
             worker.workComplete.connect(self.abort_workers)
 
@@ -356,6 +423,29 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
         path = QFileDialog.getExistingDirectory(self, "Select Directory")
         self.txtSavePath.setText(path + "/")
 
+    def changeCheckpointLoadPath(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.txtLoadCheckpoints.setText(path + "/")
+        self.chkSavePath.setCheckState(False)
+
+    def checkpointCheckBoxStateChange(self):
+        if self.chkSavePath.isChecked():
+            self.txtSavePath.setText(self.txtLoadCheckpoints.text())
+
+    def loadModelRadClicked(self):
+        self.grpCreateModel.setDisabled(True)
+        self.btnChangeModelPath.setEnabled(True)
+
+    def createModelRadClicked(self):
+        self.grpCreateModel.setEnabled(True)
+        self.btnChangeModelPath.setDisabled(True)
+        self.tabMenuLayer.setEnabled(True)
+            
+    def openDesignTab(self):
+        self.tabWidget.setCurrentIndex(0)
+
+    def openVisualizationTab(self):
+        self.tabWidget.setCurrentIndex(1)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Message', "Are you sure you want to quit? All Unsaved Progress will be lost...", 
