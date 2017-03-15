@@ -252,6 +252,7 @@ class Worker(QObject):
 
 
                 for epoch in range(num_epochs):
+                    
                     offset = (epoch * batch_size) % (training_labels.shape[0] - batch_size)
                     batch_data = training_set[offset:(offset + batch_size), :, :, :]
                     batch_labels = training_labels[offset:(offset + batch_size)]
@@ -375,17 +376,17 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
     def trainButtonClicked(self):
         try:
-            
+            '''
             num_epochs = int(self.txtNumEpochs.text())
             batch_size = int(self.txtBatchSize. text())
             learning_rate = float(self.txtLearningRate.text())
             optimizer = int(self.cbxOptimizer.currentIndex())
             '''
-            num_epochs = 400
+            num_epochs = 1000
             batch_size = 64
             learning_rate = 0.05
-            optimizer = 0
-            '''
+            optimizer = 1
+            
             save_path = str(self.txtSavePath.text())
             if self.cbxSaveInterval.currentIndex() == 0:
                 save_interval = 0

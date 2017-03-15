@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1169</width>
-    <height>933</height>
+    <width>1175</width>
+    <height>637</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Tab 1</string>
+      <string>Train</string>
      </attribute>
      <widget class="QGroupBox" name="grpDataSet">
       <property name="geometry">
@@ -36,7 +36,7 @@
         <x>20</x>
         <y>10</y>
         <width>120</width>
-        <height>91</height>
+        <height>111</height>
        </rect>
       </property>
       <property name="title">
@@ -92,7 +92,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>450</y>
+        <y>130</y>
         <width>1141</width>
         <height>411</height>
        </rect>
@@ -489,7 +489,7 @@
         <x>150</x>
         <y>10</y>
         <width>1011</width>
-        <height>441</height>
+        <height>111</height>
        </rect>
       </property>
       <property name="title">
@@ -581,830 +581,905 @@
        <property name="title">
         <string/>
        </property>
-       <widget class="QWidget" name="horizontalLayoutWidget_2">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>501</width>
-          <height>331</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Design">
+     <attribute name="title">
+      <string>Design</string>
+     </attribute>
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>630</x>
+        <y>60</y>
+        <width>458</width>
+        <height>329</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <widget class="QTableView" name="tblNetworkModel"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnValidateNetwork">
+         <property name="text">
+          <string>Validate Network</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>60</y>
+        <width>491</width>
+        <height>331</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout">
+            <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout">
+              <widget class="QComboBox" name="cbxLayerSelect">
                <item>
-                <widget class="QComboBox" name="cbxLayerSelect">
-                 <item>
-                  <property name="text">
-                   <string>Convolutional Layer</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Max Pooling Layer</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Dropout</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Normalizing Layer</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Fully Connected Layer</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Output</string>
-                  </property>
-                 </item>
-                </widget>
+                <property name="text">
+                 <string>Convolutional Layer</string>
+                </property>
                </item>
                <item>
-                <widget class="QPushButton" name="btnAddLayer">
-                 <property name="text">
-                  <string>Add New Layer</string>
-                 </property>
-                </widget>
+                <property name="text">
+                 <string>Max Pooling Layer</string>
+                </property>
                </item>
-              </layout>
-             </item>
-             <item>
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>0</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QTabWidget" name="tabMenuLayer">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="currentIndex">
-                <number>0</number>
-               </property>
-               <widget class="QWidget" name="tabConvLayer">
-                <attribute name="title">
-                 <string>Conv Layer</string>
-                </attribute>
-                <widget class="QWidget" name="gridLayoutWidget_2">
-                 <property name="geometry">
-                  <rect>
-                   <x>50</x>
-                   <y>10</y>
-                   <width>391</width>
-                   <height>186</height>
-                  </rect>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_2">
-                  <item row="7" column="1">
-                   <widget class="QComboBox" name="cbxConvPadding">
-                    <item>
-                     <property name="text">
-                      <string>SAME</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>VALID</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="lblConvStDev">
-                    <property name="text">
-                     <string>Std Dev of Weights:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QComboBox" name="cbxConvoWeightInit">
-                    <item>
-                     <property name="text">
-                      <string>Truncated Normal</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="lblConvWeightInit">
-                    <property name="text">
-                     <string>Weight Initialization:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="lblConvKernelSize">
-                    <property name="text">
-                     <string>Conv Kernel Size:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="lblConvOutputFilters">
-                    <property name="text">
-                     <string>Num Output Filters:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="lblConvStride">
-                    <property name="text">
-                     <string>Conv Stride:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="0">
-                   <widget class="QLabel" name="lblConvPadding">
-                    <property name="text">
-                     <string>Padding:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_4">
-                    <item>
-                     <widget class="QLineEdit" name="txtConvStDev"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_2">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="1" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_3">
-                    <item>
-                     <widget class="QLineEdit" name="txtConvStride1"/>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="txtConvStride2"/>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="txtConvStride3"/>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="txtConvStride4"/>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="3" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_5">
-                    <item>
-                     <widget class="QLineEdit" name="txtConvOutputFilters"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_3">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="0" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_12">
-                    <item>
-                     <widget class="QLineEdit" name="txtConvKernelSize"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_6">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="lblConvActFunction">
-                    <property name="text">
-                     <string>Activation Function:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QComboBox" name="cbxConvActFunction">
-                    <item>
-                     <property name="text">
-                      <string>Rectified Linear</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Sigmoid</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QPushButton" name="btnAddConvLayer">
-                 <property name="geometry">
-                  <rect>
-                   <x>180</x>
-                   <y>210</y>
-                   <width>131</width>
-                   <height>31</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Add Layer</string>
-                 </property>
-                </widget>
-               </widget>
-               <widget class="QWidget" name="tabMaxPooling">
-                <attribute name="title">
-                 <string>Max Pooling</string>
-                </attribute>
-                <widget class="QWidget" name="gridLayoutWidget_3">
-                 <property name="geometry">
-                  <rect>
-                   <x>50</x>
-                   <y>10</y>
-                   <width>391</width>
-                   <height>91</height>
-                  </rect>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_3">
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="lblPoolStride">
-                    <property name="text">
-                     <string>Pooling Stride:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="lblPoolPadding">
-                    <property name="text">
-                     <string>Padding:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="lblPoolKernelSize">
-                    <property name="text">
-                     <string>Pooling Kernel Size:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QComboBox" name="cbxPoolPadding"/>
-                  </item>
-                  <item row="1" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_6">
-                    <item>
-                     <widget class="QLineEdit" name="txtPoolStride1"/>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="txtPoolStride2"/>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="txtPoolStride3"/>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="txtPoolStride4"/>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="0" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_13">
-                    <item>
-                     <widget class="QLineEdit" name="txtPoolKernelSize"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_8">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QPushButton" name="btnAddMaxPool">
-                 <property name="geometry">
-                  <rect>
-                   <x>170</x>
-                   <y>120</y>
-                   <width>131</width>
-                   <height>31</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Add Layer</string>
-                 </property>
-                </widget>
-               </widget>
-               <widget class="QWidget" name="tabDropout">
-                <attribute name="title">
-                 <string>Dropout</string>
-                </attribute>
-                <widget class="QWidget" name="gridLayoutWidget_5">
-                 <property name="geometry">
-                  <rect>
-                   <x>50</x>
-                   <y>10</y>
-                   <width>391</width>
-                   <height>51</height>
-                  </rect>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="lblPoolKeepRate">
-                    <property name="text">
-                     <string>Keep Rate:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_16">
-                    <item>
-                     <widget class="QLineEdit" name="txtPoolKeepRate"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_11">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QPushButton" name="btnAddDropout">
-                 <property name="geometry">
-                  <rect>
-                   <x>180</x>
-                   <y>80</y>
-                   <width>131</width>
-                   <height>31</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Add Layer</string>
-                 </property>
-                </widget>
-               </widget>
-               <widget class="QWidget" name="tabNormalizing">
-                <attribute name="title">
-                 <string>Normalizing</string>
-                </attribute>
-                <widget class="QWidget" name="gridLayoutWidget_4">
-                 <property name="geometry">
-                  <rect>
-                   <x>50</x>
-                   <y>10</y>
-                   <width>391</width>
-                   <height>121</height>
-                  </rect>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_4">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="lblNormBias">
-                    <property name="text">
-                     <string>Bias:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_9">
-                    <item>
-                     <widget class="QLineEdit" name="txtNormAlpha"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_4">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>280</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="2" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_11">
-                    <item>
-                     <widget class="QLineEdit" name="txtNormBeta"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_5">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>280</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="lblNormAlpha">
-                    <property name="text">
-                     <string>Alpha:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="lblNormBeta">
-                    <property name="text">
-                     <string>Beta:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_10">
-                    <item>
-                     <widget class="QLineEdit" name="txtNormBias"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_7">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>280</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QPushButton" name="btnAddNormalizing">
-                 <property name="geometry">
-                  <rect>
-                   <x>180</x>
-                   <y>150</y>
-                   <width>131</width>
-                   <height>31</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Add Layer</string>
-                 </property>
-                </widget>
-               </widget>
-               <widget class="QWidget" name="tabFullyConnected">
-                <attribute name="title">
-                 <string>Fully Connected</string>
-                </attribute>
-                <widget class="QWidget" name="gridLayoutWidget_6">
-                 <property name="geometry">
-                  <rect>
-                   <x>50</x>
-                   <y>10</y>
-                   <width>391</width>
-                   <height>131</height>
-                  </rect>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_6">
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="lblFCWeightInit">
-                    <property name="text">
-                     <string>Weight Initialization:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_14">
-                    <item>
-                     <widget class="QLineEdit" name="txtFCStDev"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_9">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="lblFCNumOutputNodes">
-                    <property name="text">
-                     <string>Num Output Nodes:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_17">
-                    <item>
-                     <widget class="QLineEdit" name="txtFCNumOutputNodes"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_10">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="lblFCStDev">
-                    <property name="text">
-                     <string>Std Dev of Weights:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <widget class="QComboBox" name="cbxFCWeightInit">
-                    <item>
-                     <property name="text">
-                      <string>Truncated Normal</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QComboBox" name="cbxFCActFunction">
-                    <item>
-                     <property name="text">
-                      <string>Rectified Linear</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Sigmoid</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="lblFCActFunction">
-                    <property name="text">
-                     <string>Activation Function:</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QPushButton" name="btnAddFullyConn">
-                 <property name="geometry">
-                  <rect>
-                   <x>180</x>
-                   <y>160</y>
-                   <width>131</width>
-                   <height>31</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Add Layer</string>
-                 </property>
-                </widget>
-               </widget>
-               <widget class="QWidget" name="tabOutput">
-                <attribute name="title">
+               <item>
+                <property name="text">
+                 <string>Fully Connected Layer</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
                  <string>Output</string>
-                </attribute>
-                <widget class="QWidget" name="gridLayoutWidget_7">
-                 <property name="geometry">
-                  <rect>
-                   <x>50</x>
-                   <y>10</y>
-                   <width>391</width>
-                   <height>101</height>
-                  </rect>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_7">
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="lblOutputStDev">
-                    <property name="text">
-                     <string>Std Dev of Weights:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
-                   <widget class="QComboBox" name="cbxOutputWeightInit">
-                    <item>
-                     <property name="text">
-                      <string>Truncated Normal</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="lblOutputActFunction">
-                    <property name="text">
-                     <string>Activation Function:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QComboBox" name="cbxOutputActFunction">
-                    <item>
-                     <property name="text">
-                      <string>Rectified Linear</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Sigmoid</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_15">
-                    <item>
-                     <widget class="QLineEdit" name="txtOutputStDev"/>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_12">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>210</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="lblOutputWeightInit">
-                    <property name="text">
-                     <string>Weight Initialization:</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QPushButton" name="btnAddOutput">
-                 <property name="geometry">
-                  <rect>
-                   <x>180</x>
-                   <y>130</y>
-                   <width>131</width>
-                   <height>31</height>
-                  </rect>
-                 </property>
-                 <property name="text">
-                  <string>Add Layer</string>
-                 </property>
-                </widget>
-               </widget>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnAddLayer">
+               <property name="text">
+                <string>Add New Layer</string>
+               </property>
               </widget>
              </item>
             </layout>
            </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>10</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QTabWidget" name="tabMenuLayer">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="tabPosition">
+              <enum>QTabWidget::North</enum>
+             </property>
+             <property name="tabShape">
+              <enum>QTabWidget::Rounded</enum>
+             </property>
+             <property name="currentIndex">
+              <number>2</number>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="tabsClosable">
+              <bool>false</bool>
+             </property>
+             <property name="movable">
+              <bool>false</bool>
+             </property>
+             <widget class="QWidget" name="tabConvLayer">
+              <attribute name="title">
+               <string>Conv Layer</string>
+              </attribute>
+              <widget class="QPushButton" name="btnAddConvLayer">
+               <property name="geometry">
+                <rect>
+                 <x>180</x>
+                 <y>220</y>
+                 <width>131</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Add Layer</string>
+               </property>
+              </widget>
+              <widget class="QWidget" name="gridLayoutWidget_2">
+               <property name="geometry">
+                <rect>
+                 <x>20</x>
+                 <y>20</y>
+                 <width>441</width>
+                 <height>197</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_8">
+                <item row="4" column="4">
+                 <widget class="QLineEdit" name="txtConvStdDev">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="2">
+                 <spacer name="horizontalSpacer_2">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item row="8" column="1">
+                 <widget class="QCheckBox" name="cbxConvDropout">
+                  <property name="text">
+                   <string>Yes</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="3">
+                 <widget class="QLabel" name="lblConvStride">
+                  <property name="text">
+                   <string>Conv Stride:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QComboBox" name="cbxConvPadding">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>SAME</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>VALID</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="7" column="0">
+                 <widget class="QLabel" name="lblConvNorm">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string>Normalize:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="1">
+                 <widget class="QCheckBox" name="cbxConvNorm">
+                  <property name="text">
+                   <string>Yes</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="0">
+                 <widget class="QLabel" name="lblConvDropout">
+                  <property name="text">
+                   <string>Dropout:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="lblConvActFunction">
+                  <property name="text">
+                   <string>Activation Function:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lblConvKernelSize">
+                  <property name="text">
+                   <string>Conv Kernel Size:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="txtConvKernelSize">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="lblConvOutputFilters">
+                  <property name="text">
+                   <string>Num Output Filters:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="cbxConvActFunction">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>Rectified Linear</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Sigmoid</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="lblConvWeightInit">
+                  <property name="text">
+                   <string>Weight Initialization:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QLineEdit" name="txtConvOutputFilters">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QComboBox" name="cbxConvoWeightInit">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>Truncated Normal</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="4" column="3">
+                 <widget class="QLabel" name="lblConvStdDev">
+                  <property name="text">
+                   <string>Std Dev of Weights:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="lblConvPadding">
+                  <property name="text">
+                   <string>Padding:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="4">
+                 <widget class="QLineEdit" name="txtConvStride">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="3">
+                 <widget class="QLabel" name="lblConvKeepRate">
+                  <property name="text">
+                   <string>Keep Rate:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="4">
+                 <widget class="QLineEdit" name="txtConvKeepRate">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="tabMaxPooling">
+              <attribute name="title">
+               <string>Max Pooling</string>
+              </attribute>
+              <widget class="QWidget" name="gridLayoutWidget_3">
+               <property name="geometry">
+                <rect>
+                 <x>20</x>
+                 <y>20</y>
+                 <width>341</width>
+                 <height>131</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_3">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblPoolKernelSize">
+                  <property name="text">
+                   <string>Pooling Kernel Size:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="lblPoolPadding">
+                  <property name="text">
+                   <string>Padding:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lblPoolStride">
+                  <property name="text">
+                   <string>Pooling Stride:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="cbxPoolPadding">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>SAME</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="lblPoolNorm">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string>Normalize:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QCheckBox" name="cbxPoolNorm">
+                  <property name="text">
+                   <string>Yes</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QCheckBox" name="cbxPoolDropout">
+                  <property name="text">
+                   <string>Yes</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="lblPoolDropout">
+                  <property name="text">
+                   <string>Dropout:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="3">
+                 <widget class="QLabel" name="lblPoolKeepRate">
+                  <property name="text">
+                   <string>Keep Rate:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="4">
+                 <widget class="QLineEdit" name="txtPoolKeepRate">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="2">
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="txtPoolKernelSize">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="txtPoolStride">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QPushButton" name="btnAddMaxPool">
+               <property name="geometry">
+                <rect>
+                 <x>160</x>
+                 <y>170</y>
+                 <width>131</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Add Layer</string>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="tabFullyConnected">
+              <attribute name="title">
+               <string>Fully Connected</string>
+              </attribute>
+              <widget class="QWidget" name="gridLayoutWidget_6">
+               <property name="geometry">
+                <rect>
+                 <x>20</x>
+                 <y>20</y>
+                 <width>402</width>
+                 <height>141</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_6">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lblFCNumOutputNodes">
+                  <property name="text">
+                   <string>Num Output Nodes:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="lblFCWeightInit">
+                  <property name="text">
+                   <string>Weight Initialization:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cbxFCActFunction">
+                  <item>
+                   <property name="text">
+                    <string>Rectified Linear</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Sigmoid</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QComboBox" name="cbxFCWeightInit">
+                  <item>
+                   <property name="text">
+                    <string>Truncated Normal</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblFCActFunction">
+                  <property name="text">
+                   <string>Activation Function:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="3">
+                 <widget class="QLabel" name="lblFCStdDev">
+                  <property name="text">
+                   <string>Std Dev of Weights:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="4">
+                 <widget class="QLineEdit" name="txtFCKeepRate">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="lblFCNorm">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string>Normalize:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="4">
+                 <widget class="QLineEdit" name="txtFCStdDev">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QCheckBox" name="cbxFCNorm">
+                  <property name="text">
+                   <string>Yes</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="txtFCNumOutputNodes">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="lblFCDropout">
+                  <property name="text">
+                   <string>Dropout:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QCheckBox" name="cbxFCDropout">
+                  <property name="text">
+                   <string>Yes</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="3">
+                 <widget class="QLabel" name="lblFCKeepRate">
+                  <property name="text">
+                   <string>Keep Rate:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="2">
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QPushButton" name="btnAddFullyConn">
+               <property name="geometry">
+                <rect>
+                 <x>170</x>
+                 <y>190</y>
+                 <width>131</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Add Layer</string>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="tabOutput">
+              <attribute name="title">
+               <string>Output</string>
+              </attribute>
+              <widget class="QWidget" name="gridLayoutWidget_7">
+               <property name="geometry">
+                <rect>
+                 <x>20</x>
+                 <y>20</y>
+                 <width>402</width>
+                 <height>61</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_7">
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cbxOutputActFunction">
+                  <item>
+                   <property name="text">
+                    <string>None</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Rectified Linear</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Sigmoid</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="cbxOutputWeightInit">
+                  <item>
+                   <property name="text">
+                    <string>Truncated Normal</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblOutputActFunction">
+                  <property name="text">
+                   <string>Activation Function:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="lblOutputWeightInit">
+                  <property name="text">
+                   <string>Weight Initialization:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="3">
+                 <widget class="QLabel" name="lblOutputStDev">
+                  <property name="text">
+                   <string>Std Dev of Weights:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="4">
+                 <widget class="QLineEdit" name="txtOutputStDev">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>60</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="2">
+                 <spacer name="horizontalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QPushButton" name="btnAddOutput">
+               <property name="geometry">
+                <rect>
+                 <x>180</x>
+                 <y>140</y>
+                 <width>131</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Add Layer</string>
+               </property>
+              </widget>
+             </widget>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="">
-       <property name="geometry">
-        <rect>
-         <x>540</x>
-         <y>100</y>
-         <width>458</width>
-         <height>329</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <item>
-           <widget class="QTableView" name="tblNetworkModel"/>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnValidateNetwork">
-          <property name="text">
-           <string>Validate Network</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7"/>
-        </item>
-       </layout>
-      </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>Visualizations</string>
      </attribute>
      <widget class="QWidget" name="lossGraphWidget" native="true">
       <property name="geometry">
@@ -1455,6 +1530,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionTrain"/>
    <addaction name="actionDesign"/>
    <addaction name="actionVisualizations"/>
    <addaction name="actionExit"/>
@@ -1490,6 +1566,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionTrain">
+   <property name="icon">
+    <iconset>
+     <normaloff>Icons/train.png</normaloff>Icons/train.png</iconset>
+   </property>
+   <property name="text">
+    <string>Train</string>
    </property>
   </action>
  </widget>

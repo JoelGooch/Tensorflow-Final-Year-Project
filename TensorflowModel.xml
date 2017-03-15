@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf8'?>
+<Model>
+	<Layer Type="Convolution">
+		<NumInputs>3</NumInputs>
+		<KernelSize>5</KernelSize>
+		<Stride>1</Stride>
+		<ActFunction>ReLu</ActFunction>
+		<NumOutputFilters>64</NumOutputFilters>
+		<Padding>SAME</Padding>
+		<Normalize>False</Normalize>
+		<Dropout>False</Dropout>
+		<KeepRate>1</KeepRate>
+	</Layer>
+	<Layer Type="Max Pool">
+		<KernelSize>3</KernelSize>
+		<Stride>2</Stride>
+		<Padding>SAME</Padding>
+		<Normalize>True</Normalize>
+		<Dropout>False</Dropout>
+		<KeepRate>1</KeepRate>
+	</Layer>
+	<Layer Type="Convolution">
+		<NumInputs>64</NumInputs>
+		<KernelSize>5</KernelSize>
+		<Stride>1</Stride>
+		<ActFunction>ReLu</ActFunction>
+		<NumOutputFilters>64</NumOutputFilters>
+		<Padding>SAME</Padding>
+		<Normalize>True</Normalize>
+		<Dropout>False</Dropout>
+		<KeepRate>1</KeepRate>
+	</Layer>
+	<Layer Type="Max Pool">
+		<KernelSize>3</KernelSize>
+		<Stride>2</Stride>
+		<Padding>SAME</Padding>
+		<Normalize>False</Normalize>
+		<Dropout>False</Dropout>
+		<KeepRate>1</KeepRate>
+	</Layer>
+	<Layer Type="Dense">
+		<NumInputs>4096</NumInputs>
+		<ActFunction>ReLu</ActFunction>
+		<NumOutputNodes>384</NumOutputNodes>
+		<Normalize>False</Normalize>
+		<Dropout>False</Dropout>
+		<KeepRate>1</KeepRate>
+	</Layer>
+	<Layer Type="Dense">
+		<NumInputs>384</NumInputs>
+		<ActFunction>ReLu</ActFunction>
+		<NumOutputNodes>192</NumOutputNodes>
+		<Normalize>False</Normalize>
+		<Dropout>False</Dropout>
+		<KeepRate>1</KeepRate>
+	</Layer>
+	<Layer Type="Output">
+		<NumInputs>192</NumInputs>
+		<ActFunction>None</ActFunction>
+		<NumOutputNodes>10</NumOutputNodes>
+	</Layer>
+</Model>
