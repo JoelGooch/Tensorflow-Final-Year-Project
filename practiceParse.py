@@ -1,49 +1,5 @@
 import xml.etree.ElementTree as ET
-
-
-class Layer:
-	def __init__(self, layerType):
-		self.layerType = layerType
-
-class ConvLayer(Layer):
-	def __init__(self, layerType, numInputs, kernelSize, stride, actFunction, numOutputFilters, padding, normalize, dropout , keepRate):
-		Layer.__init__(self, layerType)
-		self.numInputs = int(numInputs)
-		self.kernelSize = int(kernelSize)
-		self.stride = int(stride)
-		self.actFunction = actFunction
-		self.numOutputFilters = int(numOutputFilters)
-		self.padding = padding
-		self.normalize = normalize
-		self.dropout = dropout
-		self.keepRate = float(keepRate)
-
-class MaxPoolingLayer(Layer):
-	def __init__(self, layerType, kernelSize, stride, padding, normalize, dropout, keepRate):
-		Layer.__init__(self, layerType)
-		self.kernelSize = int(kernelSize)
-		self.stride = int(stride)
-		self.padding = padding
-		self.normalize = normalize
-		self.dropout = dropout
-		self.keepRate = float(keepRate)
-
-class DenseLayer(Layer):
-	def __init__(self, layerType, numInputs, actFunction, numOutputNodes, normalize, dropout, keepRate):
-		Layer.__init__(self, layerType)
-		self.numInputs = int(numInputs)
-		self.actFunction = actFunction
-		self.numOutputNodes = int(numOutputNodes)
-		self.normalize = normalize
-		self.dropout = dropout
-		self.keepRate = float(keepRate)
-
-class OutputLayer(Layer):
-	def __init__(self, layerType, numInputs, actFunction, numOutputNodes):
-		Layer.__init__(self, layerType)
-		self.numInputs = int(numInputs)
-		self.actFunction = actFunction
-		self.numOutputNodes = int(numOutputNodes)
+import Layer as l
 
 
 def getLayers(filePath):
@@ -79,23 +35,52 @@ def getLayers(filePath):
 
 
 		if layerType == 'Convolution':
-			layer = ConvLayer('Convolution', numInputs, kernelSize, stride, actFunction, numOutputFilters, padding, normalize, dropout, keepRate)
+			layer = l.ConvLayer('Convolution', numInputs, kernelSize, stride, actFunction, numOutputFilters, padding, normalize, dropout, keepRate)
 		if layerType == 'Max Pool':
-			layer = MaxPoolingLayer('Max Pool', kernelSize, stride, padding, normalize, dropout, keepRate)
+			layer = l.MaxPoolingLayer('Max Pool', kernelSize, stride, padding, normalize, dropout, keepRate)
 		if layerType == 'Dense':
-			layer = DenseLayer('Dense', numInputs, actFunction, numOutputNodes, normalize, dropout, keepRate)
+			layer = l.DenseLayer('Dense', numInputs, actFunction, numOutputNodes, normalize, dropout, keepRate)
 		if layerType == 'Output':
-			layer = OutputLayer('Output', numInputs, actFunction, numOutputNodes)
+			layer = l.OutputLayer('Output', numInputs, actFunction, numOutputNodes)
 		
 		Layers.append(layer)
 
 	return Layers
 
+def createXMLModel(layers):
+	model = ET.Element('Model')
 
-	'''
-	for layer in Layers:
-		attrs = vars(layer)
-		print(', '.join("%s: %s" % item for item in attrs.items()))
-	'''
+	for e in layers:
+		layer = ET.SubElement(model, 'Layer', Type=e.layerType)
+		if e.layerType == 'Convolution':
+			numInputs = ET.SubElement(layer, 'NumInputs').text = str(e.numInputs)
+			kernelSize = ET.SubElement(layer, 'KernelSize').text = str(e.kernelSize)
+			stride = ET.SubElement(layer, 'Stride').text = str(e.stride)
+			actFunction = ET.SubElement(layer, 'ActFunction').text = e.actFunction
+			numOutputFilters = ET.SubElement(layer, 'NumOutputFilters').text = str(e.numOutputFilters)
+			padding = ET.SubElement(layer, 'Padding').text = str(e.padding)
+			normalize = ET.SubElement(layer, 'Normalize').text = str(e.normalize)
+			dropout = ET.SubElement(layer, 'Dropout').text = str(e.dropout)
+			keepRate = ET.SubElement(layer, 'KeepRate').text = str(e.keepRate)
+		elif e.layerType == 'Max Pool':
+			kernelSize = ET.SubElement(layer, 'KernelSize').text = str(e.kernelSize)
+			stride = ET.SubElement(layer, 'Stride').text = str(e.stride)
+			padding = ET.SubElement(layer, 'Padding').text = str(e.padding)
+			normalize = ET.SubElement(layer, 'Normalize').text = str(e.normalize)
+			dropout = ET.SubElement(layer, 'Dropout').text = str(e.dropout)
+			keepRate = ET.SubElement(layer, 'KeepRate').text = str(e.keepRate)
+		elif e.layerType == 'Dense':
+			numInputs = ET.SubElement(layer, 'NumInputs').text = str(e.numInputs)
+			actFunction = ET.SubElement(layer, 'ActFunction').text = e.actFunction
+			numOutputNodes = ET.SubElement(layer, 'NumOutputNodes').text = str(e.numOutputNodes)
+			normalize = ET.SubElement(layer, 'Normalize').text = str(e.normalize)
+			dropout = ET.SubElement(layer, 'Dropout').text = str(e.dropout)
+			keepRate = ET.SubElement(layer, 'KeepRate').text = str(e.keepRate)
+		elif e.layerType == 'Output':
+			numInputs = ET.SubElement(layer, 'NumInputs').text = str(e.numInputs)
+			actFunction = ET.SubElement(layer, 'ActFunction').text = e.actFunction
+			numOutputNodes = ET.SubElement(layer, 'NumOutputNodes').text = str(e.numOutputNodes)
 
-
+	tree = ET.ElementTree(model)
+	complete = tree.write("TestModel.xml")
+	return complete
