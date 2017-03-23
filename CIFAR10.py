@@ -1,31 +1,25 @@
 import tensorflow as tf
 import numpy as np
-import os
 import pickle
 import datetime
-import cv2
 
-def accuracy(predictions, labels):
-    predicted_classes = tf.argmax(predictions, dimension=1)
-    actual_classes = tf.argmax(labels, dimension=1)
 
-    correct_prediction = tf.equal(predicted_classes, actual_classes)
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
-
-    return accuracy
-
-def train_network(num_epochs, batch_size, learning_rate, learning_algo):
+def main():
     
-    image_size = 32 # images are 32x32x3
-    num_channels = 3 # RGB
-    num_classes = 10 # 10 possible classes
+    # 
+    batch_size = 64
+    learning_rate = 0.05
 
+    # static parameters
+    num_channels = 3 # RGB
+    image_size = 32 # 32x32 images
+    num_classes = 10 # 10 possible classes. info @ https://www.cs.toronto.edu/~kriz/cifar.html
+    pickle_directory = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/CIFAR-10/cifar-10-batches-py/" # DONT WANT THIS TO BE HARDCODED
     num_training_files = 5 # CIFAR10 training data is split into 5 files
-    num_images_per_file = 10000
+    num_images_per_file = 10000 
     num_training_images_total = num_training_files * num_images_per_file
     num_testing_images_total = 10000
 
-    pickle_directory = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/CIFAR-10/cifar-10-batches-py/"
 
     # training images
     training_set = np.zeros(shape=[num_training_images_total, image_size, image_size, num_channels], dtype=float)
@@ -38,7 +32,7 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
 
     for i in range(num_training_files):
         pickle_file = pickle_directory + "data_batch_" + str(i + 1)
-        
+            
         with open(pickle_file, mode='rb') as file:
             data = pickle.load(file, encoding='bytes')
             images_batch = data[b'data']
@@ -57,7 +51,7 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
 
     # convert training labels from integer format to one hot encoding
     training_labels = np.eye(num_classes, dtype=int)[training_classes]
-        
+            
     # testing class labels in one hot encoding
     testing_labels = np.zeros(shape=[num_testing_images_total, num_classes], dtype=int)
 
@@ -80,11 +74,13 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
     testing_set = testing_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
 
     # normalize data
-    training_set -= 127 
-    testing_set -= 127
+    #training_set -= 127 
+    #testing_set -= 127
 
     graph = tf.Graph()
     with graph.as_default():
+
+        print("Initialising Tensorflow Variables...")
 
         # define placeholder variables
         x = tf.placeholder(tf.float32, shape=(None, image_size, image_size, num_channels))
@@ -92,7 +88,6 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
 
         # stores the class integer values 
         labels_class = tf.argmax(y, dimension=1)
-
 
         # define network structure
         #[conv_kernel_size, conv_kernel_size, num_channels, num_output_filters]
@@ -175,39 +170,36 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
         #learning_rate = tf.train.exponential_decay(0.0125, global_step, 15000, 0.1, staircase=True)
         #lrate_summary = tf.summary.scalar("learning rate", learning_rate)
 
-        if (learning_algo == 0):
-            optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
-            print("gradient descent optimizer in use")
-        elif (learning_algo == 1):
-            optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss, global_step=global_step)
-            print("adam optimizer optmizer in use")
-        elif (learning_algo == 2):
-            optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
-            print("ada grad optimizer optimizer in use")
-
+        #optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
+        optimizer = tf.train.AdamOptimizer().minimize(loss, global_step=global_step)
+        #optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
         #optimizer = tf.train.MomentumOptimizer(learning_rate, 0.95).minimize(loss, global_step=global_step)
+
+        #train_prediction = model_output
+        #test_prediction = CIFAR10_CNN_Model(tf_testing_set)
 
         network_pred_class = tf.argmax(model_output, dimension=1)
         correct_prediction = tf.equal(network_pred_class, labels_class)
+
         accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
+        accuracy_summary = tf.summary.scalar("accuracy", accuracy)
 
         saver = tf.train.Saver()
 
+        total_epochs = 500
 
         with tf.Session(graph=graph) as session:
             merged_summaries = tf.summary.merge_all()
             now = datetime.datetime.now()
-            log_path = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/tmp/CIFAR10/log/" + str(now.hour) + str(now.minute) + str(now.second)
+            log_path = "/tmp/CIFAR10/log/" + str(now.hour) + str(now.minute) + str(now.second)
             writer_summaries = tf.summary.FileWriter(log_path, graph)
 
-            save_path = 'C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/tmp/CIFAR10/checkpoints/'
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
-            try:
-                print("Trying to restore last checkpoint ...")
-                # Use TensorFlow to find the latest checkpoint - if any.
-                last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=save_path)
+            print("Trying to restore last checkpoint ...")
+            save_path = '/tmp/CIFAR10/checkpoints/'
+            # Use TensorFlow to find the latest checkpoint - if any.
+            last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=save_path)
 
+            try:
                 # Try and load the data in the checkpoint.
                 saver.restore(session, save_path=last_chk_path)
                 print("Restored checkpoint from:", last_chk_path)
@@ -216,7 +208,7 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
                 session.run(tf.global_variables_initializer())
 
 
-            for epoch in range(num_epochs):
+            for epoch in range(total_epochs):
 
                 offset = (epoch * batch_size) % (training_labels.shape[0] - batch_size)
                 batch_data = training_set[offset:(offset + batch_size), :, :, :]
@@ -229,9 +221,9 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
 
                 if (epoch % 100 == 0):
                     print("")
-                    print("Loss at epoch: ", epoch, "of ", str(num_epochs) ," is " , l)
+                    print("Loss at epoch: ", epoch, "of ", str(total_epochs) ," is " , l)
                     print("Global Step: " + str(global_step.eval()))
-                    print("Learning Rate: " + str(learning_rate))
+                    #print("Learning Rate: " + str(learning_rate.eval()))
                     print("Minibatch size: " + str(batch_labels.shape))
                     print("Batch Accuracy = " + str(acc))
 
@@ -239,9 +231,9 @@ def train_network(num_epochs, batch_size, learning_rate, learning_algo):
                 #    saver.save(session, save_path=save_path, global_step=global_step)
                 #    print("Saved Checkpoint")
 
-            test_acc = session.run(accuracy, feed_dict={x: testing_set, y:testing_labels, keep_prob: 1.0})
-            print("Test Set Accuracy:", session.run(accuracy, feed_dict={x: testing_set, y:testing_labels, keep_prob: 1.0}))
+            print("Test Set Accuracy:", session.run(accuracy, feed_dict={x: testing_set, y:testing_labels}))
             saver.save(session, save_path=save_path, global_step=global_step)
             print("Saved Checkpoint")
 
-            return test_acc
+if __name__ == "__main__":
+    main()

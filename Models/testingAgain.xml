@@ -1,0 +1,80 @@
+<Model><Layer Type="Convolution">
+	<LayerName>conv1</LayerName>
+	<KernelSize>5</KernelSize>
+	<Stride>1</Stride>
+	<ActFunction>ReLu</ActFunction>
+	<NumOutputFilters>64</NumOutputFilters>
+	<Padding>SAME</Padding>
+	<Normalize>False</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Max Pool">
+	<LayerName>pool1</LayerName>
+	<KernelSize>5</KernelSize>
+	<Stride>2</Stride>
+	<Padding>SAME</Padding>
+	<Normalize>True</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Convolution">
+	<LayerName>conv2</LayerName>
+	<KernelSize>5</KernelSize>
+	<Stride>1</Stride>
+	<ActFunction>ReLu</ActFunction>
+	<NumOutputFilters>128</NumOutputFilters>
+	<Padding>SAME</Padding>
+	<Normalize>False</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Convolution">
+	<LayerName>conv3</LayerName>
+	<KernelSize>5</KernelSize>
+	<Stride>1</Stride>
+	<ActFunction>ReLu</ActFunction>
+	<NumOutputFilters>256</NumOutputFilters>
+	<Padding>SAME</Padding>
+	<Normalize>False</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Max Pool">
+	<LayerName>pool2</LayerName>
+	<KernelSize>5</KernelSize>
+	<Stride>2</Stride>
+	<Padding>SAME</Padding>
+	<Normalize>True</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Dense">
+	<LayerName>FC1</LayerName>
+	<ActFunction>ReLu</ActFunction>
+	<NumOutputNodes>256</NumOutputNodes>
+	<Normalize>False</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Dense">
+	<LayerName>FC2</LayerName>
+	<ActFunction>ReLu</ActFunction>
+	<NumOutputNodes>128</NumOutputNodes>
+	<Normalize>False</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Dense">
+	<LayerName>FC3</LayerName>
+	<ActFunction>ReLu</ActFunction>
+	<NumOutputNodes>64</NumOutputNodes>
+	<Normalize>False</Normalize>
+	<Dropout>False</Dropout>
+	<KeepRate>1.0</KeepRate>
+</Layer>
+<Layer Type="Output">
+	<LayerName>output1</LayerName>
+	<ActFunction>ReLu</ActFunction>
+</Layer>
+</Model>

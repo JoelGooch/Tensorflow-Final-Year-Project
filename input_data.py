@@ -1,5 +1,40 @@
 from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
+import pickle
+
+def load_prima_head_pose():
+
+    image_size = 64 # images are 32x32x3
+    num_channels = 3 # RGB
+    num_classes = 10 # 10 possible classes
+
+    pickle_directory = "./data/prima_pitch_p1_out.pickle"
+    
+    with open(pickle_directory, mode='rb') as file:
+        data = pickle.load(file, encoding='bytes')
+        training_data = data[b'training_dataset']
+        training_labels = data[b'training_label']
+        testing_data = data[b'validation_dataset']
+        testing_labels = data[b'validation_label']
+    
+    print(training_data.shape)
+    print(training_labels.shape)
+    print(testing_data.shape)
+    print(testing_labels.shape)
+
+    training_data = training_data.reshape((-1, image_size, image_size, num_channels)).astype(np.float32)
+    training_labels = training_labels.reshape((-1, 1)).astype(np.float32)
+
+    testing_data = testing_data.reshape((-1, image_size, image_size, num_channels)).astype(np.float32)
+    testing_labels = testing_labels.reshape((-1, 1)).astype(np.float32)
+
+    print(training_data.shape)
+    print(training_labels.shape)
+    print(testing_data.shape)
+    print(testing_labels.shape)
+
+    return training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes
+
 
 # function to load data set and parameters for CIFAR10
 def load_CIFAR_10():

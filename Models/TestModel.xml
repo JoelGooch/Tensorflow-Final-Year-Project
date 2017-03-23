@@ -1,6 +1,5 @@
 <Model>
 	<Layer Type="Convolution">
-		<NumInputs>1</NumInputs>
 		<KernelSize>5</KernelSize>
 		<Stride>1</Stride>
 		<ActFunction>ReLu</ActFunction>
@@ -19,7 +18,6 @@
 		<KeepRate>1.0</KeepRate>
 	</Layer>
 	<Layer Type="Convolution">
-		<NumInputs>64</NumInputs>
 		<KernelSize>5</KernelSize>
 		<Stride>1</Stride>
 		<ActFunction>ReLu</ActFunction>
@@ -38,7 +36,6 @@
 		<KeepRate>1.0</KeepRate>
 	</Layer>
 	<Layer Type="Dense">
-		<NumInputs>6272</NumInputs>
 		<ActFunction>ReLu</ActFunction>
 		<NumOutputNodes>256</NumOutputNodes>
 		<Normalize>False</Normalize>
@@ -46,7 +43,6 @@
 		<KeepRate>1.0</KeepRate>
 	</Layer>
 	<Layer Type="Dense">
-		<NumInputs>256</NumInputs>
 		<ActFunction>ReLu</ActFunction>
 		<NumOutputNodes>128</NumOutputNodes>
 		<Normalize>False</Normalize>
@@ -54,7 +50,6 @@
 		<KeepRate>1.0</KeepRate>
 	</Layer>
 	<Layer Type="Output">
-		<NumInputs>128</NumInputs>
 		<ActFunction>ReLu</ActFunction>
 		<NumOutputNodes>10</NumOutputNodes>
 	</Layer></Model>
