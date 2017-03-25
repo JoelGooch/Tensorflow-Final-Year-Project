@@ -1,1 +1,0 @@
-<Model><Layer Type="Dense"><LayerName>fc1</LayerName><ActFunction>ReLu</ActFunction><NumOutputNodes>128</NumOutputNodes><Normalize>False</Normalize><Dropout>False</Dropout><KeepRate>1.0</KeepRate></Layer><Layer Type="Output"><LayerName>output</LayerName><ActFunction>ReLu</ActFunction></Layer></Model>

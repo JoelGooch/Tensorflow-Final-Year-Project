@@ -10,36 +10,55 @@ class layer_factory():
         self.newLayers = []
         self.dataSet = dataSet
         self.allLayers = allLayers
-        print(self.dataSet)
 
     def createLayer(self, inputLayer, layer):
         if layer.layerType == 'Convolution':
-            newLayer = self.new_conv_layer(inputLayer, layer.layerName, layer.kernelSize, layer.stride, layer.actFunction, layer.numOutputFilters, layer.padding, layer.normalize, layer.dropout, layer.keepRate)
+            newLayer = self.new_conv_layer(inputLayer, layer.layerName, layer.kernelSize, layer.stride, layer.actFunction, layer.numOutputFilters, 
+                layer.weightInit, layer.weightVal, layer.biasInit, layer.biasVal, layer.padding, layer.normalize, layer.dropout, layer.keepRate)
             self.numConvLayersTotal += 1
+
         elif layer.layerType == 'Max Pool':
-            newLayer = self.new_max_pool_layer(inputLayer, layer.layerName, layer.kernelSize, layer.stride, layer.padding, layer.normalize, layer.dropout, layer.keepRate)
+            newLayer = self.new_max_pool_layer(inputLayer, layer.kernelSize, layer.stride, layer.padding, layer.normalize, layer.dropout, layer.keepRate)
+
         elif layer.layerType == 'Dense':
             # if this is the first dense layer, reshape its incoming layer
             if self.numDenseLayers == 0:
                 inputLayer = self.flatten_layer(inputLayer)
-            newLayer = self.new_dense_layer(inputLayer, layer.layerName, layer.numOutputNodes, layer.actFunction, layer.normalize, layer.dropout, layer.keepRate)
+
+            newLayer = self.new_dense_layer(inputLayer, layer.layerName, layer.numOutputNodes, layer.weightInit, layer.weightVal, layer.biasInit, 
+                layer.biasVal, layer.actFunction, layer.normalize, layer.dropout, layer.keepRate)
+
             self.numDenseLayers += 1
+
         elif layer.layerType == 'Output':
-            newLayer = self.new_output_layer(inputLayer, layer.layerName, layer.actFunction)
+            newLayer = self.new_output_layer(inputLayer, layer.layerName, layer.actFunction, layer.weightInit, layer.weightVal, layer.biasInit, layer.biasVal)
 
         self.newLayers.append(newLayer)
         return newLayer
 
     # helper function to create weights
-    def new_weights(self, shape):
-        return tf.Variable(tf.truncated_normal(shape, stddev=0.05))
+    def new_weights(self, shape, name, init, val):
+        weightName = name + "_weights"
+        return tf.Variable(tf.truncated_normal(shape=shape, stddev=val, name=weightName))
 
     # helper function to create biases
-    def new_biases(self, length):
-        return tf.Variable(tf.constant(0.05, shape=[length]))
+    def new_biases(self, length, name, init, val):
+        weightName = name + "_biases"
+        if init == 'Random Normal':
+            return tf.Variable(tf.random_normal(shape=[length]), name=weightName)
+            print(init)
+        if init == 'Truncated Normal':
+            return tf.Variable(tf.truncated_normal(shape=[length]), name=weightName)
+            print(init)
+        elif init == 'Zeros':
+            return tf.Variable(tf.constant(val, shape=[length]), name=weightName)
+            print(init)
+        elif init == 'Constant':
+            return tf.Variable(tf.zeros(shape=[length]), name=weightName)
+            print(init)
 
     # helper function to create a convolution layer
-    def new_conv_layer(self, inputLayer, layerName, filter_size, stride, act_function, num_output_filters, padding, normalize, dropout, keepRate):
+    def new_conv_layer(self, inputLayer, layerName, filter_size, stride, act_function, num_output_filters, init, val, padding, normalize, dropout, keepRate):
 
         self.currConvLayer = 0
 
@@ -61,24 +80,30 @@ class layer_factory():
 
         shape = [filter_size, filter_size, num_input_channels, num_output_filters]
 
-        weights = self.new_weights(shape=shape)
-        biases = self.new_biases(length=num_output_filters)
+        weights = self.new_weights(shape=shape, name=layerName)
+
+        biases = self.new_biases(length=num_output_filters, name=layerName)
 
         layer = tf.nn.conv2d(input=inputLayer, filter=weights, strides=[1, stride, stride, 1], padding=padding)
         layer += biases
 
         if act_function == 'ReLu':
             layer = tf.nn.relu(layer)
-        elif act_funcion == 'Sigmoid':
+        elif act_function == 'Sigmoid':
             layer = tf.sigmoid(layer)
+        elif act_function == "Tanh":
+            layer = tf.tanh(layer)
+
         if normalize == 'True':
             layer = tf.nn.lrn(layer, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
         if dropout == 'True':
             layer = tf.nn.dropout(layer, keepRate)
+
         return layer
 
         # helper function to create a new max pooling layer
-    def new_max_pool_layer(self, inputLayer, layerName, kernel_size, stride, padding, normalize, dropout, keep_rate):
+
+    def new_max_pool_layer(self, inputLayer, kernel_size, stride, padding, normalize, dropout, keep_rate):
         layer = tf.nn.max_pool(inputLayer, ksize=[1, kernel_size, kernel_size, 1], strides=[1, stride, stride, 1], padding=padding)
         if normalize == 'True':
             layer = tf.nn.lrn(layer, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
@@ -137,14 +162,17 @@ class layer_factory():
         print("dense inputs {0}".format(num_inputs))
         print("dense outputs {0}".format(num_outputs))
 
-        weights = self.new_weights(shape=[int(num_inputs), num_outputs])
-        biases = self.new_biases(length=num_outputs)
+        weights = self.new_weights(shape=[int(num_inputs), num_outputs], name=layerName)
+        biases = self.new_biases(length=num_outputs, name=layerName)
 
         layer = tf.matmul(inputLayer, weights) + biases
         if act_function == 'ReLu':
             layer = tf.nn.relu(layer)
         elif act_funcion == 'Sigmoid':
             layer = tf.sigmoid(layer)
+        elif act_function == "Tanh":
+            layer = tf.tanh(layer)
+
         if normalize == 'True':
             layer = tf.nn.lrn(layer, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
         if dropout == 'True':
@@ -164,12 +192,16 @@ class layer_factory():
 
         print("output outputs {0}".format(num_outputs))
 
+        weights = self.new_weights(shape=[num_inputs, num_outputs], name=layerName)
+        biases = self.new_biases(length=num_outputs, name=layerName)
 
-        weights = self.new_weights(shape=[num_inputs, num_outputs])
-        biases = self.new_biases(length=num_outputs)
         layer = tf.matmul(inputLayer, weights) + biases
+
         if act_function == 'ReLu':
             layer = tf.nn.relu(layer)
         elif act_function == 'Sigmoid':
             layer = tf.sigmoid(layer)
+        elif act_function == "Tanh":
+            layer = tf.tanh(layer)
+
         return layer

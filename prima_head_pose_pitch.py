@@ -163,6 +163,7 @@ def main():
 
         loss = tf.nn.l2_loss(model_output - y)
         
+
         #Adding the regularization terms to the loss
         beta = 5e-4
         loss += (beta * tf.nn.l2_loss(conv1_weights)) 
@@ -174,7 +175,6 @@ def main():
         loss += (beta * tf.nn.l2_loss(layer_out_weights))
         
         
-
         loss_summary = tf.summary.scalar("loss", loss)
 
         global_step = tf.Variable(0, trainable=False)

@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='utf8'?>
 <Model>
 	<Layer Type="Convolution">
+		<LayerName>conv1</LayerName>
 		<KernelSize>5</KernelSize>
 		<Stride>1</Stride>
 		<ActFunction>ReLu</ActFunction>
@@ -11,6 +12,7 @@
 		<KeepRate>1</KeepRate>
 	</Layer>
 	<Layer Type="Max Pool">
+		<LayerName>conv1</LayerName>
 		<KernelSize>2</KernelSize>
 		<Stride>2</Stride>
 		<Padding>SAME</Padding>
@@ -19,6 +21,7 @@
 		<KeepRate>1</KeepRate>
 	</Layer>
 	<Layer Type="Convolution">
+		<LayerName>conv1</LayerName>
 		<KernelSize>5</KernelSize>
 		<Stride>1</Stride>
 		<ActFunction>ReLu</ActFunction>
@@ -29,6 +32,7 @@
 		<KeepRate>1</KeepRate>
 	</Layer>
 	<Layer Type="Max Pool">
+		<LayerName>conv1</LayerName>
 		<KernelSize>2</KernelSize>
 		<Stride>2</Stride>
 		<Padding>SAME</Padding>
@@ -37,6 +41,7 @@
 		<KeepRate>1</KeepRate>
 	</Layer>
 	<Layer Type="Dense">
+		<LayerName>conv1</LayerName>
 		<ActFunction>ReLu</ActFunction>
 		<NumOutputNodes>128</NumOutputNodes>
 		<Normalize>False</Normalize>
@@ -44,7 +49,7 @@
 		<KeepRate>1</KeepRate>
 	</Layer>
 	<Layer Type="Output">
+		<LayerName>conv1</LayerName>
 		<ActFunction>None</ActFunction>
-		<NumOutputNodes>10</NumOutputNodes>
 	</Layer>
 </Model>
