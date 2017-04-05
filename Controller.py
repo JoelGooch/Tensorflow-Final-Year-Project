@@ -5,47 +5,58 @@ import pickle
 import datetime
 import cv2
 import matplotlib as mpl
-mpl.use('Agg')
 import xml.etree.ElementTree as ET
 
-import CNN_GUI_V12 as design
+import CNN_GUI_V14 as design
 import input_data as data
 import xml_parser as pp
 import Layer as l
 import layer_factory as factory
 
-from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog, QSizePolicy, QListWidgetItem
-from PyQt5.QtGui import QPixmap
+from math import ceil, sqrt
 
+from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QMainWindow, QWidget, QLabel, QApplication, QMessageBox, QFileDialog, QSizePolicy, QListWidgetItem, QVBoxLayout
+from PyQt5.QtGui import QPixmap
+from functools import partial
+
+mpl.use('Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 
 #np.set_printoptions(threshold=np.inf)
 
-
 class Worker(QObject):
 
-	epochProgress = pyqtSignal(float)
-	testSetAccuracy = pyqtSignal(float)
-	logMessage = pyqtSignal(str)
-	workComplete = pyqtSignal()
+	# signals for updating GUI elements
+	epoch_progress = pyqtSignal(float)
+	test_set_accuracy = pyqtSignal(float)
+	log_message = pyqtSignal(str)
+	network_model = pyqtSignal(list)
 
-	lossOverEpochs = pyqtSignal(float, int)
-	testSetAccOverEpochs = pyqtSignal(float, int)
-	confusionMat = pyqtSignal(object, bool, int)
+	# signals for updating/creating visualizations
+	train_valid_error = pyqtSignal(float, int)
+	train_valid_acc = pyqtSignal(float, float, int)
+	batch_loss = pyqtSignal(float, int)
+	batch_acc = pyqtSignal(float, int)
+	confusion_mat = pyqtSignal(bool, int)
+	network_weights_outputs = pyqtSignal(list, list)
 
-	networkModel = pyqtSignal(list)
+	# signal to inform main thread that worker thread has finished work
+	work_complete = pyqtSignal()
 
-	def __init__(self, data_set: str, num_epochs: int, batch_size: int, learning_rate: float, optimizer: int, l2_reg: bool, beta: float, save_directory: str, save_interval: int, model_path: str, run_time: bool):
+	def __init__(self, data_set: str, validation: bool, num_epochs: int, batch_size: int, learning_rate: float, momentum: float, optimizer: int, normalize: bool, l2_reg: bool, beta: float, save_directory: str, save_interval: int, model_path: str, run_time: bool):
 		super().__init__()
 		self.end_training = False
 		self.data_set = data_set
+		self.validation = validation
 		self.num_epochs = num_epochs
 		self.batch_size = batch_size
 		self.learning_rate = learning_rate
+		self.momentum = momentum
 		self.optimizer = optimizer
+		self.normalize = normalize
 		self.l2_reg = l2_reg
 		self.beta = beta
 		self.save_directory = save_directory
@@ -55,35 +66,35 @@ class Worker(QObject):
 		
 	@pyqtSlot()
 	def work(self):
-		self.train_network(self.data_set, self.num_epochs, self.batch_size, self.learning_rate, self.optimizer, self.l2_reg, self.beta, self.save_directory, self.save_interval, self.model_path, self.run_time)
+		self.train_network(self.data_set, self.validation, self.num_epochs, self.batch_size, self.learning_rate, self.momentum, self.optimizer, 
+			self.normalize, self.l2_reg, self.beta, self.save_directory, self.save_interval, self.model_path, self.run_time)
 
 
-	def train_network(self, data_set, num_epochs, batch_size, learning_rate, learning_algo, l2_reg, beta, save_path, save_interval, model_path, run_time):
-		
-		run_time = False
+	def train_network(self, data_set, validation, num_epochs, batch_size, learning_rate, momentum, learning_algo, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time):
 
 		# load selected data set
 		if (data_set == 'CIFAR10'):
-			training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10()
+			training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10(validation)
 		if (data_set == 'MNIST'):
-			training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST()
-		if (data_set == 'Prima head pose'):
+			training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST(validation)
+		if (data_set == 'Prima Head Pose'):
 			training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose()
 
-		# normalize data, THIS BREAKS MNIST, CIFAR10 WORKS WITH OR WITHOUT
-		#training_set -= 127 
-		#testing_set -= 127
+		# normalize data, if user requires
+		if normalize == True:
+			training_set -= 127 
+			testing_set -= 127
 
 		try:
 			# get array of layers from XML file
-			Layers = pp.getLayers(model_path)
+			layers = pp.get_layers(model_path)
 		except:
-			self.logMessage.emit('Error reading XML file')
+			self.log_message.emit('Error reading XML file')
 			return 0
 
-		self.networkModel.emit(Layers)
+		self.network_model.emit(layers)
 
-		self.logMessage.emit('Initialising Tensorflow Variables... \n')
+		self.log_message.emit('Initialising Tensorflow Variables... \n')
 		
 		graph = tf.Graph()
 		with graph.as_default():
@@ -95,27 +106,27 @@ class Worker(QObject):
 
 			# stores the class integer values 
 			labels_class = tf.argmax(y, dimension=1)
-			
-			numLayers = len(Layers)
 
 			# array to hold tensorflow layers
-			networkLayers = []
+			network_layers = []
 
 			def CNN_Model(data, _dropout=1.0):
 
 				# instantiate layer factory
-				layerFactory = factory.layer_factory(data_set, Layers)
+				layer_factory = factory.layer_factory(num_classes, num_channels, layers)
 
 				# set input to first layer as x (input data)
 				layer = x
 
+				input_dimension = image_size
+
 				# create as many layers as are stored in XML file
-				for e in range(len(Layers)):
-					layer = layerFactory.createLayer(layer, Layers[e])
-					networkLayers.append(layer)
+				for e in range(len(layers)):
+					layer, input_dimension = layer_factory.create_layer(layer, layers[e], input_dimension)
+					network_layers.append(layer)
 
 				# return last element of layers array (output layer)
-				return networkLayers[-1]
+				return network_layers[-1]
 
 
 			model_output = CNN_Model(x, keep_prob)
@@ -124,36 +135,38 @@ class Worker(QObject):
 
 			if data_set == 'MNIST' or data_set == 'CIFAR10':
 				loss = tf.reduce_mean(cross_entropy, name='cross_entropy')
-			elif data_set == 'Prima head pose':
+			elif data_set == 'Prima Head Pose':
 				loss = tf.nn.l2_loss(model_output - y)
+
 
 			# add l2 regularization if user has specified
 			if l2_reg == True:
-				# for all weights of network, add regularization term
+				# for all trainable variables in graph
 				for e in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
-					loss += (beta * tf.nn.l2_loss(e))
+					# if a weights variable (excluding biases), add regularization term
+					if 'weights' in e.name:
+						loss += (beta * tf.nn.l2_loss(e))
 			
 
 			global_step = tf.Variable(0, trainable=False)
 
 			#learning_rate = tf.train.exponential_decay(0.0125, global_step, 15000, 0.1, staircase=True)
-			#lrate_summary = tf.summary.scalar("learning rate", learning_rate)
 
 			if (learning_algo == 0):
 				optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.logMessage.emit('Optimizer: Gradient Descent')
+				self.log_message.emit('Optimizer: Gradient Descent')
 			elif (learning_algo == 1):
 				optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.logMessage.emit('Optimizer: Adam')
+				self.log_message.emit('Optimizer: Adam')
 			elif (learning_algo == 2):
 				optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.logMessage.emit('Optimizer: Ada Grad')
+				self.log_message.emit('Optimizer: Ada Grad')
 			elif (learning_algo == 3):
 				optimizer = tf.train.AdadeltaOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.logMessage.emit('Optimizer: Ada Delta')
-			#elif (learning_algo == 4):
-			#	optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(loss, global_step=global_step)
-			#	self.logMessage.emit('Optimizer: Momentum')
+				self.log_message.emit('Optimizer: Ada Delta')
+			elif (learning_algo == 4):
+				optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(loss, global_step=global_step)
+				self.log_message.emit('Optimizer: Momentum')
 
 
 			# convert one hot encoded array to single prediction value
@@ -174,13 +187,13 @@ class Worker(QObject):
 				 # Use TensorFlow to find the latest checkpoint - if any.
 				last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=save_path)
 
-				self.logMessage.emit('Trying to restore last checkpoint ...')
+				self.log_message.emit('Trying to restore last checkpoint ...')
 				try:
 					# Try and load the data in the checkpoint.
 					saver.restore(session, save_path=last_chk_path)
-					self.logMessage.emit('Restored checkpoint from: {} '.format(last_chk_path))
+					self.log_message.emit('Restored checkpoint from: {} '.format(last_chk_path))
 				except:
-					self.logMessage.emit('Failed to restore checkpoint. Initializing variables instead.')
+					self.log_message.emit('Failed to restore checkpoint. Initializing variables instead.')
 					# initialise variables if not possible
 					session.run(tf.global_variables_initializer())
 
@@ -200,62 +213,232 @@ class Worker(QObject):
 
 						# print information to output log
 						if (epoch % 100 == 0):
-							self.logMessage.emit('')
-							self.logMessage.emit('Loss at epoch: {} of {} is {}'.format(epoch, str(num_epochs), l))
-							self.logMessage.emit('Global Step: {}'.format(str(global_step.eval())))
-							self.logMessage.emit('Learning Rate: {}'.format(str(learning_rate)))
-							self.logMessage.emit('Minibatch size: {}'.format(str(batch_labels.shape)))
-							self.logMessage.emit('Batch Accuracy = {}'.format(str(acc)))
+							self.log_message.emit('')
+							self.log_message.emit('Loss at epoch: {} of {} is {}'.format(epoch, str(num_epochs), l))
+							self.log_message.emit('Global Step: {}'.format(str(global_step.eval())))
+							self.log_message.emit('Learning Rate: {}'.format(str(learning_rate)))
+							self.log_message.emit('Minibatch size: {}'.format(str(batch_labels.shape)))
+							self.log_message.emit('Batch Accuracy = {}'.format(str(acc)))
 
 							# emit batch loss for GUI visualization
-							self.lossOverEpochs.emit(l, epoch)
+							self.batch_loss.emit(l, epoch)
+							self.batch_acc.emit(acc, epoch)
 
 							# if user has chosen to include run time visualizations
 							if run_time == True:
+
 								# create confusion matrix for current batch
 								batch_confusion = tf.contrib.metrics.confusion_matrix(batch_classes, batch_pred_class).eval()
-								self.confusionMat.emit(batch_confusion, True, epoch)
+								self.create_confusion_matrix(batch_confusion, False)
+								self.confusion_mat.emit(True, epoch)
 
-								# run test set at current batch
-								test_accuracy_epoch  = session.run(accuracy, feed_dict={x: testing_set, y:testing_labels, keep_prob: 1.0})
-								self.testSetAccOverEpochs.emit(test_accuracy_epoch, epoch)
+								if validation == True:
+
+									#num_training_data = len(training_labels)
+									#data_per_batch = num_training_data / 10
+									#for i in range(10):
+									#	batch_data = training_set[i*data_per_batch:i+1*data_per_batch]
+									#	batch_labels = training_labels[i*data_per_batch:i+1*data_per_batch]
+									#	train_accuracy = session.run(accuracy, feed_dict={x: batch_data, y: batch_labels, keep_prob: 1.0})
+									#	print(accuracy)
+
+									# run validation set at current batch
+									valid_accuracy = session.run(accuracy, feed_dict={x: validation_set, y: validation_labels, keep_prob: 1.0})
+
+									self.train_valid_acc.emit(valid_accuracy, 0, epoch)
+
 
 						# calculate progress as percentage and emit signal to GUI to update
-						epochProg = (epoch / num_epochs) * 100
-						self.epochProgress.emit(epochProg)
+						epoch_prog = (epoch / num_epochs) * 100
+						self.epoch_progress.emit(epoch_prog)
 
 						# check save interval to avoid divide by zero
 						if save_interval != 0:
 							# save at interval define by user
 							if (epoch % save_interval == 0):
 								saver.save(sess=session, save_path=save_path, global_step=global_step)
-								self.logMessage.emit('Saved Checkpoint \n')
+								self.log_message.emit('Saved Checkpoint \n')
+
+				self.log_message.emit('\nTraining Complete')
+				# save network state when complete
+				saver.save(sess=session, save_path=save_path, global_step=global_step)
+
+				self.log_message.emit('Saved Checkpoint')
 
 				# set progress bar to 100% (if training was not interrupted)
 				if (self.end_training == False):
-					self.epochProgress.emit(100)
+					self.epoch_progress.emit(100)
+
+				self.log_message.emit('\nEvaluating Test Set...')
 
 				# run test set through network and return accuracy and predicted classes
 				test_acc, testing_pred_class, testing_classes = session.run([accuracy, network_pred_class, labels_class], 
 												feed_dict={x: testing_set, y:testing_labels, keep_prob: 1.0})
+
+				self.log_message.emit('Test Set Evaluated \n')
 				
 				# send test accuracy to GUI
-				self.testSetAccuracy.emit(test_acc)
+				self.test_set_accuracy.emit(test_acc)
+
+				self.log_message.emit('Loading Visualizations...')
+
+				# lists to hold file names of each plot
+				layer_weights_file_names = []
+				layer_outputs_file_names = []
+
+				# create convolution weight plots for each convolution layer
+				for e in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+					if 'Cweights' in e.name:
+						file_name = self.plot_conv_weights(weights=e, name=e.name, session=session)
+						layer_weights_file_names.append(file_name)
+
+				# grab random image from batch
+				random = np.random.randint(0, batch_data.shape[0])
+				image = batch_data[random]
+				layer_count = 0
+				# create convolution output plots for each convolution layer
+				for layer in network_layers:
+					if layers[layer_count].layer_type == 'Convolution':
+						file_name = self.plot_conv_layer(layer=layer, name=layers[layer_count].layer_name, image=image, session=session, x=x)
+						layer_outputs_file_names.append(file_name)
+					layer_count += 1
+
+
+				self.network_weights_outputs.emit(layer_weights_file_names, layer_outputs_file_names)
 
 				# create confusion matrix from predicted and actual classes
-				confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
-				self.confusionMat.emit(confusion, False, 0)
+				test_set_confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
+				self.create_confusion_matrix(test_set_confusion, False)
+				self.confusion_mat.emit(False, 0)
 
-				# save network state when complete
-				saver.save(sess=session, save_path=save_path, global_step=global_step)
-				self.logMessage.emit('\nTraining Complete')
-				self.logMessage.emit('Saved Checkpoint \n')
+				self.log_message.emit('Visualizations Loaded\n')
 
 				# signal that thread has completed
-				self.workComplete.emit()
+				self.work_complete.emit()
+
 
 	def cancel_training(self):
 		self.end_training = True
+
+	def plot_conv_layer(self, layer, name, image, session, x):
+
+		feed_dict = {x: [image]}
+
+		# Calculate and retrieve the output values of the layer
+		# when inputting that image.
+		values = session.run(layer, feed_dict=feed_dict)
+
+		values_min = np.min(values)
+		values_max = np.max(values)
+
+		# Number of filters used in the conv. layer.
+		num_filters = values.shape[3]
+
+		# Number of grids to plot.
+		# Rounded-up, square-root of the number of filters.
+		num_grids = ceil(sqrt(num_filters))
+		
+		# Create figure with a grid of sub-plots.
+		fig, axes = plt.subplots(num_grids, num_grids)
+
+		# Plot the output images of all the filters.
+		for i, ax in enumerate(axes.flat):
+			# Only plot the images for valid filters.
+			if i < num_filters:
+				# Get the output image of using the i'th filter.
+				# See new_conv_layer() for details on the format
+				# of this 4-dim tensor.
+				img = values[0, :, :, i]
+
+			# Plot image.
+			ax.imshow(img, vmin=values_min, vmax=values_max, interpolation='nearest', cmap='binary')
+			
+			# Remove ticks from the plot.
+			ax.set_xticks([])
+			ax.set_yticks([])
+
+		file_name = name + "_output.png"
+		plt.savefig(file_name, format='png')
+		plt.close()
+		return file_name
+
+	def plot_conv_weights(self, weights, name, session, input_channel=0):
+		w = session.run(weights)
+
+		w_min = np.min(w)
+		w_max = np.max(w)
+		abs_max = max(abs(w_min), abs(w_max))
+
+		# Number of filters used in the conv. layer.
+		num_filters = w.shape[3]
+
+		# Number of grids to plot.
+		# Rounded-up, square-root of the number of filters.
+		num_grids = ceil(sqrt(num_filters))
+		
+		# Create figure with a grid of sub-plots.
+		fig, axes = plt.subplots(num_grids, num_grids)
+
+		# Plot all the filter-weights.
+		for i, ax in enumerate(axes.flat):
+			# Only plot the valid filter-weights.
+			if i < num_filters:
+				# Get the weights for the i'th filter of the input channel.
+				# See new_conv_layer() for details on the format
+				# of this 4-dim tensor.
+				img = w[:, :, input_channel, i]
+
+				# Plot image.
+				ax.imshow(img, vmin=-abs_max, vmax=abs_max, interpolation='nearest', cmap='seismic')
+			
+			# Remove ticks from the plot.
+			ax.set_xticks([])
+			ax.set_yticks([])
+
+		name = name[:-2]
+		file_name = name + ".png"
+		plt.savefig(file_name, format='png')
+		plt.close()
+		return file_name
+
+	def create_confusion_matrix(self, confusion, training):
+
+		norm_conf = []
+
+		for i in confusion:
+			a = 0
+			tmp_arr = []
+			a = sum(i, 0)
+
+			for j in i:
+				tmp_arr.append(float(j)/float(a))
+			norm_conf.append(tmp_arr)
+
+		self.fig = plt.figure()
+		self.axes = self.fig.add_subplot(111)
+
+		self.axes.set_aspect(1)
+			
+		res = self.axes.imshow(np.array(norm_conf), cmap=plt.cm.jet, interpolation='nearest')
+		
+		width, height = confusion.shape
+
+		for x in range(width):
+			for y in range(height):
+				self.axes.annotate(str(confusion[x][y]), xy=(y, x), horizontalalignment='center', verticalalignment='center')
+
+		cb = self.fig.colorbar(res)
+
+		alphabet = '0123456789'
+
+		# set axes to 0-9
+		plt.xticks(range(width), alphabet[:width])
+		plt.yticks(range(height), alphabet[:height])
+
+		if training == True:
+			plt.savefig('training_confusion_matrix.png', format='png')
+		else:
+			plt.savefig('testing_confusion_matrix.png', format='png')
 
 
 class MyMplCanvas(FigureCanvas):
@@ -303,6 +486,33 @@ class ErrorOverEpochsGraph(MyMplCanvas):
 		self.axes.grid(True)
 		self.draw()
 
+class MultipleErrorOverEpochsGraph(MyMplCanvas):
+	"""A canvas that updates itself every secoSnd with a new plot."""
+	def __init__(self, *args, **kwargs):
+		MyMplCanvas.__init__(self, *args, **kwargs)
+		self.train_errors = []
+		self.valid_errors = []
+		self.epochs = []
+
+	@pyqtSlot(float, float, int)
+	def update_figure(self, train_error: float, valid_error: float, epoch: int):
+
+		if epoch == 0:
+			self.axes.clear()
+			self.train_errors = []
+			self.valid_errors = []
+			self.epochs = []
+
+		self.axes.set_ylabel('Accuracy')
+		self.axes.set_xlabel('Epoch')
+		# add current values to array
+		self.train_errors.append(train_error)
+		self.valid_errors.append(valid_error)
+		self.epochs.append(epoch)
+		# plot new, extended graph
+		self.axes.plot(self.epochs, self.train_errors, self.valid_errors, 'r')
+		self.axes.grid(True)
+		self.draw()
 
 class CNNApp(QMainWindow, design.Ui_MainWindow):
 
@@ -313,6 +523,10 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		super().__init__()
 		self.setupUi(self)
 
+		# initialise threads array, if multiple required
+		self.__threads = None
+		self.new_model = []
+
 		# initialise GUI elements
 		self.btnCancelTraining.setEnabled(False)
 		self.txtConvKeepRate.setEnabled(False)
@@ -321,65 +535,66 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.btnCreateModel.setEnabled(False)
 		self.txtL2Beta.setEnabled(False)
 
-		# initialise threads array, if multiple required
-		self.__threads = None
-		self.newModel = []
-
-		# default text for fields
-		self.txtSavePath.setText('C:/tmp/')
-		self.txtLoadCheckpoints.setText('C:/tmp/')
-		self.txtModelSavePath.setText('C:/tmp/')
-		self.txtLoadModel.setText('C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/Tensorflow-Final-Year-Project/Models/MNISTmodel.xml')
+		# for quickness. TEMPORRARY
+		self.txtLoadModel.setText('C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/Tensorflow-Final-Year-Project/Models/MNIST.xml')
 
 		# navigational buttons
-		self.actionTrain.triggered.connect(self.openTrainTab)
-		self.actionDesign.triggered.connect(self.openDesignTab)
-		self.actionVisualizations.triggered.connect(self.openVisualizationTab)
+		self.actionTrain.triggered.connect(partial(self.open_tab, index=0))
+		self.actionDesign.triggered.connect(partial(self.open_tab, index=1))
+		self.actionVisualizations.triggered.connect(partial(self.open_tab, index=2))
+		self.actionSettings.triggered.connect(partial(self.open_tab, index=3))
 		self.actionExit.triggered.connect(self.close)
 
-		self.cbxSavePath.stateChanged.connect(self.checkpointCheckBoxStateChange)
-		self.radCreateModel.toggled.connect(self.createModelRadClicked)
+		self.cbxSavePath.stateChanged.connect(self.checkpoint_checkbox_state_changed)
+		self.radCreateModel.toggled.connect(self.create_model_rad_clicked)
 
 		# events for checking/unchecking dropout when creating model
-		self.chkConvDropout.stateChanged.connect(self.dropoutCheckBoxStateChanged)
-		self.chkPoolDropout.stateChanged.connect(self.dropoutCheckBoxStateChanged)
-		self.chkFCDropout.stateChanged.connect(self.dropoutCheckBoxStateChanged)
+		self.chkConvDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkConvDropout, keep_rate_text_field=self.txtConvKeepRate))
+		self.chkPoolDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkPoolDropout, keep_rate_text_field=self.txtPoolKeepRate))
+		self.chkFCDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkFCDropout, keep_rate_text_field=self.txtFCKeepRate))
 
+		self.cbxOptimizer.currentIndexChanged.connect(self.optimizer_combo_box_changed)
+		self.chkL2Reg.stateChanged.connect(self.l2_reg_checkbox_state_changed)
 
-		self.chkL2Reg.stateChanged.connect(self.l2RegularizationCheckBoxStateChanged)
+		self.cbxConvBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxConvBiasInit, bias_val_text_field= self.txtConvBiasVal, bias_val_label= self.lblConvBiasVal))
+		self.cbxFCBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxFCBiasInit, bias_val_text_field= self.txtFCBiasVal, bias_val_label= self.lblFCBiasVal))
+		self.cbxOutputBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxOutputBiasInit, bias_val_text_field= self.txtOutputBiasVal, bias_val_label= self.lblOutputBiasVal))
 
-		self.cbxConvBiasInit.currentIndexChanged.connect(self.biasInitComboBoxChanged)
-		
 		# buttons to change file paths 
-		self.btnChangeSavePath.clicked.connect(self.changeCheckpointSavePath)
-		self.btnChangeLoadCheckpoints.clicked.connect(self.changeCheckpointLoadPath)
-		self.btnChangeModelPath.clicked.connect(self.changeModelLoadPath)
-		self.btnChangeModelSavePath.clicked.connect(self.changeModelSavePath)
+		self.btnChangeSavePath.clicked.connect(partial(self.change_file_path, path_text_field=self.txtSavePath))
+		self.btnChangeLoadCheckpoints.clicked.connect(partial(self.change_file_path, path_text_field=self.txtLoadCheckpoints, disable=True))
+		self.btnChangeModelPath.clicked.connect(partial(self.change_file_path, path_text_field=self.txtLoadModel))
+		self.btnChangeModelSavePath.clicked.connect(partial(self.change_file_path, path_text_field=self.txtModelSavePath))
 		
 		# train/cancel training buttons
-		self.btnTrainNetwork.clicked.connect(self.trainButtonClicked)
+		self.btnTrainNetwork.clicked.connect(self.train_button_clicked)
 		self.btnCancelTraining.clicked.connect(self.cancel_train)
 
+		self.radMNIST.toggled.connect(partial(self.data_set_rad_state_changed, False))
+		self.radCIFAR10.toggled.connect(partial(self.data_set_rad_state_changed, False))
+		self.radPrimaHeadPose.toggled.connect(partial(self.data_set_rad_state_changed, True))
+
 		# create new model buttons
-		self.btnAddConvLayer.clicked.connect(self.createConvLayerButtonClicked)
-		self.btnAddMaxPool.clicked.connect(self.createPoolingLayerButtonClicked)
-		self.btnAddFullyConn.clicked.connect(self.createDenseLayerButtonClicked)
-		self.btnAddOutput.clicked.connect(self.createOutputLayerButtonClicked)
-		self.btnValidateNetwork.clicked.connect(self.validateModelButtonClicked)
-		self.btnCreateModel.clicked.connect(self.createModelButtonClicked)
-		self.btnDeleteModel.clicked.connect(self.deleteModelButtonClicked)
-		self.btnDeleteLayer.clicked.connect(self.deleteLastLayerButtonClicked)
+		self.btnAddConvLayer.clicked.connect(self.create_conv_layer_button_clicked)
+		self.btnAddMaxPool.clicked.connect(self.create_pooling_layer_button_clicked)
+		self.btnAddFullyConn.clicked.connect(self.create_full_conn_layer_button_clicked)
+		self.btnAddOutput.clicked.connect(self.create_output_layer_button_clicked)
+		self.btnValidateNetwork.clicked.connect(self.validate_model_button_clicked)
+		self.btnCreateModel.clicked.connect(self.create_model_button_clicked)
+		self.btnDeleteModel.clicked.connect(self.delete_model_button_clicked)
+		self.btnDeleteLayer.clicked.connect(self.delete_last_layer_button_clicked)
 
 		# clear output logs
-		self.btnClearLog.clicked.connect(self.clearOutputLog)
-		self.btnClearModelLog.clicked.connect(self.clearOutputModelLog)
+		self.btnClearLog.clicked.connect(self.clear_output_log)
+		self.btnClearModelLog.clicked.connect(self.clear_output_model_log)
 
 		# create graph instances
-		self.lossGraph = ErrorOverEpochsGraph(self.lossGraphWidget, width=5, height=4, dpi=100, title='Loss Over Epochs', xAxisTitle='Epoch', yAxisTitle='Loss')
-		self.testErrorGraph = ErrorOverEpochsGraph(self.graphWidget2, width=5, height=4, dpi=100, title='Test Error Over Epochs', xAxisTitle='Epoch', yAxisTitle='Error')
+		self.batch_loss_graph = ErrorOverEpochsGraph(self.grphBatchLoss, width=5, height=4, dpi=100, title='Loss Over Epochs', xAxisTitle='Epoch', yAxisTitle='Loss')
+		self.batch_acc_graph = ErrorOverEpochsGraph(self.grphBatchAcc, width=5, height=4, dpi=100, title='Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
+		self.train_valid_accuracy = MultipleErrorOverEpochsGraph(self.grphTrainValidAcc, width=5, height=4, dpi=100, title='Training / Validation Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
 
 		
-	def trainButtonClicked(self):
+	def train_button_clicked(self):
 		try:
 			'''
 			num_epochs = int(self.txtNumEpochs.text())
@@ -387,14 +602,26 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			learning_rate = float(self.txtLearningRate.text())
 			optimizer = int(self.cbxOptimizer.currentIndex())
 			'''
-			num_epochs = 200
-			batch_size = 128
-			learning_rate = 0.005
-			optimizer = 0
+			num_epochs = 10000
+			batch_size = 64
+			learning_rate = 0.0005
+			optimizer = 1
 			
 			# obtain model file path and checkpoint save path from user text fields
 			model_path = self.txtLoadModel.text()
 			save_path = self.txtSavePath.text()
+
+			if self.chkValidationSet.isChecked():
+				validation = True
+			else: validation = False
+
+			if self.cbxOptimizer.currentIndex == 4:
+				momentum = float(self.txtMomentum.text())
+			else: momentum = 0
+
+			if self.chkNormalize.isChecked():
+				normalize = True
+			else: normalize = False
 
 			if self.chkL2Reg.isChecked():
 				l2_reg = True
@@ -405,16 +632,14 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 			if self.chkVisualizations.isChecked():
 				run_time = True
-			else:
-				run_time = False
+			else: run_time = False
 
 			if self.cbxSaveInterval.currentIndex() == 0:
 				save_interval = 0
-			else:
-				save_interval = int(self.cbxSaveInterval.currentText())
+			else: save_interval = int(self.cbxSaveInterval.currentText())
 	
 		except ValueError:
-			self.txtOutputLog.append('Number of Epochs, Batch Size and Learning Rate and L2 Beta must be a Numerical Value!')
+			self.txtOutputLog.append('Number of Epochs, Batch Size and Learning Rate, Momentum and L2 Beta must be a Numerical Value!')
 		else:
 			# initialise threads array
 			self.__threads = []
@@ -424,7 +649,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.btnCancelTraining.setEnabled(True)
 			self.prgTrainingProgress.setValue(0)
 
-			worker = Worker(self.currentDataSet(), num_epochs, batch_size, learning_rate, optimizer, l2_reg, beta, save_path, save_interval, model_path, run_time)
+			worker = Worker(self.current_data_set(), validation, num_epochs, batch_size, learning_rate, momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time)
 			thread = QThread()
 
 			# connect cancel button in main thread to background thread
@@ -435,172 +660,84 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			worker.moveToThread(thread)
 
 			# set connections from background thread to main thread for updating GUI
-			worker.testSetAccuracy.connect(self.updateTestSetAccuracy)
-			worker.epochProgress.connect(self.updateProgressBar)
+			worker.test_set_accuracy.connect(self.update_test_set_accuracy)
+			worker.epoch_progress.connect(self.update_progress_bar)
+			worker.batch_loss.connect(self.batch_loss_graph.update_figure)
+			worker.batch_acc.connect(self.batch_acc_graph.update_figure)
+			worker.train_valid_acc.connect(self.train_valid_accuracy.update_figure)
+			worker.confusion_mat.connect(self.update_confusion_plot)
+			worker.network_weights_outputs.connect(self.embed_network_weights_outputs)
 
-			worker.lossOverEpochs.connect(self.lossGraph.update_figure)
-			worker.testSetAccOverEpochs.connect(self.testErrorGraph.update_figure)
-			worker.confusionMat.connect(self.updateConfusionPlot)
-
-			worker.logMessage.connect(self.txtOutputLog.append)
-			worker.networkModel.connect(self.showModelDetails)
-			worker.workComplete.connect(self.abort_workers)
+			worker.log_message.connect(self.txtOutputLog.append)
+			worker.network_model.connect(self.show_model_details)
+			worker.work_complete.connect(self.abort_workers)
 
 			# connect and start thread
 			thread.started.connect(worker.work)
 			thread.start()
 
-	def createConvLayerButtonClicked(self):
+	def create_conv_layer_button_clicked(self):
 
 		try:
 			conv_layer_name = self.txtConvName.text()
 			conv_kernel_size = int(self.txtConvKernelSize.text())
 			conv_stride = int(self.txtConvStride.text())
 			num_output_filters = int(self.txtConvOutputFilters.text())
+			act_function = self.return_act_function(self.cbxConvActFunction)
+			weight_init, weight_std_dev = self.return_weight_init(self.cbxConvWeightInit, self.txtConvStdDev)
+			bias_init, bias_val = self.return_bias_init(self.cbxConvBiasInit, self.txtConvBiasVal)
+			padding = self.return_padding(self.cbxConvPadding)
+			normalize = self.return_normalize(self.chkConvNorm)
+			dropout, keep_rate = self.return_dropout(self.chkConvDropout, self.txtConvKeepRate)
 
-			if self.cbxConvActFunction.currentIndex() == 0:
-				act_function = 'ReLu'
-			elif self.cbxConvActFunction.currentIndex() == 1:
-				act_function = 'Sigmoid'
-			elif self.cbxConvActFunction.currentIndex() == 2:
-				act_function = 'Tanh'
+			layer = l.ConvLayer(conv_layer_name, conv_kernel_size, conv_stride, act_function, num_output_filters, weight_init, weight_std_dev, bias_init, bias_val, padding, normalize, dropout, keep_rate)
+			self.new_model.append(layer)
 
-			if self.cbxConvWeightInit.currentIndex() == 0:
-				weightInit = "Random Normal"
-				weightStdDev = float(self.txtConvStdDev.text())
-			elif self.cbxConvWeightInit.currentIndex() == 1:
-				weightInit = "Truncated Normal"
-				weightStdDev = float(self.txtConvStdDev.text())
-
-			if self.cbxConvBiasInit.currentIndex() == 0:
-				biasInit = "Random Normal"
-				biasVal = float(self.txtConvBiasVal.text())
-			elif self.cbxConvBiasInit.currentIndex() == 1:
-				biasInit = "Truncated Normal"
-				biasVal = float(self.txtConvBiasVal.text())
-			elif self.cbxConvBiasInit.currentIndex() == 2:
-				biasInit = "Zeros"
-				biasVal = 0
-			elif self.cbxConvBiasInit.currentIndex() == 3:
-				biasInit = "Constant"
-				biasVal = float(self.txtConvBiasVal.text())
-
-
-			if self.cbxConvPadding.currentIndex() == 0:
-				padding = 'SAME'
-			elif self.cbxConvPadding.currentIndex() == 1:
-				padding = 'VALID'
-
-			if self.chkConvNorm.isChecked():
-				normalize = True
-			else:
-				normalize = False
-
-			if self.chkConvDropout.isChecked():
-				dropout = True
-				keep_rate = float(self.txtConvKeepRate.text())
-			else: 
-				dropout = False
-				keep_rate = 1.0
-
-			layer = l.ConvLayer(conv_layer_name, conv_kernel_size, conv_stride, act_function, num_output_filters, weightInit, weightStdDev, biasInit, biasVal, padding, normalize, dropout, keep_rate)
-
-			self.newModel.append(layer)
-
-			item = QListWidgetItem(("Convolution, Num Output Filters {}, Kernel Size: {}, Stride: {}, Activation Function: {}, Padding: {}, Normalize: {}, Dropout: {}, Keep Rate: {}").format(layer.numOutputFilters, layer.kernelSize, layer.stride, layer.actFunction, layer.padding, layer.normalize, layer.dropout, layer.keepRate))
-			
+			item = QListWidgetItem(("Convolution, Num Output Filters {}, Kernel Size: {}, Stride: {}, Activation Function: {}, Padding: {}, Normalize: {}, Dropout: {}, Keep Rate: {}").format(layer.num_output_filters, layer.kernel_size, layer.stride, layer.act_function, layer.padding, layer.normalize, layer.dropout, layer.keep_rate))
 			self.lstModel.addItem(item)
 
 		except ValueError:
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
 
-	def createPoolingLayerButtonClicked(self):
+	def create_pooling_layer_button_clicked(self):
 		try:    
 			pool_layer_name = self.txtPoolName.text()
 			pool_kernel_size = int(self.txtPoolKernelSize.text())
 			pool_stride = int(self.txtPoolStride.text())
-
-			if self.cbxPoolPadding.currentIndex() == 0:
-				padding = 'SAME'
-			elif self.cbxPoolPadding.currentIndex() == 1:
-				padding = 'VALID'
-
-			if self.chkPoolNorm.isChecked():
-				normalize = True
-			else:
-				normalize = False
-
-			if self.chkConvDropout.isChecked():
-				dropout = True
-				keep_rate = float(self.txtConvKeepRate.text())
-			else: 
-				dropout = False
-				keep_rate = 1.0
+			padding = self.return_padding(self.cbxPoolPadding)
+			normalize = self.return_normalize(self.chkPoolNorm)
+			dropout, keep_rate = self.return_dropout(self.chkPoolDropout, self.txtPoolKeepRate)
 
 			layer = l.MaxPoolingLayer(pool_layer_name, pool_kernel_size, pool_stride, padding, normalize, dropout, keep_rate)
-			self.newModel.append(layer)
+			self.new_model.append(layer)
 
-			item = QListWidgetItem(("Max Pool, Kernel Size: {}, Stride: {}, Padding: {}, Normalize: {}, Dropout: {}, Keep Rate: {}").format(layer.kernelSize, layer.stride, layer.padding, layer.normalize, layer.dropout, layer.keepRate))
+			item = QListWidgetItem(("Max Pool, Kernel Size: {}, Stride: {}, Padding: {}, Normalize: {}, Dropout: {}, Keep Rate: {}").format(layer.kernel_size, layer.stride, layer.padding, layer.normalize, layer.dropout, layer.keep_rate))
 			self.lstModel.addItem(item)
 
 		except ValueError:
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
 
-	def createDenseLayerButtonClicked(self):
+	def create_full_conn_layer_button_clicked(self):
 
 		try:
-			dense_layer_name = self.txtFCName.text()
-
-			if self.cbxFCActFunction.currentIndex() == 0:
-				act_function = 'ReLu'
-			elif self.cbxFCActFunction.currentIndex() == 1:
-				act_function = 'Sigmoid'
-			elif self.cbxFCActFunction.currentIndex() == 2:
-				act_function = 'Tanh'
+			FC_layer_name = self.txtFCName.text()
 			num_output_nodes = int(self.txtFCNumOutputNodes.text())
+			act_function = self.return_act_function(self.cbxFCActFunction)
+			weight_init, weight_std_dev = self.return_weight_init(self.cbxFCWeightInit, self.txtFCStdDev)
+			bias_init, bias_val = self.return_bias_init(self.cbxFCBiasInit, self.txtFCBiasVal)
+			normalize = self.return_normalize(self.chkFCNorm)
+			dropout, keep_rate = self.return_dropout(self.chkFCDropout, self.txtFCKeepRate)
 
-			if self.cbxFCWeightInit.currentIndex() == 0:
-				weightInit = "Random Normal"
-				weightStdDev = float(self.txtFCStdDev.text())
-			elif self.cbxFCWeightInit.currentIndex() == 1:
-				weightInit = "Truncated Normal"
-				weightStdDev = float(self.txtFCStdDev.text())
+			layer = l.FullyConnectedLayer(FC_layer_name, act_function, num_output_nodes, weight_init, weight_std_dev, bias_init, bias_val,  normalize, dropout, keep_rate)
+			self.new_model.append(layer)
 
-			if self.cbxFCBiasInit.currentIndex() == 0:
-				biasInit = "Random Normal"
-				biasVal = float(self.txtFCBiasVal.text())
-			elif self.cbxConvBiasInit.currentIndex() == 1:
-				biasInit = "Truncated Normal"
-				biasVal = float(self.txtFCBiasVal.text())
-			elif self.cbxConvBiasInit.currentIndex() == 2:
-				biasInit = "Zeros"
-				biasVal = 0
-			elif self.cbxFCBiasInit.currentIndex() == 3:
-				biasInit = "Constant"
-				biasVal = float(self.txtFCBiasVal.text())
-
-			if self.chkFCDropout.isChecked():
-				dropout = True
-				keep_rate = float(self.txtFCKeepRate.text())
-			else: 
-				dropout = False
-				keep_rate = 1.0
-
-			if self.chkFCNorm.isChecked():
-				normalize = True
-			else:
-				normalize = False			
-
-			layer = l.DenseLayer(dense_layer_name, act_function, num_output_nodes, weightInit, weightStdDev, biasInit, biasVal,  normalize, dropout, keep_rate)
-			self.newModel.append(layer)
-
-			item = QListWidgetItem(("Dense,  Num Output Nodes: {}, Activation Function: {}, Normalize: {}, Dropout: {}, Keep Rate: {}").format(layer.numOutputNodes, layer.actFunction, layer.normalize, layer.dropout, layer.keepRate))
+			item = QListWidgetItem(("Fully Connected,  Num Output Nodes: {}, Activation Function: {}, Normalize: {}, Dropout: {}, Keep Rate: {}").format(layer.num_output_nodes, layer.act_function, layer.normalize, layer.dropout, layer.keep_rate))
 			self.lstModel.addItem(item)
 
 		except ValueError:
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
 
-	def createOutputLayerButtonClicked(self):
+	def create_output_layer_button_clicked(self):
 		try:
 			output_layer_name = self.txtOutputName.text()
 
@@ -613,53 +750,91 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			elif self.cbxOutputActFunction.currentIndex() == 3:
 				act_function = 'Tanh'
 
-			if self.cbxOutputWeightInit.currentIndex() == 0:
-				weightInit = "Random Normal"
-				weightStdDev = float(self.txtOutputStdDev.text())
-			elif self.cbxOutputWeightInit.currentIndex() == 1:
-				weightInit = "Truncated Normal"
-				weightStdDev = float(self.txtOutputStdDev.text())
+			weight_init, weight_std_dev = self.return_weight_init(self.cbxOutputWeightInit, self.txtOutputStdDev)
+			bias_init, bias_val = self.return_bias_init(self.cbxOutputBiasInit, self.txtOutputBiasVal)
 
-			if self.cbxOutputBiasInit.currentIndex() == 0:
-				biasInit = "Random Normal"
-				biasVal = float(self.txtOutputBiasVal.text())
-			elif self.cbxOutputBiasInit.currentIndex() == 1:
-				biasInit = "Truncated Normal"
-				biasVal = float(self.txtOutputBiasVal.text())
-			elif self.cbxOutputBiasInit.currentIndex() == 2:
-				biasInit = "Zeros"
-				biasVal = 0
-			elif self.cbxOutputBiasInit.currentIndex() == 3:
-				biasInit = "Constant"
-				biasVal = float(self.txtOutputBiasVal.text())
+			layer = l.OutputLayer(output_layer_name, act_function, weight_init, weight_std_dev, bias_init, bias_val)
+			self.new_model.append(layer)
 
-			layer = l.OutputLayer(output_layer_name, act_function, weightInit, weightStdDev, biasInit, biasVal)
-			self.newModel.append(layer)
-
-			item = QListWidgetItem(("Output, Activation Function: {}").format(layer.actFunction))
+			item = QListWidgetItem(("Output, Activation Function: {}").format(layer.act_function))
 			self.lstModel.addItem(item)
 
 		except ValueError:
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
 
-	def validateModelButtonClicked(self):
+	def return_act_function(self, comboBox):
+		if comboBox.currentIndex() == 0:
+			act_function = 'ReLu'
+		elif comboBox.currentIndex() == 1:
+			act_function = 'Sigmoid'
+		elif comboBox.currentIndex() == 2:
+			act_function = 'Tanh'
+		return act_function
 
-		if not self.newModel:
+	def return_weight_init(self, comboBox, textField):
+		if comboBox.currentIndex() == 0:
+			weight_init = "Random Normal"
+			weight_std_dev = float(textField.text())
+		elif comboBox.currentIndex() == 1:
+			weight_init = "Truncated Normal"
+			weight_std_dev = float(textField.text())
+		return weight_init, weight_std_dev
+
+	def return_bias_init(self, comboBox, textField):
+		if comboBox.currentIndex() == 0:
+			bias_init = "Random Normal"
+			bias_val = float(textField.text())
+		elif comboBox.currentIndex() == 1:
+			bias_init = "Truncated Normal"
+			bias_val = float(textField.text())
+		elif comboBox.currentIndex() == 2:
+			bias_init = "Zeros"
+			bias_val = 0
+		elif comboBox.currentIndex() == 3:
+			bias_init = "Constant"
+			bias_val = float(textField.text())
+		return bias_init, bias_val
+
+	def return_padding(self, comboBox):
+		if comboBox.currentIndex() == 0:
+			padding = 'SAME'
+		elif comboBox.currentIndex() == 1:
+			padding = 'VALID'	
+		return padding	
+
+	def return_normalize(self, checkBox):
+		if checkBox.isChecked():
+			normalize = True
+		else: normalize = False
+		return normalize
+
+	def return_dropout(self, checkBox, textField):
+		if checkBox.isChecked():
+			dropout = True
+			keep_rate = float(textField.text())
+		else: 
+			dropout = False
+			keep_rate = 1.0
+		return dropout, keep_rate
+
+	def validate_model_button_clicked(self):
+
+		if not self.new_model:
 			self.txtOutputModelLog.append('No Layers Added')
 			return
 
-		if not self.newModel[0].layerType == 'Convolution':
+		if not self.new_model[0].layer_type == 'Convolution':
 			self.txtOutputModelLog.append('First layer must be Convolution layer')
 			return
 
-		if not self.newModel[-1].layerType == 'Output':
+		if not self.new_model[-1].layer_type == 'Output':
 			self.txtOutputModelLog.append('Final layer must be output layer')
 			return
 
 		self.txtOutputModelLog.append('Model Successfully Validated')
 		self.btnCreateModel.setEnabled(True)
 
-	def createModelButtonClicked(self):
+	def create_model_button_clicked(self):
 
 		try:
 			fileName = self.txtSaveModelAs.text()
@@ -669,21 +844,20 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 			filePath = self.txtModelSavePath.text()
 
-			success = pp.createXMLModel(self.newModel, fileName, filePath)
+			success = pp.create_XML_model(self.new_model, fileName, filePath)
 
 			if success == True:
 				self.txtOutputModelLog.append("Success Writing XML File")
-				self.resetModelCreation()
+				self.reset_model_creation()
 			else : 
 				self.txtOutputModelLog.append("Error Writing XML File")
 				return False
 		except:
 			self.txtOutputModelLog.append("Error Writing XML File")
-
-			
 		
-	def resetModelCreation(self):
-		self.deleteModelButtonClicked()
+	def reset_model_creation(self):
+		self.delete_model_button_clicked()
+		self.txtSaveModelAs.setText('')
 		self.txtConvName.setText('')
 		self.txtConvKernelSize.setText('')
 		self.txtConvStride.setText('')
@@ -710,219 +884,206 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.cbxFCWeightInit.setCurrentIndex(0)
 		self.cbxFCBiasInit.setCurrentIndex(0)
 		self.txtFCStdDev.setText('')
-		self.txtFCCBiasVal.setText('')
+		self.txtFCBiasVal.setText('')
 		self.chkFCNorm.setChecked(False)
 		self.chkFCDropout.setChecked(False)
 		self.txtFCKeepRate.setText('')
 		self.txtOutputName.setText('')
 		self.cbxOutputActFunction.setCurrentIndex(0)
 		self.cbxOutputWeightInit.setCurrentIndex(0)
-		self.cbxOutputBiasVal.setCurrentIndex(0)
+		self.txtOutputBiasVal.setText('')
 		self.txtOutputStdDev.setText('')
-		self.txtOutputConstantVal.setText('')
+		self.txtOutputBiasVal.setText('')
 
-	def deleteModelButtonClicked(self):
-		self.newModel = []
+	def delete_model_button_clicked(self):
+		if not self.new_model:
+			self.txtOutputModelLog.append("No Model to Delete!")
+			return
+		self.new_model = []
 		self.lstModel.clear()
 
-	def deleteLastLayerButtonClicked(self):
+	def delete_last_layer_button_clicked(self):
 		try:
-			self.newModel.pop(-1)
-			self.lstModel.takeItem(len(self.newModel))
+			self.new_model.pop(-1)
+			self.lstModel.takeItem(len(self.new_model))
 		except:
 			self.txtOutputModelLog.append("No More Layers to Delete!")
 
-	def biasInitComboBoxChanged(self):
-		print("made it")
-		if self.cbxConvBiasInit.currentIndex() == 0 or self.cbxConvBiasInit.currentIndex() == 1:
-			self.lblConvBiasVal.setText('Std Dev of Weights')
-		elif self.cbxConvBiasInit.currentIndex() == 2:
-			self.lblConvBiasVal.setText('')
-			self.txtConvBiasVal.setFixedWidth(0)
+	def bias_init_combo_changed(self, bias_init_combobox, bias_val_text_field, bias_val_label):
+		if bias_init_combobox.currentIndex() == 0 or bias_init_combobox.currentIndex() == 1:
+			bias_val_label.setText('Std Dev of Weights:')
+			bias_val_text_field.setFixedWidth(60)
+		elif bias_init_combobox.currentIndex() == 2:
+			bias_val_label.setText('')
+			bias_val_text_field.setFixedWidth(0)
+		elif bias_init_combobox.currentIndex() == 3:
+			bias_val_label.setText('Value:')
+			bias_val_text_field.setFixedWidth(60)
 
-		
-	def changeModelLoadPath(self):
-		fname = QFileDialog.getOpenFileName(self, 'Open file', '/home', "XML Files (*.xml)")
-		self.txtLoadModel.setText(str(fname[0])) 
-
-	def changeCheckpointSavePath(self):
+	def change_file_path(self, path_text_field, disable=False):
 		path = QFileDialog.getExistingDirectory(self, "Select Directory")
-		self.txtSavePath.setText(path + "/")
+		path_text_field.setText(path + "/")
+		if disable == True:
+			self.cbxSavePath.setCheckState(False)
 
-	def changeCheckpointLoadPath(self):
-		path = QFileDialog.getExistingDirectory(self, "Select Directory")
-		self.txtLoadCheckpoints.setText(path + "/")
-		self.cbxSavePath.setCheckState(False)
+	def data_set_rad_state_changed(self, prima_head_pose):
+		if prima_head_pose == True:
+			self.chkValidationSet.setFixedWidth(0)
+		else: self.chkValidationSet.setFixedWidth(110)
 
-	def changeModelSavePath(self):
-		path = QFileDialog.getExistingDirectory(self, "Select Directory")
-		self.txtModelSavePath.setText(path + "/")
 
-	def currentDataSet(self):
+	def current_data_set(self):
 		if self.radCIFAR10.isChecked():
 			return 'CIFAR10'
 		elif self.radMNIST.isChecked():
 			return 'MNIST'
+		elif self.radPrimaHeadPose.isChecked():
+			return 'Prima Head Pose'
 
-	def l2RegularizationCheckBoxStateChanged(self):
+	def optimizer_combo_box_changed(self):
+		if self.cbxOptimizer.currentIndex() == 4:
+			self.txtMomentum.setFixedWidth(60)
+			self.lblMomentum.setFixedWidth(60)
+		else:
+			self.txtMomentum.setFixedWidth(0)
+			self.lblMomentum.setFixedWidth(0)	
+
+	def l2_reg_checkbox_state_changed(self):
 		if self.chkL2Reg.isChecked():
 			self.txtL2Beta.setEnabled(True)
 		else: self.txtL2Beta.setEnabled(False)
 
-	def checkpointCheckBoxStateChange(self):
+	def checkpoint_checkbox_state_changed(self):
 		if self.cbxSavePath.isChecked():
 			self.txtSavePath.setText(self.txtLoadCheckpoints.text())
 
-	def dropoutCheckBoxStateChanged(self):
-		if self.chkConvDropout.isChecked():
-			self.txtConvKeepRate.setEnabled(True)
-		else: self.txtConvKeepRate.setEnabled(False)
+	def dropout_checkbox_state_changed(self, dropout_checkbox, keep_rate_text_field):
+		if dropout_checkbox.isChecked():
+			keep_rate_text_field.setEnabled(True)
+		else: keep_rate_text_field.setEnabled(False)
 
-		if self.chkPoolDropout.isChecked():
-			self.txtPoolKeepRate.setEnabled(True)
-		else: self.txtPoolKeepRate.setEnabled(False)
-
-		if self.chkFCDropout.isChecked():
-			self.txtFCKeepRate.setEnabled(True)
-		else: self.txtFCKeepRate.setEnabled(False)
-
-	def createModelRadClicked(self, enabled):
+	def create_model_rad_clicked(self, enabled):
 		if enabled:
 			self.tabPages.setCurrentIndex(1)
 			self.radLoadModel.setChecked(True)
 			
-	def openTrainTab(self):
-		self.tabPages.setCurrentIndex(0)
+	def open_tab(self, index):
+		self.tabPages.setCurrentIndex(index)
 
-	def openDesignTab(self):
-		self.tabPages.setCurrentIndex(1)
-
-	def openVisualizationTab(self):
-		self.tabPages.setCurrentIndex(2)
-
-	def clearOutputLog(self):
+	def clear_output_log(self):
 		self.txtOutputLog.setText('')
 
-	def clearOutputModelLog(self):
+	def clear_output_model_log(self):
 		self.txtOutputModelLog.setText('')
 
-	def closeEvent(self, event):
+	def close_event(self, event):
 		reply = QMessageBox.question(self, 'Message', "Are you sure you want to quit? All Unsaved Progress will be lost...", 
 			QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 		if reply == QMessageBox.Yes:
 			event.accept()
-		else:
-			event.ignore()
+		else: event.ignore()
 	
 
 	@pyqtSlot(float)
-	def updateTestSetAccuracy(self, accuracy: float):
-		self.txtTestAccuracy.setText(str(round(accuracy, 2)))
-		self.btnTrainNetwork.setEnabled(True)
+	def update_test_set_accuracy(self, accuracy: float):
+		self.txtTestAccuracy.setText(str(round(accuracy, 6)))
 		self.btnCancelTraining.setEnabled(False)
 
 	@pyqtSlot(float)
-	def updateProgressBar(self, progress: float):
+	def update_progress_bar(self, progress: float):
 		self.prgTrainingProgress.setValue(progress)
 
 	@pyqtSlot(list)
-	def showModelDetails(self, layers: list):
+	def show_model_details(self, layers: list):
 		for e in layers:
-			self.txtOutputLog.append("Layer Name: {0}".format(e.layerName))
-			if e.layerType == 'Convolution':
+			self.txtOutputLog.append("Layer Name: {0}".format(e.layer_name))
+			if e.layer_type == 'Convolution':
 				self.txtOutputLog.append('Convolution Layer')
-				self.txtOutputLog.append("Num Output Filters {0}".format(e.numOutputFilters))
-				self.txtOutputLog.append("Kernel Size: [1,{0},{1},1], Stride: [1,{2},{3},1]".format(e.kernelSize, e.kernelSize, e.stride, e.stride))
-				self.txtOutputLog.append("Activation Function: {0}".format(e.actFunction))  
+				self.txtOutputLog.append("Num Output Filters {0}".format(e.num_output_filters))
+				self.txtOutputLog.append("Kernel Size: [1,{0},{1},1], Stride: [1,{2},{3},1]".format(e.kernel_size, e.kernel_size, e.stride, e.stride))
+				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))  
 				self.txtOutputLog.append("Padding: {0}".format(e.padding))  
 				self.txtOutputLog.append("Normalize: {0}".format(e.normalize))  
-				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keepRate)) 
-			elif e.layerType == 'Max Pool':
+				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keep_rate)) 
+			elif e.layer_type == 'Max Pool':
 				self.txtOutputLog.append('Max Pooling Layer')
-				self.txtOutputLog.append("Kernel Size: [1,{0},{1},1], Stride: [1,{2},{3},1]".format(e.kernelSize, e.kernelSize, e.stride, e.stride))
+				self.txtOutputLog.append("Kernel Size: [1,{0},{1},1], Stride: [1,{2},{3},1]".format(e.kernel_size, e.kernel_size, e.stride, e.stride))
 				self.txtOutputLog.append("Padding: {0}".format(e.padding))  
 				self.txtOutputLog.append("Normalize: {0}".format(e.normalize))  
-				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keepRate)) 
-			elif e.layerType == 'Dense':
-				self.txtOutputLog.append('Dense Layer')
-				self.txtOutputLog.append("Num Output Nodes {0}".format(e.numOutputNodes))
-				self.txtOutputLog.append("Activation Function: {0}".format(e.actFunction))  
+				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keep_rate)) 
+			elif e.layer_type == 'Fully Connected':
+				self.txtOutputLog.append('Fully Connected Layer')
+				self.txtOutputLog.append("Num Output Nodes {0}".format(e.num_output_nodes))
+				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))  
 				self.txtOutputLog.append("Normalize: {0}".format(e.normalize))  
-				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keepRate)) 
-			elif e.layerType == 'Output':
+				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keep_rate)) 
+			elif e.layer_type == 'Output':
 				self.txtOutputLog.append('Output Layer')
-				self.txtOutputLog.append("Activation Function: {0}".format(e.actFunction))  
+				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))  
 		self.txtOutputLog.append('\n ------------------------------------------------------------------------------------------------------------- \n')
 
  
+	@pyqtSlot(list, list)
+	def embed_network_weights_outputs(self, weight_file_names: list, output_file_names: list):
 
-	@pyqtSlot(object, bool, int)
-	def updateConfusionPlot(self, confusion: object, training: bool, epoch: int):
-		plt.close()
+		# clears tabs from previous runs
+		self.tabLayerWeights.clear()
+		self.tabLayerOutput.clear()
 
-		norm_conf = []
+		# cycle 
+		for file_name in weight_file_names:
+			self.tab = QWidget()
+			tab_name = file_name.split('_')
+			self.tabLayerWeights.addTab(self.tab, tab_name[0])
+			self.image = QLabel()
+			self.vbox = QVBoxLayout()
+			self.vbox.addWidget(self.image)
+			pix_map = QPixmap(file_name)
+			self.image.setPixmap(pix_map)
+			self.tab.setLayout(self.vbox)
 
-		for i in confusion:
-			a = 0
-			tmp_arr = []
-			a = sum(i, 0)
+		for file_name in output_file_names:
+			self.tab = QWidget()
+			tab_name = file_name.split('_')
+			self.tabLayerOutput.addTab(self.tab, tab_name[0])
+			self.image = QLabel()
+			self.vbox = QVBoxLayout()
+			self.vbox.addWidget(self.image)
+			pix_map = QPixmap(file_name)
+			self.image.setPixmap(pix_map)
+			self.tab.setLayout(self.vbox)
 
-			for j in i:
-				tmp_arr.append(float(j)/float(a))
-			norm_conf.append(tmp_arr)
 
-		self.fig = plt.figure()
-		self.axes = self.fig.add_subplot(111)
 
-		self.axes.set_aspect(1)
-			
-		res = self.axes.imshow(np.array(norm_conf), cmap=plt.cm.jet, interpolation='nearest')
-		
-		width, height = confusion.shape
-
-		for x in range(width):
-			for y in range(height):
-				self.axes.annotate(str(confusion[x][y]), xy=(y, x), horizontalalignment='center', verticalalignment='center')
-
-		cb = self.fig.colorbar(res)
-
-		alphabet = '0123456789'
-
-		# set axes to 0-9
-		plt.xticks(range(width), alphabet[:width])
-		plt.yticks(range(height), alphabet[:height])
-
+	@pyqtSlot(bool, int)
+	def update_confusion_plot(self, training: bool, epoch: int):
 		if training == True:
 			plt.savefig('training_confusion_matrix.png', format='png')
-			pixMap = QPixmap("training_confusion_matrix.png")
-			self.lblTrainingConfusionMat.setPixmap(pixMap)
+			pix_map = QPixmap("training_confusion_matrix.png")
+			self.lblTrainingConfusionMat.setPixmap(pix_map)
 			self.lblBatchConf.setText("Batch {0}".format(epoch))
 		else:
 			plt.savefig('testing_confusion_matrix.png', format='png')
-			pixMap = QPixmap("testing_confusion_matrix.png")
-			self.lblTestingConfusionMat.setPixmap(pixMap)
+			pix_map = QPixmap("testing_confusion_matrix.png")
+			self.lblTestingConfusionMat.setPixmap(pix_map)
 
-		plt.clf()
-
+		plt.close()
 
 
 	# called when thread(s) have finished, i.e. training has finished or been cancelled
 	@pyqtSlot()
 	def abort_workers(self):
-		for thread, worker in self.__threads:  # note nice unpacking by Python, avoids indexing
+		for thread, worker in self.__threads: 
 			thread.quit()  # this will quit **as soon as thread event loop unblocks**
 			thread.wait()  # <- so you need to wait for it to *actually* quit
+		self.btnTrainNetwork.setEnabled(True)
 	
 	def cancel_train(self):
 		self.end_train.emit()
 
 		
-
-
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
-	
 	ui = CNNApp()
 	ui.show()
-
 	sys.exit(app.exec_())

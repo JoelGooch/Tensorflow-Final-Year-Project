@@ -37,7 +37,7 @@ def load_prima_head_pose():
 
 
 # function to load data set and parameters for CIFAR10
-def load_CIFAR_10():
+def load_CIFAR_10(validation=True):
     num_channels = 3 # RGB
     image_size = 32 # 32x32 images
     num_classes = 10 # 10 possible classes. info @ https://www.cs.toronto.edu/~kriz/cifar.html
@@ -99,10 +99,15 @@ def load_CIFAR_10():
     training_set = training_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
     testing_set = testing_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
 
-    return training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes
+    if validation == True:
+        testing_set, testing_labels, validation_set, validation_labels = create_validation_set(testing_set, testing_labels)
+    else: validation_set, validation_labels = np.empty(shape=(2, 2))
+        
+    return training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes
+
 
 # function to loead data set and parameters for MNIST
-def load_MNIST():
+def load_MNIST(validation=False):
     num_channels = 1 # Monocolour images
     image_size = 28 # 28x28 images
     num_classes = 10 # characters 0-9
@@ -118,4 +123,14 @@ def load_MNIST():
     training_set = training_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
     testing_set = testing_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
 
-    return training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes
+    if validation == True:
+        testing_set, testing_labels, validation_set, validation_labels = create_validation_set(testing_set, testing_labels)
+    else: validation_set, validation_labels = np.empty(shape=(2, 2))
+        
+    return training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes
+
+
+def create_validation_set(testing_set, testing_labels):
+    testing_set, validation_set = np.split(testing_set, 2)
+    testing_labels, validation_labels = np.split(testing_labels, 2)
+    return testing_set, testing_labels, validation_set, validation_labels
