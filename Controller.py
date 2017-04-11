@@ -4,8 +4,10 @@ import numpy as np
 import pickle
 import datetime
 import cv2
-import matplotlib as mpl
 import xml.etree.ElementTree as ET
+import matplotlib as mpl
+#mpl.use('Agg')
+mpl.use('Qt5Agg')
 
 import CNN_GUI_V14 as design
 import input_data as data
@@ -13,18 +15,15 @@ import xml_parser as pp
 import Layer as l
 import layer_factory as factory
 
+from functools import partial
 from math import ceil, sqrt
-
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QMainWindow, QWidget, QLabel, QApplication, QMessageBox, QFileDialog, QSizePolicy, QListWidgetItem, QVBoxLayout
 from PyQt5.QtGui import QPixmap
-from functools import partial
-
-mpl.use('Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
-
+#plt.rcParams['axes.facecolor'] = 'peachpuff'
 #np.set_printoptions(threshold=np.inf)
 
 class Worker(QObject):
@@ -50,6 +49,7 @@ class Worker(QObject):
 		super().__init__()
 		self.end_training = False
 		self.data_set = data_set
+		self.regression = False
 		self.validation = validation
 		self.num_epochs = num_epochs
 		self.batch_size = batch_size
@@ -69,6 +69,32 @@ class Worker(QObject):
 		self.train_network(self.data_set, self.validation, self.num_epochs, self.batch_size, self.learning_rate, self.momentum, self.optimizer, 
 			self.normalize, self.l2_reg, self.beta, self.save_directory, self.save_interval, self.model_path, self.run_time)
 
+	# function that calculates and returns RMSE of current batch
+	def calc_accuracy(self, predictions, labels, verbose=True):
+
+		# Convert back to degree
+		predictions_degree = predictions * 180
+		predictions_degree -= 90
+		labels_degree = labels * 180
+		labels_degree -= 90
+
+		RMSE_pitch = np.sum(np.square(predictions_degree - labels_degree), dtype=np.float32) * 1 / predictions.shape[0]
+		RMSE_pitch = np.sqrt(RMSE_pitch)
+		RMSE_std = np.std(np.sqrt(np.square(predictions_degree - labels_degree)), dtype=np.float32)
+		# MAE = Mean Absolute Error
+		MAE_pitch = np.sum(np.absolute(predictions_degree - labels_degree), dtype=np.float32) * 1 / predictions.shape[0]
+		MAE_std = np.std(np.absolute(predictions_degree - labels_degree), dtype=np.float32)
+
+		if (verbose == True):
+			print("==============================")            
+			print("RMSE mean: " + str(RMSE_pitch) + " degree")
+			print("RMSE std: " + str(RMSE_std) + " degree")
+			print("MAE mean: " + str(MAE_pitch) + " degree")
+			print("MAE std: " + str(MAE_std) + " degree")
+			print("==============================")
+
+		return RMSE_pitch
+
 
 	def train_network(self, data_set, validation, num_epochs, batch_size, learning_rate, momentum, learning_algo, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time):
 
@@ -77,13 +103,16 @@ class Worker(QObject):
 			training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10(validation)
 		if (data_set == 'MNIST'):
 			training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST(validation)
-		if (data_set == 'Prima Head Pose'):
+		if (data_set == 'PrimaHeadPose'):
 			training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose()
+			self.regression = True
 
 		# normalize data, if user requires
 		if normalize == True:
 			training_set -= 127 
 			testing_set -= 127
+			if validation == True:
+				validation_set -= 127
 
 		try:
 			# get array of layers from XML file
@@ -104,8 +133,14 @@ class Worker(QObject):
 			y = tf.placeholder(tf.float32, shape=(None, num_classes))
 			keep_prob = tf.placeholder(tf.float32)
 
-			# stores the class integer values 
-			labels_class = tf.argmax(y, dimension=1)
+			global_step = tf.Variable(0, trainable=False)
+
+
+			if self.regression == False:
+				# stores the class integer values 
+				class_labels = tf.argmax(y, dimension=1)
+			else: 
+				angle_labels = y
 
 			# array to hold tensorflow layers
 			network_layers = []
@@ -131,13 +166,11 @@ class Worker(QObject):
 
 			model_output = CNN_Model(x, keep_prob)
 
-			cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=model_output, labels=y)
-
-			if data_set == 'MNIST' or data_set == 'CIFAR10':
+			# define loss term dependent upon which data set is in use.. Prima = regression
+			if self.regression == False:
+				cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=model_output, labels=y)
 				loss = tf.reduce_mean(cross_entropy, name='cross_entropy')
-			elif data_set == 'Prima Head Pose':
-				loss = tf.nn.l2_loss(model_output - y)
-
+			else: loss = tf.nn.l2_loss(model_output - angle_labels)
 
 			# add l2 regularization if user has specified
 			if l2_reg == True:
@@ -148,8 +181,7 @@ class Worker(QObject):
 						loss += (beta * tf.nn.l2_loss(e))
 			
 
-			global_step = tf.Variable(0, trainable=False)
-
+			# consider adding option for learning rates like this 
 			#learning_rate = tf.train.exponential_decay(0.0125, global_step, 15000, 0.1, staircase=True)
 
 			if (learning_algo == 0):
@@ -169,14 +201,14 @@ class Worker(QObject):
 				self.log_message.emit('Optimizer: Momentum')
 
 
-			# convert one hot encoded array to single prediction value
-			network_pred_class = tf.argmax(model_output, dimension=1)
+			if self.regression == False:
+				# convert one hot encoded array to single prediction value
+				network_pred_class = tf.argmax(model_output, dimension=1)
+				correct_prediction = tf.equal(network_pred_class, class_labels)
+				accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+			else: 
+				network_pred_angle = model_output
 
-			# compare if network prediction was correct
-			correct_prediction = tf.equal(network_pred_class, labels_class)
-			
-			# define network accuracy
-			accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 			# create saver object to save/restore checkpoints
 			saver = tf.train.Saver()
@@ -207,9 +239,14 @@ class Worker(QObject):
 						batch_data = training_set[offset:(offset + batch_size), :, :, :]
 						batch_labels = training_labels[offset:(offset + batch_size)]
 
-						# feed batch through network
+						# feed batch through network                        this shouldnt be here?
 						feed_dict = {x: batch_data, y: batch_labels, keep_prob: 0.5}
-						_, l, predictions, acc, batch_pred_class, batch_classes = session.run([optimizer, loss, model_output, accuracy, network_pred_class, labels_class], feed_dict=feed_dict)
+
+						if self.regression == False:
+							_, l, acc, batch_pred_class, batch_classes = session.run([optimizer, loss, accuracy, network_pred_class, class_labels], feed_dict=feed_dict)
+						else: 
+							_, l, batch_pred_angles = session.run([optimizer, loss, model_output], feed_dict=feed_dict)
+
 
 						# print information to output log
 						if (epoch % 100 == 0):
@@ -218,34 +255,44 @@ class Worker(QObject):
 							self.log_message.emit('Global Step: {}'.format(str(global_step.eval())))
 							self.log_message.emit('Learning Rate: {}'.format(str(learning_rate)))
 							self.log_message.emit('Minibatch size: {}'.format(str(batch_labels.shape)))
-							self.log_message.emit('Batch Accuracy = {}'.format(str(acc)))
 
+							if self.regression == False:
+								self.log_message.emit('Batch Accuracy = {}'.format(str(acc)))
+								self.batch_acc.emit(acc, epoch)
+							else: 
+								RMSE = self.calc_accuracy(batch_pred_angles, batch_labels)
+								self.log_message.emit('Batch RMSE = {}'.format(str(RMSE)))
+								self.batch_acc.emit(RMSE, epoch)
+
+							
 							# emit batch loss for GUI visualization
 							self.batch_loss.emit(l, epoch)
-							self.batch_acc.emit(acc, epoch)
+							
 
 							# if user has chosen to include run time visualizations
 							if run_time == True:
 
-								# create confusion matrix for current batch
-								batch_confusion = tf.contrib.metrics.confusion_matrix(batch_classes, batch_pred_class).eval()
-								self.create_confusion_matrix(batch_confusion, False)
-								self.confusion_mat.emit(True, epoch)
+								if self.regression == False:
+									# create confusion matrix for current batch
+									batch_confusion = tf.contrib.metrics.confusion_matrix(batch_classes, batch_pred_class).eval()
+									self.create_confusion_matrix(batch_confusion, False)
+									self.confusion_mat.emit(True, epoch)
 
 								if validation == True:
 
-									#num_training_data = len(training_labels)
-									#data_per_batch = num_training_data / 10
-									#for i in range(10):
-									#	batch_data = training_set[i*data_per_batch:i+1*data_per_batch]
-									#	batch_labels = training_labels[i*data_per_batch:i+1*data_per_batch]
-									#	train_accuracy = session.run(accuracy, feed_dict={x: batch_data, y: batch_labels, keep_prob: 1.0})
-									#	print(accuracy)
+									num_training_data = len(training_labels)
+									data_per_batch = 10000
+									num_batches = num_training_data / data_per_batch
+
+									for i in range(int(num_batches)):
+									   batch_data = training_set[i*data_per_batch:i+1*data_per_batch]
+									   batch_labels = training_labels[i*data_per_batch:i+1*data_per_batch]
+									   train_accuracy = session.run(accuracy, feed_dict={x: batch_data, y: batch_labels, keep_prob: 1.0})
 
 									# run validation set at current batch
 									valid_accuracy = session.run(accuracy, feed_dict={x: validation_set, y: validation_labels, keep_prob: 1.0})
 
-									self.train_valid_acc.emit(valid_accuracy, 0, epoch)
+									self.train_valid_acc.emit(train_accuracy, valid_accuracy, epoch)
 
 
 						# calculate progress as percentage and emit signal to GUI to update
@@ -271,9 +318,17 @@ class Worker(QObject):
 
 				self.log_message.emit('\nEvaluating Test Set...')
 
-				# run test set through network and return accuracy and predicted classes
-				test_acc, testing_pred_class, testing_classes = session.run([accuracy, network_pred_class, labels_class], 
-												feed_dict={x: testing_set, y:testing_labels, keep_prob: 1.0})
+				feed_dict = {x: testing_set, y:testing_labels, keep_prob: 1.0}
+
+				# run test set through network
+				if self.regression == False:
+					# if classification, grab accuracy from tensorflow graph
+					test_acc, testing_pred_class, testing_classes = session.run([accuracy, network_pred_class, class_labels], feed_dict=feed_dict)
+				else: 
+					# otherwise calculate RMSE using function
+					batch_pred_angles = session.run(model_output, feed_dict=feed_dict)
+					test_acc = self.calc_accuracy(batch_pred_angles, testing_labels)
+
 
 				self.log_message.emit('Test Set Evaluated \n')
 				
@@ -292,9 +347,9 @@ class Worker(QObject):
 						file_name = self.plot_conv_weights(weights=e, name=e.name, session=session)
 						layer_weights_file_names.append(file_name)
 
-				# grab random image from batch
-				random = np.random.randint(0, batch_data.shape[0])
-				image = batch_data[random]
+				# grab random image from test set
+				random = np.random.randint(0, testing_set.shape[0])
+				image = testing_set[random]
 				layer_count = 0
 				# create convolution output plots for each convolution layer
 				for layer in network_layers:
@@ -304,12 +359,14 @@ class Worker(QObject):
 					layer_count += 1
 
 
+				# send file paths for newly created plots to GUI to load on screen
 				self.network_weights_outputs.emit(layer_weights_file_names, layer_outputs_file_names)
 
-				# create confusion matrix from predicted and actual classes
-				test_set_confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
-				self.create_confusion_matrix(test_set_confusion, False)
-				self.confusion_mat.emit(False, 0)
+				if self.regression == False:
+					# create confusion matrix from predicted and actual classes
+					test_set_confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
+					self.create_confusion_matrix(test_set_confusion, False)
+					self.confusion_mat.emit(False, 0)
 
 				self.log_message.emit('Visualizations Loaded\n')
 
@@ -445,13 +502,16 @@ class MyMplCanvas(FigureCanvas):
 	"""Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 	def __init__(self, parent=None, width=5, height=4, dpi=100, title='title', xAxisTitle='x', yAxisTitle='y'):
 		self.title = title
+		self.xAxisTitle = xAxisTitle
+		self.yAxisTitle = yAxisTitle
 
 		self.fig = Figure(figsize=(width, height), dpi=dpi)
 		self.axes = self.fig.add_subplot(111)
 		self.fig.suptitle(title)
 
-		self.axes.set_xlabel(xAxisTitle)
-		self.axes.set_ylabel(yAxisTitle)
+		self.axes.set_xlabel(self.xAxisTitle)
+		self.axes.set_ylabel(self.yAxisTitle)
+
 		self.axes.grid(True)
 
 		FigureCanvas.__init__(self, self.fig)
@@ -461,7 +521,7 @@ class MyMplCanvas(FigureCanvas):
 		FigureCanvas.updateGeometry(self)
 
 
-class ErrorOverEpochsGraph(MyMplCanvas):
+class DynamicGraph(MyMplCanvas):
 	"""A canvas that updates itself every secoSnd with a new plot."""
 	def __init__(self, *args, **kwargs):
 		MyMplCanvas.__init__(self, *args, **kwargs)
@@ -473,20 +533,24 @@ class ErrorOverEpochsGraph(MyMplCanvas):
 
 		if epoch == 0:
 			self.axes.clear()
+			self.axes.set_xlabel(self.xAxisTitle)
+			self.axes.set_ylabel(self.yAxisTitle)
+			self.axes.grid(True)
 			self.errors = []
 			self.epochs = []
 
-		self.axes.set_ylabel('Error')
-		self.axes.set_xlabel('Epoch')
 		# add current values to array
 		self.errors.append(error)
 		self.epochs.append(epoch)
+
 		# plot new, extended graph
 		self.axes.plot(self.epochs, self.errors, 'r')
-		self.axes.grid(True)
+		#self.axes.fill_between(self.epochs, 0, self.errors, alpha=0.5, facecolor='r')
+		
+		#self.axes.grid(True)
 		self.draw()
 
-class MultipleErrorOverEpochsGraph(MyMplCanvas):
+class DynamicDoubleGraph(MyMplCanvas):
 	"""A canvas that updates itself every secoSnd with a new plot."""
 	def __init__(self, *args, **kwargs):
 		MyMplCanvas.__init__(self, *args, **kwargs)
@@ -499,19 +563,23 @@ class MultipleErrorOverEpochsGraph(MyMplCanvas):
 
 		if epoch == 0:
 			self.axes.clear()
+			self.axes.set_xlabel(self.xAxisTitle)
+			self.axes.set_ylabel(self.yAxisTitle)
+			self.axes.grid(True)
 			self.train_errors = []
 			self.valid_errors = []
 			self.epochs = []
 
-		self.axes.set_ylabel('Accuracy')
-		self.axes.set_xlabel('Epoch')
+		#ax2 = self.fig.add_subplot(212, sharex=self.axes)
+
 		# add current values to array
 		self.train_errors.append(train_error)
 		self.valid_errors.append(valid_error)
 		self.epochs.append(epoch)
+
 		# plot new, extended graph
-		self.axes.plot(self.epochs, self.train_errors, self.valid_errors, 'r')
-		self.axes.grid(True)
+		self.axes.plot(self.epochs, self.train_errors, 'r', label="train")
+		self.axes.plot(self.epochs, self.valid_errors, 'blue', label="valid")
 		self.draw()
 
 class CNNApp(QMainWindow, design.Ui_MainWindow):
@@ -561,10 +629,10 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.cbxOutputBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxOutputBiasInit, bias_val_text_field= self.txtOutputBiasVal, bias_val_label= self.lblOutputBiasVal))
 
 		# buttons to change file paths 
-		self.btnChangeSavePath.clicked.connect(partial(self.change_file_path, path_text_field=self.txtSavePath))
-		self.btnChangeLoadCheckpoints.clicked.connect(partial(self.change_file_path, path_text_field=self.txtLoadCheckpoints, disable=True))
-		self.btnChangeModelPath.clicked.connect(partial(self.change_file_path, path_text_field=self.txtLoadModel))
-		self.btnChangeModelSavePath.clicked.connect(partial(self.change_file_path, path_text_field=self.txtModelSavePath))
+		self.btnChangeSavePath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtSavePath))
+		self.btnChangeLoadCheckpoints.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtLoadCheckpoints, disable=True))
+		self.btnChangeModelPath.clicked.connect(self.change_file_path)
+		self.btnChangeModelSavePath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtModelSavePath))
 		
 		# train/cancel training buttons
 		self.btnTrainNetwork.clicked.connect(self.train_button_clicked)
@@ -589,9 +657,9 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.btnClearModelLog.clicked.connect(self.clear_output_model_log)
 
 		# create graph instances
-		self.batch_loss_graph = ErrorOverEpochsGraph(self.grphBatchLoss, width=5, height=4, dpi=100, title='Loss Over Epochs', xAxisTitle='Epoch', yAxisTitle='Loss')
-		self.batch_acc_graph = ErrorOverEpochsGraph(self.grphBatchAcc, width=5, height=4, dpi=100, title='Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
-		self.train_valid_accuracy = MultipleErrorOverEpochsGraph(self.grphTrainValidAcc, width=5, height=4, dpi=100, title='Training / Validation Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
+		self.batch_loss_graph = DynamicGraph(self.grphBatchLoss, width=5, height=4, dpi=100, title='Loss Over Epochs', xAxisTitle='Epoch', yAxisTitle='Loss')
+		self.batch_acc_graph = DynamicGraph(self.grphBatchAcc, width=5, height=4, dpi=100, title='Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
+		self.train_valid_accuracy = DynamicDoubleGraph(self.grphTrainValidAcc, width=5, height=4, dpi=100, title='Training / Validation Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
 
 		
 	def train_button_clicked(self):
@@ -602,7 +670,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			learning_rate = float(self.txtLearningRate.text())
 			optimizer = int(self.cbxOptimizer.currentIndex())
 			'''
-			num_epochs = 10000
+			num_epochs = 500
 			batch_size = 64
 			learning_rate = 0.0005
 			optimizer = 1
@@ -649,6 +717,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.btnCancelTraining.setEnabled(True)
 			self.prgTrainingProgress.setValue(0)
 
+			# create worker object and thread
 			worker = Worker(self.current_data_set(), validation, num_epochs, batch_size, learning_rate, momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time)
 			thread = QThread()
 
@@ -659,18 +728,19 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.__threads.append((thread, worker))
 			worker.moveToThread(thread)
 
-			# set connections from background thread to main thread for updating GUI
+			# set connections from background thread to main thread for updating GUI elements
 			worker.test_set_accuracy.connect(self.update_test_set_accuracy)
 			worker.epoch_progress.connect(self.update_progress_bar)
+			worker.log_message.connect(self.txtOutputLog.append)
+			worker.network_model.connect(self.show_model_details)
+			worker.work_complete.connect(self.abort_workers)
+
+			# set connections from background thread to create/update visualizations on GUI
 			worker.batch_loss.connect(self.batch_loss_graph.update_figure)
 			worker.batch_acc.connect(self.batch_acc_graph.update_figure)
 			worker.train_valid_acc.connect(self.train_valid_accuracy.update_figure)
 			worker.confusion_mat.connect(self.update_confusion_plot)
 			worker.network_weights_outputs.connect(self.embed_network_weights_outputs)
-
-			worker.log_message.connect(self.txtOutputLog.append)
-			worker.network_model.connect(self.show_model_details)
-			worker.work_complete.connect(self.abort_workers)
 
 			# connect and start thread
 			thread.started.connect(worker.work)
@@ -799,8 +869,8 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		if comboBox.currentIndex() == 0:
 			padding = 'SAME'
 		elif comboBox.currentIndex() == 1:
-			padding = 'VALID'	
-		return padding	
+			padding = 'VALID'   
+		return padding  
 
 	def return_normalize(self, checkBox):
 		if checkBox.isChecked():
@@ -920,17 +990,24 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			bias_val_label.setText('Value:')
 			bias_val_text_field.setFixedWidth(60)
 
-	def change_file_path(self, path_text_field, disable=False):
+	def change_directory_path(self, path_text_field, disable=False):
 		path = QFileDialog.getExistingDirectory(self, "Select Directory")
 		path_text_field.setText(path + "/")
 		if disable == True:
 			self.cbxSavePath.setCheckState(False)
 
+	def change_file_path(self):
+		file = QFileDialog.getOpenFileName(self, 'Open file', '/home', "XML Files (*.xml)")
+		self.txtLoadModel.setText(str(file[0])) 
+
 	def data_set_rad_state_changed(self, prima_head_pose):
 		if prima_head_pose == True:
 			self.chkValidationSet.setFixedWidth(0)
-		else: self.chkValidationSet.setFixedWidth(110)
-
+			self.chkValidationSet.setChecked(False)
+			self.lblTestAccuracy.setText('Test Set RMSE:')
+		else: 
+			self.chkValidationSet.setFixedWidth(110)
+			self.lblTestAccuracy.setText('Test Set Accuracy:')
 
 	def current_data_set(self):
 		if self.radCIFAR10.isChecked():
@@ -938,7 +1015,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		elif self.radMNIST.isChecked():
 			return 'MNIST'
 		elif self.radPrimaHeadPose.isChecked():
-			return 'Prima Head Pose'
+			return 'PrimaHeadPose'
 
 	def optimizer_combo_box_changed(self):
 		if self.cbxOptimizer.currentIndex() == 4:
@@ -946,7 +1023,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.lblMomentum.setFixedWidth(60)
 		else:
 			self.txtMomentum.setFixedWidth(0)
-			self.lblMomentum.setFixedWidth(0)	
+			self.lblMomentum.setFixedWidth(0)   
 
 	def l2_reg_checkbox_state_changed(self):
 		if self.chkL2Reg.isChecked():

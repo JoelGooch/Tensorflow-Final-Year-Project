@@ -3298,7 +3298,7 @@
        <rect>
         <x>10</x>
         <y>30</y>
-        <width>1151</width>
+        <width>1161</width>
         <height>571</height>
        </rect>
       </property>
@@ -3306,7 +3306,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabErrorAccuracy">
        <attribute name="title">
@@ -3378,7 +3378,7 @@
          <rect>
           <x>570</x>
           <y>50</y>
-          <width>561</width>
+          <width>571</width>
           <height>431</height>
          </rect>
         </property>
