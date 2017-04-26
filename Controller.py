@@ -131,7 +131,6 @@ class Worker(QObject):
 			# define placeholder variables
 			x = tf.placeholder(tf.float32, shape=(None, image_size, image_size, num_channels))
 			y = tf.placeholder(tf.float32, shape=(None, num_classes))
-			keep_prob = tf.placeholder(tf.float32)
 
 			global_step = tf.Variable(0, trainable=False)
 
@@ -164,7 +163,7 @@ class Worker(QObject):
 				return network_layers[-1]
 
 
-			model_output = CNN_Model(x, keep_prob)
+			model_output = CNN_Model(x)
 
 			# define loss term dependent upon which data set is in use.. Prima = regression
 			if self.regression == False:
@@ -240,7 +239,8 @@ class Worker(QObject):
 						batch_labels = training_labels[offset:(offset + batch_size)]
 
 						# feed batch through network                        this shouldnt be here?
-						feed_dict = {x: batch_data, y: batch_labels, keep_prob: 0.5}
+						feed_dict = {x: batch_data, y: batch_labels}
+
 
 						if self.regression == False:
 							_, l, acc, batch_pred_class, batch_classes = session.run([optimizer, loss, accuracy, network_pred_class, class_labels], feed_dict=feed_dict)
@@ -281,17 +281,28 @@ class Worker(QObject):
 								if validation == True:
 
 									num_training_data = len(training_labels)
-									data_per_batch = 10000
+									print('num training data = {0}'.format(num_training_data))
+									data_per_batch = 5000
 									num_batches = num_training_data / data_per_batch
+									print('num of batches = {0}'.format(num_batches))
+									train_accuracy = 0
 
 									for i in range(int(num_batches)):
-									   batch_data = training_set[i*data_per_batch:i+1*data_per_batch]
-									   batch_labels = training_labels[i*data_per_batch:i+1*data_per_batch]
-									   train_accuracy = session.run(accuracy, feed_dict={x: batch_data, y: batch_labels, keep_prob: 1.0})
+									   print('i = {0}'.format(i))
+									   batch_data = training_set[i*data_per_batch:(i+1)*data_per_batch]
+									   print('length of batch {0}'.format(len(batch_data)))
+									   print(i*data_per_batch)
+									   print((i+1)*data_per_batch)
+
+									   batch_labels = training_labels[i*data_per_batch:(i+1)*data_per_batch]
+									   train_accuracy += session.run(accuracy, feed_dict={x: batch_data, y: batch_labels})
+									   
 
 									# run validation set at current batch
-									valid_accuracy = session.run(accuracy, feed_dict={x: validation_set, y: validation_labels, keep_prob: 1.0})
+									valid_accuracy = session.run(accuracy, feed_dict={x: validation_set, y: validation_labels})
 
+									train_accuracy /= num_batches
+									print(train_accuracy)
 									self.train_valid_acc.emit(train_accuracy, valid_accuracy, epoch)
 
 
@@ -318,7 +329,7 @@ class Worker(QObject):
 
 				self.log_message.emit('\nEvaluating Test Set...')
 
-				feed_dict = {x: testing_set, y:testing_labels, keep_prob: 1.0}
+				feed_dict = {x: testing_set, y:testing_labels}
 
 				# run test set through network
 				if self.regression == False:
@@ -462,45 +473,49 @@ class Worker(QObject):
 
 		norm_conf = []
 
-		for i in confusion:
-			a = 0
-			tmp_arr = []
-			a = sum(i, 0)
+		try:
+			for i in confusion:
+				a = 0
+				tmp_arr = []
+				a = sum(i, 0)
 
-			for j in i:
-				tmp_arr.append(float(j)/float(a))
-			norm_conf.append(tmp_arr)
+				for j in i:
+					tmp_arr.append(float(j)/float(a))
+				norm_conf.append(tmp_arr)
 
-		self.fig = plt.figure()
-		self.axes = self.fig.add_subplot(111)
+			self.fig = plt.figure()
+			self.axes = self.fig.add_subplot(111)
 
-		self.axes.set_aspect(1)
+			self.axes.set_aspect(1)
+				
+			res = self.axes.imshow(np.array(norm_conf), cmap=plt.cm.jet, interpolation='nearest')
 			
-		res = self.axes.imshow(np.array(norm_conf), cmap=plt.cm.jet, interpolation='nearest')
-		
-		width, height = confusion.shape
+			width, height = confusion.shape
 
-		for x in range(width):
-			for y in range(height):
-				self.axes.annotate(str(confusion[x][y]), xy=(y, x), horizontalalignment='center', verticalalignment='center')
+			for x in range(width):
+				for y in range(height):
+					self.axes.annotate(str(confusion[x][y]), xy=(y, x), horizontalalignment='center', verticalalignment='center')
 
-		cb = self.fig.colorbar(res)
+			cb = self.fig.colorbar(res)
 
-		alphabet = '0123456789'
+			alphabet = '0123456789'
 
-		# set axes to 0-9
-		plt.xticks(range(width), alphabet[:width])
-		plt.yticks(range(height), alphabet[:height])
+			# set axes to 0-9
+			plt.xticks(range(width), alphabet[:width])
+			plt.yticks(range(height), alphabet[:height])
 
-		if training == True:
-			plt.savefig('training_confusion_matrix.png', format='png')
-		else:
-			plt.savefig('testing_confusion_matrix.png', format='png')
+			if training == True:
+				plt.savefig('training_confusion_matrix.png', format='png')
+			else:
+				plt.savefig('testing_confusion_matrix.png', format='png')
+		# sometimes get a division by zero error, this just skips creating that matrix
+		except ZeroDivisionError:
+			doNothing = 0
 
 
 class MyMplCanvas(FigureCanvas):
-	"""Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-	def __init__(self, parent=None, width=5, height=4, dpi=100, title='title', xAxisTitle='x', yAxisTitle='y'):
+
+	def __init__(self, parent=None, width=20, height=20, dpi=100, title='title', xAxisTitle='x', yAxisTitle='y'):
 		self.title = title
 		self.xAxisTitle = xAxisTitle
 		self.yAxisTitle = yAxisTitle
@@ -520,9 +535,8 @@ class MyMplCanvas(FigureCanvas):
 		FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
 		FigureCanvas.updateGeometry(self)
 
-
+# this graph gets updated within the application
 class DynamicGraph(MyMplCanvas):
-	"""A canvas that updates itself every secoSnd with a new plot."""
 	def __init__(self, *args, **kwargs):
 		MyMplCanvas.__init__(self, *args, **kwargs)
 		self.errors = []
@@ -550,8 +564,9 @@ class DynamicGraph(MyMplCanvas):
 		#self.axes.grid(True)
 		self.draw()
 
+
+# this graph is is the same as above except with two lines, for validation/training accuracy
 class DynamicDoubleGraph(MyMplCanvas):
-	"""A canvas that updates itself every secoSnd with a new plot."""
 	def __init__(self, *args, **kwargs):
 		MyMplCanvas.__init__(self, *args, **kwargs)
 		self.train_errors = []
@@ -569,8 +584,6 @@ class DynamicDoubleGraph(MyMplCanvas):
 			self.train_errors = []
 			self.valid_errors = []
 			self.epochs = []
-
-		#ax2 = self.fig.add_subplot(212, sharex=self.axes)
 
 		# add current values to array
 		self.train_errors.append(train_error)
@@ -638,6 +651,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.btnTrainNetwork.clicked.connect(self.train_button_clicked)
 		self.btnCancelTraining.clicked.connect(self.cancel_train)
 
+		# connect events for when data set selection radio buttons are toggled
 		self.radMNIST.toggled.connect(partial(self.data_set_rad_state_changed, False))
 		self.radCIFAR10.toggled.connect(partial(self.data_set_rad_state_changed, False))
 		self.radPrimaHeadPose.toggled.connect(partial(self.data_set_rad_state_changed, True))
@@ -663,6 +677,13 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 		
 	def train_button_clicked(self):
+
+		# clear visualizations of previous runs
+		self.lblTrainingConfusionMat.setText('Training Confusion Matrix for First Batch Will Appear When it has been Evaluated')
+		self.lblTestingConfusionMat.setText('Test Set Confusion Matrix Will Appear When Test Set has been Evaluated')
+		self.tabLayerWeights.clear()
+		self.tabLayerOutput.clear()
+
 		try:
 			'''
 			num_epochs = int(self.txtNumEpochs.text())
@@ -674,6 +695,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			batch_size = 64
 			learning_rate = 0.0005
 			optimizer = 1
+			
 			
 			# obtain model file path and checkpoint save path from user text fields
 			model_path = self.txtLoadModel.text()
@@ -1131,9 +1153,10 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.tab.setLayout(self.vbox)
 
 
-
+	# this function loads the created confusion matrix from disk and loads into GUI
 	@pyqtSlot(bool, int)
 	def update_confusion_plot(self, training: bool, epoch: int):
+		# boolean path way that states whether or not this confusion matrix is for training or testing
 		if training == True:
 			plt.savefig('training_confusion_matrix.png', format='png')
 			pix_map = QPixmap("training_confusion_matrix.png")
@@ -1155,6 +1178,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			thread.wait()  # <- so you need to wait for it to *actually* quit
 		self.btnTrainNetwork.setEnabled(True)
 	
+	# function that signals to the worked thread that the user has requested training to stop
 	def cancel_train(self):
 		self.end_train.emit()
 
