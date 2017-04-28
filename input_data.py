@@ -2,13 +2,13 @@ from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 import pickle
 
-def load_prima_head_pose():
+def load_prima_head_pose(data_path):
 
     image_size = 64 # images are 32x32x3
     num_channels = 3 # RGB
     num_classes = 1 # regression problem
 
-    pickle_directory = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/prima_pitch_p1_out.pickle"
+    pickle_directory = data_path + "prima_pitch_p1_out.pickle"
     
     with open(pickle_directory, mode='rb') as file:
         data = pickle.load(file, encoding='bytes')
@@ -16,6 +16,7 @@ def load_prima_head_pose():
         training_labels = data[b'training_label']
         testing_data = data[b'validation_dataset']
         testing_labels = data[b'validation_label']
+        del data
 
     training_data = training_data.reshape((-1, image_size, image_size, num_channels)).astype(np.float32)
     training_labels = training_labels.reshape((-1, 1)).astype(np.float32)
@@ -27,11 +28,11 @@ def load_prima_head_pose():
 
 
 # function to load data set and parameters for CIFAR10
-def load_CIFAR_10(validation=True):
+def load_CIFAR_10(data_path, validation=True):
     num_channels = 3 # RGB
     image_size = 32 # 32x32 images
     num_classes = 10 # 10 possible classes. info @ https://www.cs.toronto.edu/~kriz/cifar.html
-    pickle_directory = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/CIFAR-10/cifar-10-batches-py/" # DONT WANT THIS TO BE HARDCODED
+    pickle_directory = data_path
     num_training_files = 5 # CIFAR10 training data is split into 5 files
     num_images_per_file = 10000 
     num_training_images_total = num_training_files * num_images_per_file

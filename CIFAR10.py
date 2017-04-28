@@ -14,7 +14,7 @@ def main():
     num_channels = 3 # RGB
     image_size = 32 # 32x32 images
     num_classes = 10 # 10 possible classes. info @ https://www.cs.toronto.edu/~kriz/cifar.html
-    pickle_directory = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/CIFAR-10/cifar-10-batches-py/" # DONT WANT THIS TO BE HARDCODED
+    pickle_directory = "C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/CIFAR-10/cifar-10-batches-py/"
     num_training_files = 5 # CIFAR10 training data is split into 5 files
     num_images_per_file = 10000 
     num_training_images_total = num_training_files * num_images_per_file
@@ -48,6 +48,8 @@ def main():
             training_classes[begin:end] = classes_batch
 
             begin = end
+            
+        del data
 
     # convert training labels from integer format to one hot encoding
     training_labels = np.eye(num_classes, dtype=int)[training_classes]
@@ -74,8 +76,8 @@ def main():
     testing_set = testing_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
 
     # normalize data
-    #training_set -= 127 
-    #testing_set -= 127
+    training_set -= 127 
+    testing_set -= 127
 
     graph = tf.Graph()
     with graph.as_default():
@@ -97,11 +99,11 @@ def main():
         conv2_weights = tf.Variable(tf.truncated_normal([5, 5, 64, 64], stddev=0.05), name="conv2_weights")
         conv2_biases = tf.Variable(tf.random_normal(shape=[64]), name='conv2_biases')
 
-        dense1_weights = tf.Variable(tf.truncated_normal([8 * 8 * 64, 256], stddev=0.05), name="dense1_weights")
-        dense1_biases = tf.Variable(tf.random_normal(shape=[256]), name="dense1_biases")
+        dense1_weights = tf.Variable(tf.truncated_normal([8 * 8 * 64, 256], stddev=0.05), name="fully_conn_1_weights")
+        dense1_biases = tf.Variable(tf.random_normal(shape=[256]), name="fully_conn_1_biases")
 
-        dense2_weights = tf.Variable(tf.truncated_normal([256, 128], stddev=0.050), name='dense2_weights')
-        dense2_biases = tf.Variable(tf.random_normal(shape=[128]), name='dense2_biases')
+        dense2_weights = tf.Variable(tf.truncated_normal([256, 128], stddev=0.050), name='fully_conn_2_weights')
+        dense2_biases = tf.Variable(tf.random_normal(shape=[128]), name='fully_conn_2_biases')
 
         output_weights = tf.Variable(tf.truncated_normal([128, num_classes], stddev=0.05), name="output_weights")
         output_biases = tf.Variable(tf.random_normal(shape=[num_classes]), name="output_biases")
@@ -150,17 +152,13 @@ def main():
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=model_output, labels=y)
 
         loss = tf.reduce_mean(cross_entropy, name='cross_entropy')
-
         
-        #Adding the regularization terms to the loss
-        #beta = 5e-4
-        #loss += (beta * tf.nn.l2_loss(conv1_weights)) 
-        #loss += (beta * tf.nn.l2_loss(conv2_weights)) 
-        #loss += (beta * tf.nn.l2_loss(conv3_weights)) 
-        #loss += (beta * tf.nn.l2_loss(conv4_weights))
-        #loss += (beta * tf.nn.l2_loss(dense1_weights))
-        #loss += (beta * tf.nn.l2_loss(dense2_weights))
-        #loss += (beta * tf.nn.l2_loss(output_weights))
+        # add L2 regularization term on the weights
+        beta = 0.0005
+        for e in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+            # if a weights variable (excluding biases), add regularization term
+            if 'weights' in e.name:
+                loss += (beta * tf.nn.l2_loss(e))
         
 
         loss_summary = tf.summary.scalar("loss", loss)
@@ -175,8 +173,6 @@ def main():
         #optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
         #optimizer = tf.train.MomentumOptimizer(learning_rate, 0.95).minimize(loss, global_step=global_step)
 
-        #train_prediction = model_output
-        #test_prediction = CIFAR10_CNN_Model(tf_testing_set)
 
         network_pred_class = tf.argmax(model_output, dimension=1)
         correct_prediction = tf.equal(network_pred_class, labels_class)

@@ -5,8 +5,6 @@ import pickle
 import datetime
 import sys
 
-np.set_printoptions(threshold=np.inf)
-
 # this function calculates the accuracy measurements from the predicted labels and actual labels
 # it also writes results to a .csv file if requested
 # 	@param predictions = numpy array containing predicted values by network
@@ -37,8 +35,8 @@ def evaluate_accuracy(predictions, labels, pickle_file, test_or_train, write_to_
 		now = datetime.datetime.now()
 
 		# open (or create) .csv file and write accuracy details within
-		file = open('/tmp/Prima/Pitch/log/' + test_or_train + '_person' + str(pickle_file) + '_pitch' + str(now.hour) + str(now.minute) + str(now.second) + '.csv', 'a')
-		file.write('Evaluating ' + test_or_train + ' Set, Using Person ' + str(pickle_file) + ' as Testing Set\n\n')
+		file = open('/tmp/Prima/Yaw/log/' + test_or_train + '_person' + str(pickle_file) + '_yaw' + str(now.hour) + str(now.minute) + str(now.second) + '.csv', 'a')
+		file.write('Evaluating ' + test_or_train + ' Set, Using Person ' + str(pickle_file) + ' as Test Set\n\n')
 		file.write('RMSE = ' + str(RMSE) + ',RMSE Standard Deviation = ' + str(RMSE_stdev) + ',MAE = ' + str(MAE) + ',MAE Standard Deviation = ' + str(MAE_stdev) + '\n\n')
 		file.write('Predicted Degree,Actual Degree,Error \n')
 
@@ -76,7 +74,7 @@ def main():
 	image_size = 64 # images are 64x64x3
 	num_channels = 3 # RGB
 	num_classes = 1 # regression
-	pickle_directory = 'C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/Prima Head Pose/pitch/prima_pitch_p'
+	pickle_directory = 'C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/Prima Head Pose/yaw/prima_yaw_p'
 
 	# there are 15 files (15 people), each uses jack knife cross validation meaning in each file a different person is used for the testing set
 	# essentially this makes 15 separate networks, the final accuracy terms are the mean across all networks
@@ -174,7 +172,7 @@ def main():
 				# dropout layer
 				fully_conn_1 = tf.nn.dropout(fully_conn_1, dropout)
 
-				# Output layerS
+				# Output layer
 				output = tf.sigmoid(tf.matmul(fully_conn_1, output_weights) + output_biases)
 
 				return output
@@ -219,14 +217,14 @@ def main():
 				merged = tf.summary.merge_all()
 				curr_time = datetime.datetime.now()
 
-				log_path = '/tmp/Prima/Pitch/log/person' + str(pickle_file) + '_' + str(curr_time.hour) + str(curr_time.minute) + str(curr_time.second)
+				log_path = '/tmp/Prima/Yaw/log/person' + str(pickle_file) + '_' + str(curr_time.hour) + str(curr_time.minute) + str(curr_time.second)
 				# if folder does not exist, create it
 				if not os.path.exists(log_path):
 					os.makedirs(log_path)
 
 				summaries = tf.summary.FileWriter(log_path, graph)
 
-				save_path = '/tmp/Prima/Pitch/checkpoints/person' + str(pickle_file) + '/'
+				save_path = '/tmp/Prima/Yaw/checkpoints/person' + str(pickle_file) + '/'
 				# if folder does not exist, create it
 				if not os.path.exists(save_path):
 					os.makedirs(save_path)
@@ -245,7 +243,7 @@ def main():
 					session.run(tf.global_variables_initializer())
 
 				# here I create and format the .csv file that will hold all the information at each batch
-				file = open('/tmp/Prima/Pitch/log/batchstats_person' + str(pickle_file) + '_pitch.csv', 'a')
+				file = open('/tmp/Prima/Yaw/log/batchstats_person' + str(pickle_file) + '_yaw.csv', 'a')
 				file.write(',B Loss,B RMSE,B RMSE StDev,B MAE,B MAE StDev,,V RMSE,V RMSE StDev,V MAE,V MAE StDev\n')
 				file.close()
 
@@ -286,21 +284,21 @@ def main():
 						print_to_console('Validation', validation_RMSE, validation_RMSE_stdev, validation_MAE, validation_MAE_stdev)
 
 						# now write all the batch information into the previously made .csv file
-						file = open('/tmp/Prima/Pitch/log/batchstats_person' + str(pickle_file) + '_pitch.csv', 'a')
+						file = open('/tmp/Prima/Yaw/log/batchstats_person' + str(pickle_file) + '_yaw.csv', 'a')
 						file.write('Batch ' + str(epoch) + ',' + str(batch_loss) + ',' + str(batch_RMSE) + ',' + str(batch_RMSE_stdev) + ',' + str(batch_MAE) + ',' + 
 							str(batch_MAE_stdev) + ',,' + str(validation_RMSE) + ',' + str(validation_RMSE_stdev) + ',' + str(validation_MAE) + ',' + str(validation_MAE_stdev)  + '\n')
 						file.close()
 						
 
-					# save state every 10000 epochs in case of power failure or other unexpected event
+					# save state every 5000 epochs in case of power failure or other unexpected event
 					# the > 0 part stops it from saving a checkpoint at epoch 0
-					if (epoch % 10000 == 0 and epoch > 0):
+					if (epoch % 5000 == 0 and epoch > 0):
 						saver.save(session, save_path=save_path, global_step=global_step)
 						print('Saved Checkpoint')
-
+						
 
 				# when training has stopped run training set through network and evaluate accuracy
-				feed_dict = {x: training_data, y: training_labels, keep_rate:1.0}
+				feed_dict = {x: training_data, y:training_labels, keep_rate:1.0}
 				training_set_predictions = session.run(model_output, feed_dict=feed_dict)
 				train_RMSE, train_RMSE_stdev, train_MAE, train_MAE_stdev = evaluate_accuracy(training_set_predictions, training_labels, pickle_file, 'Training', True)
 				

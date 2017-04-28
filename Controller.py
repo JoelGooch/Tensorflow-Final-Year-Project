@@ -9,7 +9,7 @@ import matplotlib as mpl
 #mpl.use('Agg')
 mpl.use('Qt5Agg')
 
-import CNN_GUI_V14 as design
+import CNN_GUI_V15 as design
 import input_data as data
 import xml_parser as pp
 import Layer as l
@@ -45,10 +45,12 @@ class Worker(QObject):
 	# signal to inform main thread that worker thread has finished work
 	work_complete = pyqtSignal()
 
-	def __init__(self, data_set: str, validation: bool, num_epochs: int, batch_size: int, learning_rate: float, momentum: float, optimizer: int, normalize: bool, l2_reg: bool, beta: float, save_directory: str, save_interval: int, model_path: str, run_time: bool):
+	def __init__(self, data_set: str, data_location: str, validation: bool, num_epochs: int, batch_size: int, learning_rate: float, momentum: float, 
+		optimizer: int, normalize: bool, l2_reg: bool, beta: float, save_directory: str, save_interval: int, model_path: str, run_time: bool):
 		super().__init__()
 		self.end_training = False
 		self.data_set = data_set
+		self.data_location = data_location
 		self.regression = False
 		self.validation = validation
 		self.num_epochs = num_epochs
@@ -66,46 +68,46 @@ class Worker(QObject):
 		
 	@pyqtSlot()
 	def work(self):
-		self.train_network(self.data_set, self.validation, self.num_epochs, self.batch_size, self.learning_rate, self.momentum, self.optimizer, 
+		self.train_network(self.data_set, self.data_location, self.validation, self.num_epochs, self.batch_size, self.learning_rate, self.momentum, self.optimizer, 
 			self.normalize, self.l2_reg, self.beta, self.save_directory, self.save_interval, self.model_path, self.run_time)
 
-	# function that calculates and returns RMSE of current batch
-	def calc_accuracy(self, predictions, labels, verbose=True):
+	# this function calculates the accuracy measurements from the predicted labels and actual labels
+	# 	@param predictions = numpy array containing predicted values by network
+	# 	@param labels = numpy array containing actual values  
+	def evaluate_accuracy(self, predictions, labels):
 
-		# Convert back to degree
-		predictions_degree = predictions * 180
-		predictions_degree -= 90
-		labels_degree = labels * 180
-		labels_degree -= 90
+		# Convert prediction to degrees
+		prediction_degree = (predictions * 180) - 90
+		actual_degree = (labels * 180) - 90
 
-		RMSE_pitch = np.sum(np.square(predictions_degree - labels_degree), dtype=np.float32) * 1 / predictions.shape[0]
-		RMSE_pitch = np.sqrt(RMSE_pitch)
-		RMSE_std = np.std(np.sqrt(np.square(predictions_degree - labels_degree)), dtype=np.float32)
-		# MAE = Mean Absolute Error
-		MAE_pitch = np.sum(np.absolute(predictions_degree - labels_degree), dtype=np.float32) * 1 / predictions.shape[0]
-		MAE_std = np.std(np.absolute(predictions_degree - labels_degree), dtype=np.float32)
+		# calculate Root Mean Squared Error 
+		RMSE = np.sqrt(np.sum(np.square(prediction_degree - actual_degree), dtype=np.float32) * 1 / predictions.shape[0])
+		# calculate Standard Deviation of Root Mean Squared Error 
+		RMSE_stdev = np.std(np.sqrt(np.square(prediction_degree - actual_degree)), dtype=np.float32)
 
-		if (verbose == True):
-			print("==============================")            
-			print("RMSE mean: " + str(RMSE_pitch) + " degree")
-			print("RMSE std: " + str(RMSE_std) + " degree")
-			print("MAE mean: " + str(MAE_pitch) + " degree")
-			print("MAE std: " + str(MAE_std) + " degree")
-			print("==============================")
+		# calculate Mean Absolute Error
+		MAE = np.sum(np.absolute(prediction_degree - actual_degree), dtype=np.float32) * 1 / predictions.shape[0]
+		# calculate Standard Deviation of Mean Absolute Error
+		MAE_stdev = np.std(np.absolute(prediction_degree - actual_degree), dtype=np.float32)
 
-		return RMSE_pitch
+		return RMSE, RMSE_stdev, MAE, MAE_stdev
 
 
-	def train_network(self, data_set, validation, num_epochs, batch_size, learning_rate, momentum, learning_algo, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time):
+	def train_network(self, data_set, data_location, validation, num_epochs, batch_size, learning_rate, momentum, learning_algo, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time):
 
-		# load selected data set
-		if (data_set == 'CIFAR10'):
-			training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10(validation)
-		if (data_set == 'MNIST'):
-			training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST(validation)
-		if (data_set == 'PrimaHeadPose'):
-			training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose()
-			self.regression = True
+		try:
+			# load selected data set
+			if (data_set == 'CIFAR10'):
+				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10(data_location, validation)
+			if (data_set == 'MNIST'):
+				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST(validation)
+			if (data_set == 'PrimaHeadPose'):
+				training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose(data_location)
+				self.regression = True
+		except FileNotFoundError:
+			self.log_message.emit('File Not Found In Location, Please Select Valid Location in Settings')
+			self.work_complete.emit()
+			return 0
 
 		# normalize data, if user requires
 		if normalize == True:
@@ -119,6 +121,7 @@ class Worker(QObject):
 			layers = pp.get_layers(model_path)
 		except:
 			self.log_message.emit('Error reading XML file')
+			self.work_complete.emit()
 			return 0
 
 		self.network_model.emit(layers)
@@ -178,11 +181,9 @@ class Worker(QObject):
 					# if a weights variable (excluding biases), add regularization term
 					if 'weights' in e.name:
 						loss += (beta * tf.nn.l2_loss(e))
-			
 
-			# consider adding option for learning rates like this 
-			#learning_rate = tf.train.exponential_decay(0.0125, global_step, 15000, 0.1, staircase=True)
 
+			# intitialise Tensorflow optiimiser in computational graph, dependent upon previous user selection
 			if (learning_algo == 0):
 				optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
 				self.log_message.emit('Optimizer: Gradient Descent')
@@ -229,6 +230,8 @@ class Worker(QObject):
 					session.run(tf.global_variables_initializer())
 
 
+				train_start = datetime.datetime.now()
+
 				# start training loop
 				for epoch in range(num_epochs + 1):
 					# check if user has signalled training to be cancelled
@@ -238,35 +241,34 @@ class Worker(QObject):
 						batch_data = training_set[offset:(offset + batch_size), :, :, :]
 						batch_labels = training_labels[offset:(offset + batch_size)]
 
-						# feed batch through network                        this shouldnt be here?
+						# feed batch through network     
 						feed_dict = {x: batch_data, y: batch_labels}
 
 
 						if self.regression == False:
-							_, l, acc, batch_pred_class, batch_classes = session.run([optimizer, loss, accuracy, network_pred_class, class_labels], feed_dict=feed_dict)
+							_, batch_loss, batch_accuracy, batch_pred_class, batch_classes = session.run([optimizer, loss, accuracy, network_pred_class, class_labels], feed_dict=feed_dict)
 						else: 
-							_, l, batch_pred_angles = session.run([optimizer, loss, model_output], feed_dict=feed_dict)
-
+							_, batch_loss, batch_pred_angles = session.run([optimizer, loss, model_output], feed_dict=feed_dict)
 
 						# print information to output log
 						if (epoch % 100 == 0):
 							self.log_message.emit('')
-							self.log_message.emit('Loss at epoch: {} of {} is {}'.format(epoch, str(num_epochs), l))
+							self.log_message.emit('Loss at epoch: {} of {} is {}'.format(epoch, str(num_epochs), batch_loss))
 							self.log_message.emit('Global Step: {}'.format(str(global_step.eval())))
-							self.log_message.emit('Learning Rate: {}'.format(str(learning_rate)))
-							self.log_message.emit('Minibatch size: {}'.format(str(batch_labels.shape)))
 
 							if self.regression == False:
-								self.log_message.emit('Batch Accuracy = {}'.format(str(acc)))
-								self.batch_acc.emit(acc, epoch)
+								self.log_message.emit('Batch Accuracy = {}'.format(str(batch_accuracy)))
+								self.batch_acc.emit(batch_accuracy, epoch)
 							else: 
-								RMSE = self.calc_accuracy(batch_pred_angles, batch_labels)
-								self.log_message.emit('Batch RMSE = {}'.format(str(RMSE)))
+								RMSE, RMSE_stdev, MAE, MAE_stdev = self.evaluate_accuracy(batch_pred_angles, batch_labels)
+								self.log_message.emit('Batch Root Mean Squared Error = {}'.format(str(RMSE)))
+								self.log_message.emit('Batch Root Mean Squared Error Standard Deviation = {}'.format(str(RMSE_stdev)))
+								self.log_message.emit('Batch Mean Absolute Error = {}'.format(str(MAE)))
+								self.log_message.emit('Batch Mean Absolute Error Standard Deviation = {}'.format(str(MAE_stdev)))
 								self.batch_acc.emit(RMSE, epoch)
-
 							
 							# emit batch loss for GUI visualization
-							self.batch_loss.emit(l, epoch)
+							self.batch_loss.emit(batch_loss, epoch)
 							
 
 							# if user has chosen to include run time visualizations
@@ -281,28 +283,20 @@ class Worker(QObject):
 								if validation == True:
 
 									num_training_data = len(training_labels)
-									print('num training data = {0}'.format(num_training_data))
 									data_per_batch = 5000
 									num_batches = num_training_data / data_per_batch
-									print('num of batches = {0}'.format(num_batches))
 									train_accuracy = 0
 
 									for i in range(int(num_batches)):
-									   print('i = {0}'.format(i))
 									   batch_data = training_set[i*data_per_batch:(i+1)*data_per_batch]
-									   print('length of batch {0}'.format(len(batch_data)))
-									   print(i*data_per_batch)
-									   print((i+1)*data_per_batch)
-
 									   batch_labels = training_labels[i*data_per_batch:(i+1)*data_per_batch]
 									   train_accuracy += session.run(accuracy, feed_dict={x: batch_data, y: batch_labels})
-									   
+									  
+									train_accuracy /= num_batches
+									print(train_accuracy)
 
 									# run validation set at current batch
 									valid_accuracy = session.run(accuracy, feed_dict={x: validation_set, y: validation_labels})
-
-									train_accuracy /= num_batches
-									print(train_accuracy)
 									self.train_valid_acc.emit(train_accuracy, valid_accuracy, epoch)
 
 
@@ -318,6 +312,10 @@ class Worker(QObject):
 								self.log_message.emit('Saved Checkpoint \n')
 
 				self.log_message.emit('\nTraining Complete')
+				train_end = datetime.datetime.now()
+				training_time = train_end - train_start
+				self.log_message.emit(('Training Took ' + str(training_time)) + '\n')
+
 				# save network state when complete
 				saver.save(sess=session, save_path=save_path, global_step=global_step)
 
@@ -329,7 +327,7 @@ class Worker(QObject):
 
 				self.log_message.emit('\nEvaluating Test Set...')
 
-				feed_dict = {x: testing_set, y:testing_labels}
+				feed_dict = {x: testing_set, y: testing_labels}
 
 				# run test set through network
 				if self.regression == False:
@@ -338,7 +336,7 @@ class Worker(QObject):
 				else: 
 					# otherwise calculate RMSE using function
 					batch_pred_angles = session.run(model_output, feed_dict=feed_dict)
-					test_acc = self.calc_accuracy(batch_pred_angles, testing_labels)
+					test_acc, RMSE_stdev, MAE, MAE_stdev = self.evaluate_accuracy(batch_pred_angles, testing_labels)
 
 
 				self.log_message.emit('Test Set Evaluated \n')
@@ -646,7 +644,9 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.btnChangeLoadCheckpoints.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtLoadCheckpoints, disable=True))
 		self.btnChangeModelPath.clicked.connect(self.change_file_path)
 		self.btnChangeModelSavePath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtModelSavePath))
-		
+		self.btnChangeCIFARPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtCIFARPath))
+		self.btnChangePrimaPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtPrimaPath))
+	
 		# train/cancel training buttons
 		self.btnTrainNetwork.clicked.connect(self.train_button_clicked)
 		self.btnCancelTraining.clicked.connect(self.cancel_train)
@@ -685,7 +685,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.tabLayerOutput.clear()
 
 		try:
-			'''
+			
 			num_epochs = int(self.txtNumEpochs.text())
 			batch_size = int(self.txtBatchSize.text())
 			learning_rate = float(self.txtLearningRate.text())
@@ -695,6 +695,13 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			batch_size = 64
 			learning_rate = 0.0005
 			optimizer = 1
+			'''
+
+			if self.current_data_set() == 'CIFAR10':
+				data_location = self.txtCIFARPath.text()
+			elif self.current_data_set() == 'PrimaHeadPose':
+				data_location = self.txtPrimaPath.text()
+			else: data_location = 'None'
 			
 			
 			# obtain model file path and checkpoint save path from user text fields
@@ -740,7 +747,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.prgTrainingProgress.setValue(0)
 
 			# create worker object and thread
-			worker = Worker(self.current_data_set(), validation, num_epochs, batch_size, learning_rate, momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time)
+			worker = Worker(self.current_data_set(), data_location, validation, num_epochs, batch_size, learning_rate, momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time)
 			thread = QThread()
 
 			# connect cancel button in main thread to background thread
@@ -929,17 +936,21 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 	def create_model_button_clicked(self):
 
 		try:
-			fileName = self.txtSaveModelAs.text()
-			if not fileName:
+			file_name = self.txtSaveModelAs.text()
+			if not file_name:
 				self.txtOutputModelLog.append("Please add name for new model")
 				return False
 
-			filePath = self.txtModelSavePath.text()
+			file_path = self.txtModelSavePath.text()
 
-			success = pp.create_XML_model(self.new_model, fileName, filePath)
+			success = pp.create_XML_model(self.new_model, file_name, file_path)
 
 			if success == True:
 				self.txtOutputModelLog.append("Success Writing XML File")
+				response = QMessageBox.question(self, "Model Creation Successful", "Would you like to use the newly created model?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+				if response == QMessageBox.Yes:
+					self.txtLoadModel.setText((file_path + file_name + '.xml'))
+					self.tabPages.setCurrentIndex(0)
 				self.reset_model_creation()
 			else : 
 				self.txtOutputModelLog.append("Error Writing XML File")
@@ -1119,7 +1130,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			elif e.layer_type == 'Output':
 				self.txtOutputLog.append('Output Layer')
 				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))  
-		self.txtOutputLog.append('\n ------------------------------------------------------------------------------------------------------------- \n')
+		self.txtOutputLog.append('\n------------------------------------------------------------------------------------------------------------- \n')
 
  
 	@pyqtSlot(list, list)
