@@ -32,7 +32,7 @@ class MaxPoolingLayer(Layer):
 		self.keep_rate = float(keep_rate)
 
 class FullyConnectedLayer(Layer):
-	def __init__(self, layer_name, act_function, num_output_nodes, weight_init, weight_val, bias_init, bias_val, normalize, dropout, keep_rate):
+	def __init__(self, layer_name, act_function, num_output_nodes, weight_init, weight_val, bias_init, bias_val, dropout, keep_rate):
 		Layer.__init__(self, layer_name)
 		self.layer_type = 'Fully Connected'
 		self.act_function = act_function
@@ -41,7 +41,6 @@ class FullyConnectedLayer(Layer):
 		self.weight_val = float(weight_val)
 		self.bias_init = bias_init
 		self.bias_val = float(bias_val)
-		self.normalize = normalize
 		self.dropout = dropout
 		self.keep_rate = float(keep_rate)
 

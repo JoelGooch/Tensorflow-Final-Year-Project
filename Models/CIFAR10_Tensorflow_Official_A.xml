@@ -46,7 +46,6 @@
 	<Layer Type="Dense">
 		<ActFunction>ReLu</ActFunction>
 		<NumOutputNodes>192</NumOutputNodes>
-		<Normalize>False</Normalize>
 		<Dropout>False</Dropout>
 		<KeepRate>1</KeepRate>
 	</Layer>

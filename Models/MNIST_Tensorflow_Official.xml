@@ -55,7 +55,6 @@
 		<WeightVal>0.1</WeightVal>
 		<BiasInit>Random Normal</BiasInit>
 		<BiasVal>1.0</BiasVal>
-		<Normalize>False</Normalize>
 		<Dropout>False</Dropout>
 		<KeepRate>1.0</KeepRate>
 	</Layer>
@@ -67,7 +66,6 @@
 		<WeightVal>0.1</WeightVal>
 		<BiasInit>Random Normal</BiasInit>
 		<BiasVal>1.0</BiasVal>
-		<Normalize>False</Normalize>
 		<Dropout>False</Dropout>
 		<KeepRate>1.0</KeepRate>
 	</Layer>

@@ -2,13 +2,39 @@ from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 import pickle
 
-def load_prima_head_pose(data_path):
+def load_prima_head_pose_pitch(data_path, prima_test_person_out):
 
     image_size = 64 # images are 32x32x3
     num_channels = 3 # RGB
     num_classes = 1 # regression problem
 
-    pickle_directory = data_path + "prima_pitch_p1_out.pickle"
+    pickle_directory = data_path + "prima_pitch_p" + str(prima_test_person_out) + "_out.pickle"
+    print(pickle_directory)
+    
+    with open(pickle_directory, mode='rb') as file:
+        data = pickle.load(file, encoding='bytes')
+        training_data = data[b'training_dataset']
+        training_labels = data[b'training_label']
+        testing_data = data[b'validation_dataset']
+        testing_labels = data[b'validation_label']
+        del data
+
+    training_data = training_data.reshape((-1, image_size, image_size, num_channels)).astype(np.float32)
+    training_labels = training_labels.reshape((-1, 1)).astype(np.float32)
+
+    testing_data = testing_data.reshape((-1, image_size, image_size, num_channels)).astype(np.float32)
+    testing_labels = testing_labels.reshape((-1, 1)).astype(np.float32)
+
+    return training_data, training_labels, testing_data, testing_labels, image_size, num_channels, num_classes
+
+def load_prima_head_pose_yaw(data_path, prima_test_person_out):
+
+    image_size = 64 # images are 32x32x3
+    num_channels = 3 # RGB
+    num_classes = 1 # regression problem
+
+    pickle_directory = data_path + "prima_yaw_p" + str(prima_test_person_out) + "_out.pickle"
+    print(pickle_directory)
     
     with open(pickle_directory, mode='rb') as file:
         data = pickle.load(file, encoding='bytes')

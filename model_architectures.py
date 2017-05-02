@@ -30,7 +30,7 @@
 	norm_1 = tf.nn.lrn(max_pool_1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-    norm1 = tf.nn.dropout(norm_1, _dropout)
+    norm1 = tf.nn.dropout(norm_1, dropout)
 
 	# convolution layer                                       kernel stride = 1   padded with zeros
 	conv_2 = tf.sigmoid(tf.nn.conv2d(norm_1, conv_2_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_2_biases)
@@ -42,7 +42,7 @@
 	norm_2 = tf.nn.lrn(max_pool_2, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-	norm_2 = tf.nn.dropout(norm_2, _dropout)
+	norm_2 = tf.nn.dropout(norm_2, dropout)
 
 	# reshape convolution layer to feed into fully connected
 	layer_shape = norm_2.get_shape()
@@ -55,7 +55,7 @@
 	fully_conn_1 = tf.sigmoid(tf.matmul(reshaped, fully_conn_1_weights) + fully_conn_1_biases) 
 
 	# dropout layer
-	fully_conn_1 = tf.nn.dropout(fully_conn_1, _dropout)
+	fully_conn_1 = tf.nn.dropout(fully_conn_1, dropout)
 
 	# Output layer
 	output = tf.sigmoid(tf.matmul(fully_conn_1, output_weights) + output_biases)
@@ -97,7 +97,7 @@
 	norm_1 = tf.nn.lrn(max_pool_1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-    norm1 = tf.nn.dropout(norm_1, _dropout)
+    norm1 = tf.nn.dropout(norm_1, dropout)
 
 	# convolution layer                                       kernel stride = 1   padded with zeros
 	conv_2 = tf.sigmoid(tf.nn.conv2d(norm_1, conv_2_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_2_biases)
@@ -109,7 +109,7 @@
 	norm_2 = tf.nn.lrn(max_pool_2, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-	norm_2 = tf.nn.dropout(norm_2, _dropout)
+	norm_2 = tf.nn.dropout(norm_2, dropout)
 
 	# convolution layer                                       kernel stride = 1   padded with zeros
 	conv_3 = tf.sigmoid(tf.nn.conv2d(norm_2, conv_3_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_3_biases)
@@ -121,7 +121,7 @@
 	norm_3 = tf.nn.lrn(max_pool_3, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-	norm_3 = tf.nn.dropout(norm_3, _dropout)
+	norm_3 = tf.nn.dropout(norm_3, dropout)
 
 	# reshape convolution layer to feed into fully connected
 	layer_shape = norm_3.get_shape()
@@ -134,7 +134,7 @@
 	fully_conn_1 = tf.sigmoid(tf.matmul(reshaped, fully_conn_1_weights) + fully_conn_1_biases) 
 
 	# dropout layer
-	fully_conn_1 = tf.nn.dropout(fully_conn_1, _dropout)
+	fully_conn_1 = tf.nn.dropout(fully_conn_1, dropout)
 
 	# Output layer
 	output = tf.sigmoid(tf.matmul(fully_conn_1, output_weights) + output_biases)
@@ -176,7 +176,7 @@ def CNN_Architecture_C():
 	norm_1 = tf.nn.lrn(max_pool_1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-    norm1 = tf.nn.dropout(norm_1, _dropout)
+    norm1 = tf.nn.dropout(norm_1, dropout)
 
 	# convolution layer                                       kernel stride = 1   padded with zeros
 	conv_2 = tf.sigmoid(tf.nn.conv2d(norm_1, conv_2_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_2_biases)
@@ -188,7 +188,7 @@ def CNN_Architecture_C():
 	norm_2 = tf.nn.lrn(max_pool_2, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-	norm_2 = tf.nn.dropout(norm_2, _dropout)
+	norm_2 = tf.nn.dropout(norm_2, dropout)
 
 	# reshape convolution layer to feed into fully connected
 	layer_shape = norm_2.get_shape()
@@ -201,13 +201,13 @@ def CNN_Architecture_C():
 	fully_conn_1 = tf.sigmoid(tf.matmul(reshaped, fully_conn_1_weights) + fully_conn_1_biases) 
 
 	# dropout layer
-	fully_conn_1 = tf.nn.dropout(fully_conn_1, _dropout)
+	fully_conn_1 = tf.nn.dropout(fully_conn_1, dropout)
 
 	# fully connected layer
 	fully_conn_2 = tf.sigmoid(tf.matmul(fully_conn_1, fully_conn_2_weights) + fully_conn_2_biases) 
 
 	# dropout layer
-	fully_conn_2 = tf.nn.dropout(fully_conn_2, _dropout)
+	fully_conn_2 = tf.nn.dropout(fully_conn_2, dropout)
 
 	# Output layer
 	output = tf.sigmoid(tf.matmul(fully_conn_2, output_weights) + output_biases)
@@ -251,7 +251,7 @@ def CNN_Architecture_D():
 	norm_1 = tf.nn.lrn(max_pool_1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-    norm1 = tf.nn.dropout(norm_1, _dropout)
+    norm1 = tf.nn.dropout(norm_1, dropout)
 
 	# convolution layer                                       kernel stride = 1   padded with zeros
 	conv_2 = tf.sigmoid(tf.nn.conv2d(norm_1, conv_2_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_2_biases)
@@ -263,7 +263,7 @@ def CNN_Architecture_D():
 	norm_2 = tf.nn.lrn(max_pool_2, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-	norm_2 = tf.nn.dropout(norm_2, _dropout)
+	norm_2 = tf.nn.dropout(norm_2, dropout)
 
 	# convolution layer                                       kernel stride = 1   padded with zeros
 	conv_3 = tf.sigmoid(tf.nn.conv2d(norm_2, conv_3_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_3_biases)
@@ -275,7 +275,7 @@ def CNN_Architecture_D():
 	norm_3 = tf.nn.lrn(max_pool_3, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 	# dropout layer
-	norm_3 = tf.nn.dropout(norm_3, _dropout)
+	norm_3 = tf.nn.dropout(norm_3, dropout)
 
 	# reshape convolution layer to feed into fully connected
 	layer_shape = norm_3.get_shape()
@@ -288,13 +288,13 @@ def CNN_Architecture_D():
 	fully_conn_1 = tf.sigmoid(tf.matmul(reshaped, fully_conn_1_weights) + fully_conn_1_biases) 
 
 	# dropout layer
-	fully_conn_1 = tf.nn.dropout(fully_conn_1, _dropout)
+	fully_conn_1 = tf.nn.dropout(fully_conn_1, dropout)
 
 	# fully connected layer
 	fully_conn_2 = tf.sigmoid(tf.matmul(fully_conn_1, fully_conn_2_weights) + fully_conn_2_biases) 
 
 	# dropout layer
-	fully_conn_2 = tf.nn.dropout(fully_conn_2, _dropout)
+	fully_conn_2 = tf.nn.dropout(fully_conn_2, dropout)
 
 	# Output layer
 	output = tf.sigmoid(tf.matmul(fully_conn_2, output_weights) + output_biases)

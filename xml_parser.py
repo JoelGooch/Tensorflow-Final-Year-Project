@@ -47,7 +47,7 @@ def get_layers(file_path):
 		if layer_type == 'Max Pool':
 			layer = l.MaxPoolingLayer(layer_name, kernel_size, stride, padding, normalize, dropout, keep_rate)
 		if layer_type == 'Fully Connected':
-			layer = l.FullyConnectedLayer(layer_name, act_function, num_output_nodes, weight_init, weight_val, bias_init, bias_val, normalize, dropout, keep_rate)
+			layer = l.FullyConnectedLayer(layer_name, act_function, num_output_nodes, weight_init, weight_val, bias_init, bias_val, dropout, keep_rate)
 		if layer_type == 'Output':
 			layer = l.OutputLayer(layer_name, act_function, weight_init, weight_val, bias_init, bias_val,)
 		
@@ -92,7 +92,6 @@ def create_XML_model(layers, file_name, file_path):
 				weight_val = ET.SubElement(layer, 'WeightVal').text = str(e.weight_val)
 				bias_init = ET.SubElement(layer, 'BiasInit').text = e.bias_init
 				bias_val = ET.SubElement(layer, 'BiasVal').text = str(e.bias_val)
-				normalize = ET.SubElement(layer, 'Normalize').text = str(e.normalize)
 				dropout = ET.SubElement(layer, 'Dropout').text = str(e.dropout)
 				keep_rate = ET.SubElement(layer, 'KeepRate').text = str(e.keep_rate)
 			elif e.layer_type == 'Output':

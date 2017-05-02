@@ -1,3 +1,4 @@
+# import external dependencies
 import sys
 import tensorflow as tf
 import numpy as np
@@ -6,10 +7,9 @@ import datetime
 import cv2
 import xml.etree.ElementTree as ET
 import matplotlib as mpl
-#mpl.use('Agg')
-mpl.use('Qt5Agg')
 
-import CNN_GUI_V15 as design
+# import files that I have created myself
+import CNN_GUI_V16 as design
 import input_data as data
 import xml_parser as pp
 import Layer as l
@@ -23,33 +23,36 @@ from PyQt5.QtGui import QPixmap
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
-#plt.rcParams['axes.facecolor'] = 'peachpuff'
-#np.set_printoptions(threshold=np.inf)
+from matplotlib import rcParams
+
+mpl.use('Qt5Agg')
+rcParams.update({'figure.autolayout': True})
+
 
 class Worker(QObject):
 
 	# signals for updating GUI elements
 	epoch_progress = pyqtSignal(float)
-	test_set_accuracy = pyqtSignal(float)
 	log_message = pyqtSignal(str)
 	network_model = pyqtSignal(list)
 
 	# signals for updating/creating visualizations
-	train_valid_error = pyqtSignal(float, int)
-	train_valid_acc = pyqtSignal(float, float, int)
 	batch_loss = pyqtSignal(float, int)
 	batch_acc = pyqtSignal(float, int)
+	train_valid_loss = pyqtSignal(float, float, int)
+	train_valid_acc = pyqtSignal(float, float, int)
 	confusion_mat = pyqtSignal(bool, int)
 	network_weights_outputs = pyqtSignal(list, list)
 
 	# signal to inform main thread that worker thread has finished work
 	work_complete = pyqtSignal()
 
-	def __init__(self, data_set: str, data_location: str, validation: bool, num_epochs: int, batch_size: int, learning_rate: float, momentum: float, 
+	def __init__(self, data_set: str, data_location: str, prima_test_person_out:int, validation: bool, num_epochs: int, batch_size: int, learning_rate: float, momentum: float, 
 		optimizer: int, normalize: bool, l2_reg: bool, beta: float, save_directory: str, save_interval: int, model_path: str, run_time: bool):
 		super().__init__()
 		self.end_training = False
 		self.data_set = data_set
+		self.prima_test_person_out = prima_test_person_out
 		self.data_location = data_location
 		self.regression = False
 		self.validation = validation
@@ -68,7 +71,7 @@ class Worker(QObject):
 		
 	@pyqtSlot()
 	def work(self):
-		self.train_network(self.data_set, self.data_location, self.validation, self.num_epochs, self.batch_size, self.learning_rate, self.momentum, self.optimizer, 
+		self.train_network(self.data_set, self.data_location, self.prima_test_person_out, self.validation, self.num_epochs, self.batch_size, self.learning_rate, self.momentum, self.optimizer, 
 			self.normalize, self.l2_reg, self.beta, self.save_directory, self.save_interval, self.model_path, self.run_time)
 
 	# this function calculates the accuracy measurements from the predicted labels and actual labels
@@ -93,7 +96,7 @@ class Worker(QObject):
 		return RMSE, RMSE_stdev, MAE, MAE_stdev
 
 
-	def train_network(self, data_set, data_location, validation, num_epochs, batch_size, learning_rate, momentum, learning_algo, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time):
+	def train_network(self, data_set, data_location, prima_test_person_out, validation, num_epochs, batch_size, learning_rate, momentum, learning_algo, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time):
 
 		try:
 			# load selected data set
@@ -101,8 +104,11 @@ class Worker(QObject):
 				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10(data_location, validation)
 			if (data_set == 'MNIST'):
 				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST(validation)
-			if (data_set == 'PrimaHeadPose'):
-				training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose(data_location)
+			if (data_set == 'PrimaHeadPosePitch'):
+				training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose_pitch(data_location, prima_test_person_out)
+				self.regression = True
+			if (data_set == 'PrimaHeadPoseYaw'):
+				training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose_yaw(data_location, prima_test_person_out)
 				self.regression = True
 		except FileNotFoundError:
 			self.log_message.emit('File Not Found In Location, Please Select Valid Location in Settings')
@@ -119,7 +125,7 @@ class Worker(QObject):
 		try:
 			# get array of layers from XML file
 			layers = pp.get_layers(model_path)
-		except:
+		except FileNotFoundError:
 			self.log_message.emit('Error reading XML file')
 			self.work_complete.emit()
 			return 0
@@ -136,8 +142,6 @@ class Worker(QObject):
 			y = tf.placeholder(tf.float32, shape=(None, num_classes))
 
 			global_step = tf.Variable(0, trainable=False)
-
-
 			if self.regression == False:
 				# stores the class integer values 
 				class_labels = tf.argmax(y, dimension=1)
@@ -229,7 +233,7 @@ class Worker(QObject):
 					# initialise variables if not possible
 					session.run(tf.global_variables_initializer())
 
-
+				# start recording time taken to train
 				train_start = datetime.datetime.now()
 
 				# start training loop
@@ -283,21 +287,27 @@ class Worker(QObject):
 								if validation == True:
 
 									num_training_data = len(training_labels)
+									# this value needs to be decided and likely smaller, will mean machine requirements to run program are high
 									data_per_batch = 5000
 									num_batches = num_training_data / data_per_batch
-									train_accuracy = 0
+
+									train_accuracy_total = 0
+									train_loss_total = 0
 
 									for i in range(int(num_batches)):
 									   batch_data = training_set[i*data_per_batch:(i+1)*data_per_batch]
 									   batch_labels = training_labels[i*data_per_batch:(i+1)*data_per_batch]
-									   train_accuracy += session.run(accuracy, feed_dict={x: batch_data, y: batch_labels})
+									   train_accuracy, train_loss = session.run([accuracy, loss], feed_dict={x: batch_data, y: batch_labels})
+									   train_accuracy_total += train_accuracy
+									   train_loss_total += train_loss
 									  
-									train_accuracy /= num_batches
-									print(train_accuracy)
+									train_accuracy_total /= num_batches
+									train_loss_total /= num_batches
 
 									# run validation set at current batch
-									valid_accuracy = session.run(accuracy, feed_dict={x: validation_set, y: validation_labels})
+									valid_accuracy, valid_loss = session.run([accuracy, loss], feed_dict={x: validation_set, y: validation_labels})
 									self.train_valid_acc.emit(train_accuracy, valid_accuracy, epoch)
+									self.train_valid_loss.emit(train_loss_total, valid_loss, epoch)
 
 
 						# calculate progress as percentage and emit signal to GUI to update
@@ -333,16 +343,17 @@ class Worker(QObject):
 				if self.regression == False:
 					# if classification, grab accuracy from tensorflow graph
 					test_acc, testing_pred_class, testing_classes = session.run([accuracy, network_pred_class, class_labels], feed_dict=feed_dict)
+					self.log_message.emit('Test Set Accuracy = {}'.format(str(test_acc)))
 				else: 
 					# otherwise calculate RMSE using function
 					batch_pred_angles = session.run(model_output, feed_dict=feed_dict)
-					test_acc, RMSE_stdev, MAE, MAE_stdev = self.evaluate_accuracy(batch_pred_angles, testing_labels)
-
+					RMSE, RMSE_stdev, MAE, MAE_stdev = self.evaluate_accuracy(batch_pred_angles, testing_labels)
+					self.log_message.emit('Test Set Root Mean Squared Error = {}'.format(str(RMSE)))
+					self.log_message.emit('Test Set Root Mean Squared Error Standard Deviation = {}'.format(str(RMSE_stdev)))
+					self.log_message.emit('Test Set Mean Absolute Error = {}'.format(str(MAE)))
+					self.log_message.emit('Test Set Mean Absolute Error Standard Deviation = {}'.format(str(MAE_stdev)))
 
 				self.log_message.emit('Test Set Evaluated \n')
-				
-				# send test accuracy to GUI
-				self.test_set_accuracy.emit(test_acc)
 
 				self.log_message.emit('Loading Visualizations...')
 
@@ -510,17 +521,15 @@ class Worker(QObject):
 		except ZeroDivisionError:
 			doNothing = 0
 
-
+# this is a simple custom canvas that i can embed into a pyqt5 widget.
 class MyMplCanvas(FigureCanvas):
 
-	def __init__(self, parent=None, width=20, height=20, dpi=100, title='title', xAxisTitle='x', yAxisTitle='y'):
-		self.title = title
+	def __init__(self, parent=None, width=20, height=20, dpi=100, xAxisTitle='x', yAxisTitle='y'):
 		self.xAxisTitle = xAxisTitle
 		self.yAxisTitle = yAxisTitle
 
 		self.fig = Figure(figsize=(width, height), dpi=dpi)
 		self.axes = self.fig.add_subplot(111)
-		self.fig.suptitle(title)
 
 		self.axes.set_xlabel(self.xAxisTitle)
 		self.axes.set_ylabel(self.yAxisTitle)
@@ -559,9 +568,7 @@ class DynamicGraph(MyMplCanvas):
 		self.axes.plot(self.epochs, self.errors, 'r')
 		#self.axes.fill_between(self.epochs, 0, self.errors, alpha=0.5, facecolor='r')
 		
-		#self.axes.grid(True)
 		self.draw()
-
 
 # this graph is is the same as above except with two lines, for validation/training accuracy
 class DynamicDoubleGraph(MyMplCanvas):
@@ -570,6 +577,7 @@ class DynamicDoubleGraph(MyMplCanvas):
 		self.train_errors = []
 		self.valid_errors = []
 		self.epochs = []
+		self.legend = self.axes.legend(loc='upper center', shadow=True)
 
 	@pyqtSlot(float, float, int)
 	def update_figure(self, train_error: float, valid_error: float, epoch: int):
@@ -608,14 +616,14 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 		# initialise GUI elements
 		self.btnCancelTraining.setEnabled(False)
-		self.txtConvKeepRate.setEnabled(False)
-		self.txtPoolKeepRate.setEnabled(False)
-		self.txtFCKeepRate.setEnabled(False)
+		self.spnConvKeepRate.setEnabled(False)
+		self.spnPoolKeepRate.setEnabled(False)
+		self.spnFCKeepRate.setEnabled(False)
 		self.btnCreateModel.setEnabled(False)
-		self.txtL2Beta.setEnabled(False)
+		self.spnRegBeta.setEnabled(False)
 
-		# for quickness. TEMPORRARY
-		self.txtLoadModel.setText('C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/Tensorflow-Final-Year-Project/Models/MNIST.xml')
+		# for quickness. TEMPORARY
+		self.txtLoadModel.setText('C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/Tensorflow-Final-Year-Project/Models/MNIST_Tensorflow_Official.xml')
 
 		# navigational buttons
 		self.actionTrain.triggered.connect(partial(self.open_tab, index=0))
@@ -628,16 +636,16 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.radCreateModel.toggled.connect(self.create_model_rad_clicked)
 
 		# events for checking/unchecking dropout when creating model
-		self.chkConvDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkConvDropout, keep_rate_text_field=self.txtConvKeepRate))
-		self.chkPoolDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkPoolDropout, keep_rate_text_field=self.txtPoolKeepRate))
-		self.chkFCDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkFCDropout, keep_rate_text_field=self.txtFCKeepRate))
+		self.chkConvDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkConvDropout, keep_rate_spinner=self.spnConvKeepRate))
+		self.chkPoolDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkPoolDropout, keep_rate_spinner=self.spnPoolKeepRate))
+		self.chkFCDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkFCDropout, keep_rate_spinner=self.spnFCKeepRate))
 
 		self.cbxOptimizer.currentIndexChanged.connect(self.optimizer_combo_box_changed)
 		self.chkL2Reg.stateChanged.connect(self.l2_reg_checkbox_state_changed)
 
-		self.cbxConvBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxConvBiasInit, bias_val_text_field= self.txtConvBiasVal, bias_val_label= self.lblConvBiasVal))
-		self.cbxFCBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxFCBiasInit, bias_val_text_field= self.txtFCBiasVal, bias_val_label= self.lblFCBiasVal))
-		self.cbxOutputBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxOutputBiasInit, bias_val_text_field= self.txtOutputBiasVal, bias_val_label= self.lblOutputBiasVal))
+		self.cbxConvBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxConvBiasInit, bias_val_spinner= self.spnConvBiasVal, bias_val_label= self.lblConvBiasVal, help_icon=self.hlpConvBiasVal))
+		self.cbxFCBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxFCBiasInit, bias_val_spinner= self.spnFCBiasVal, bias_val_label= self.lblFCBiasVal, help_icon=self.hlpFCBiasVal))
+		self.cbxOutputBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxOutputBiasInit, bias_val_spinner= self.spnOutputBiasVal, bias_val_label= self.lblOutputBiasVal, help_icon=self.hlpOutputBiasVal))
 
 		# buttons to change file paths 
 		self.btnChangeSavePath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtSavePath))
@@ -645,7 +653,8 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.btnChangeModelPath.clicked.connect(self.change_file_path)
 		self.btnChangeModelSavePath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtModelSavePath))
 		self.btnChangeCIFARPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtCIFARPath))
-		self.btnChangePrimaPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtPrimaPath))
+		self.btnChangePrimaPitchPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtPrimaPitchPath))
+		self.btnChangePrimaYawPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtPrimaYawPath))
 	
 		# train/cancel training buttons
 		self.btnTrainNetwork.clicked.connect(self.train_button_clicked)
@@ -654,7 +663,8 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		# connect events for when data set selection radio buttons are toggled
 		self.radMNIST.toggled.connect(partial(self.data_set_rad_state_changed, False))
 		self.radCIFAR10.toggled.connect(partial(self.data_set_rad_state_changed, False))
-		self.radPrimaHeadPose.toggled.connect(partial(self.data_set_rad_state_changed, True))
+		self.radPrimaHeadPosePitch.toggled.connect(partial(self.data_set_rad_state_changed, True))
+		self.radPrimaHeadPoseYaw.toggled.connect(partial(self.data_set_rad_state_changed, True))
 
 		# create new model buttons
 		self.btnAddConvLayer.clicked.connect(self.create_conv_layer_button_clicked)
@@ -671,36 +681,28 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.btnClearModelLog.clicked.connect(self.clear_output_model_log)
 
 		# create graph instances
-		self.batch_loss_graph = DynamicGraph(self.grphBatchLoss, width=5, height=4, dpi=100, title='Loss Over Epochs', xAxisTitle='Epoch', yAxisTitle='Loss')
-		self.batch_acc_graph = DynamicGraph(self.grphBatchAcc, width=5, height=4, dpi=100, title='Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
-		self.train_valid_accuracy = DynamicDoubleGraph(self.grphTrainValidAcc, width=5, height=4, dpi=100, title='Training / Validation Accuracy Over Epochs', xAxisTitle='Epoch', yAxisTitle='Accuracy')
+		self.batch_loss_graph = DynamicGraph(self.grphBatchLoss, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Loss')
+		self.batch_acc_graph = DynamicGraph(self.grphBatchAcc, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Accuracy')
+		self.train_valid_accuracy = DynamicDoubleGraph(self.grphTrainValidAcc, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Accuracy')
+		self.train_valid_loss = DynamicDoubleGraph(self.grphTrainValidLoss, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Loss')
 
 		
 	def train_button_clicked(self):
-
 		# clear visualizations of previous runs
-		self.lblTrainingConfusionMat.setText('Training Confusion Matrix for First Batch Will Appear When it has been Evaluated')
-		self.lblTestingConfusionMat.setText('Test Set Confusion Matrix Will Appear When Test Set has been Evaluated')
-		self.tabLayerWeights.clear()
-		self.tabLayerOutput.clear()
+		self.reset_visualizations()
 
 		try:
-			
-			num_epochs = int(self.txtNumEpochs.text())
-			batch_size = int(self.txtBatchSize.text())
-			learning_rate = float(self.txtLearningRate.text())
+			num_epochs = int(self.spnNumEpochs.text())
+			batch_size = int(self.spnBatchSize.text())
+			learning_rate = float(self.spnLearningRate.text())
 			optimizer = int(self.cbxOptimizer.currentIndex())
-			'''
-			num_epochs = 500
-			batch_size = 64
-			learning_rate = 0.0005
-			optimizer = 1
-			'''
 
 			if self.current_data_set() == 'CIFAR10':
 				data_location = self.txtCIFARPath.text()
-			elif self.current_data_set() == 'PrimaHeadPose':
-				data_location = self.txtPrimaPath.text()
+			elif self.current_data_set() == 'PrimaHeadPosePitch':
+				data_location = self.txtPrimaPitchPath.text()
+			elif self.current_data_set() == 'PrimaHeadPoseYaw':
+				data_location = self.txtPrimaYawPath.text()
 			else: data_location = 'None'
 			
 			
@@ -708,12 +710,14 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			model_path = self.txtLoadModel.text()
 			save_path = self.txtSavePath.text()
 
+			prima_test_person_out = self.cbxPrimaTestPerson.currentIndex() + 1
+
 			if self.chkValidationSet.isChecked():
 				validation = True
 			else: validation = False
 
 			if self.cbxOptimizer.currentIndex == 4:
-				momentum = float(self.txtMomentum.text())
+				momentum = float(self.spnMomentum.text())
 			else: momentum = 0
 
 			if self.chkNormalize.isChecked():
@@ -722,7 +726,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 			if self.chkL2Reg.isChecked():
 				l2_reg = True
-				beta = float(self.txtL2Beta.text())
+				beta = float(self.spnRegBeta.text())
 			else:
 				l2_reg = False
 				beta = 0
@@ -747,7 +751,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.prgTrainingProgress.setValue(0)
 
 			# create worker object and thread
-			worker = Worker(self.current_data_set(), data_location, validation, num_epochs, batch_size, learning_rate, momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time)
+			worker = Worker(self.current_data_set(), data_location, prima_test_person_out, validation, num_epochs, batch_size, learning_rate, momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time)
 			thread = QThread()
 
 			# connect cancel button in main thread to background thread
@@ -758,7 +762,6 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			worker.moveToThread(thread)
 
 			# set connections from background thread to main thread for updating GUI elements
-			worker.test_set_accuracy.connect(self.update_test_set_accuracy)
 			worker.epoch_progress.connect(self.update_progress_bar)
 			worker.log_message.connect(self.txtOutputLog.append)
 			worker.network_model.connect(self.show_model_details)
@@ -767,6 +770,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			# set connections from background thread to create/update visualizations on GUI
 			worker.batch_loss.connect(self.batch_loss_graph.update_figure)
 			worker.batch_acc.connect(self.batch_acc_graph.update_figure)
+			worker.train_valid_loss.connect(self.train_valid_loss.update_figure)
 			worker.train_valid_acc.connect(self.train_valid_accuracy.update_figure)
 			worker.confusion_mat.connect(self.update_confusion_plot)
 			worker.network_weights_outputs.connect(self.embed_network_weights_outputs)
@@ -776,18 +780,27 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			thread.start()
 
 	def create_conv_layer_button_clicked(self):
-
+		if not self.txtConvName.text():
+				self.txtOutputModelLog.append('Layer Must have a Name!')
+				return 0
 		try:
 			conv_layer_name = self.txtConvName.text()
-			conv_kernel_size = int(self.txtConvKernelSize.text())
-			conv_stride = int(self.txtConvStride.text())
-			num_output_filters = int(self.txtConvOutputFilters.text())
+
+			if self.cbxConvKernelSize.currentIndex() == 0:
+				conv_kernel_size = 3
+			elif self.cbxConvKernelSize.currentIndex() == 1:
+				conv_kernel_size = 5
+			elif self.cbxConvKernelSize.currentIndex() == 2:
+				conv_kernel_size = 7
+
+			conv_stride = self.return_stride(self.cbxConvStride)
+			num_output_filters = int(self.spnConvOutputFilters.text())
 			act_function = self.return_act_function(self.cbxConvActFunction)
-			weight_init, weight_std_dev = self.return_weight_init(self.cbxConvWeightInit, self.txtConvStdDev)
-			bias_init, bias_val = self.return_bias_init(self.cbxConvBiasInit, self.txtConvBiasVal)
+			weight_init, weight_std_dev = self.return_weight_init(self.cbxConvWeightInit, self.spnConvStdDev)
+			bias_init, bias_val = self.return_bias_init(self.cbxConvBiasInit, self.spnConvBiasVal)
 			padding = self.return_padding(self.cbxConvPadding)
 			normalize = self.return_normalize(self.chkConvNorm)
-			dropout, keep_rate = self.return_dropout(self.chkConvDropout, self.txtConvKeepRate)
+			dropout, keep_rate = self.return_dropout(self.chkConvDropout, self.spnConvKeepRate)
 
 			layer = l.ConvLayer(conv_layer_name, conv_kernel_size, conv_stride, act_function, num_output_filters, weight_init, weight_std_dev, bias_init, bias_val, padding, normalize, dropout, keep_rate)
 			self.new_model.append(layer)
@@ -799,13 +812,25 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
 
 	def create_pooling_layer_button_clicked(self):
+		if not self.txtPoolName.text():
+			self.txtOutputModelLog.append('Layer Must have a Name!')
+			return 0
 		try:    
 			pool_layer_name = self.txtPoolName.text()
-			pool_kernel_size = int(self.txtPoolKernelSize.text())
-			pool_stride = int(self.txtPoolStride.text())
+
+			if self.cbxPoolKernelSize.currentIndex() == 0:
+				pool_kernel_size = 2
+			elif self.cbxPoolKernelSize.currentIndex() == 1:
+				pool_kernel_size = 3
+			elif self.cbxPoolKernelSize.currentIndex() == 2:
+				pool_kernel_size = 4
+			elif self.cbxPoolKernelSize.currentIndex() == 3:
+				pool_kernel_size = 5
+
+			pool_stride = self.return_stride(self.cbxPoolStride)
 			padding = self.return_padding(self.cbxPoolPadding)
 			normalize = self.return_normalize(self.chkPoolNorm)
-			dropout, keep_rate = self.return_dropout(self.chkPoolDropout, self.txtPoolKeepRate)
+			dropout, keep_rate = self.return_dropout(self.chkPoolDropout, self.spnPoolKeepRate)
 
 			layer = l.MaxPoolingLayer(pool_layer_name, pool_kernel_size, pool_stride, padding, normalize, dropout, keep_rate)
 			self.new_model.append(layer)
@@ -817,26 +842,30 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
 
 	def create_full_conn_layer_button_clicked(self):
-
+		if not self.txtFCName.text():
+			self.txtOutputModelLog.append('Layer Must have a Name!')
+			return 0
 		try:
 			FC_layer_name = self.txtFCName.text()
-			num_output_nodes = int(self.txtFCNumOutputNodes.text())
+			num_output_nodes = int(self.spnFCNumOutputNodes.text())
 			act_function = self.return_act_function(self.cbxFCActFunction)
-			weight_init, weight_std_dev = self.return_weight_init(self.cbxFCWeightInit, self.txtFCStdDev)
-			bias_init, bias_val = self.return_bias_init(self.cbxFCBiasInit, self.txtFCBiasVal)
-			normalize = self.return_normalize(self.chkFCNorm)
-			dropout, keep_rate = self.return_dropout(self.chkFCDropout, self.txtFCKeepRate)
+			weight_init, weight_std_dev = self.return_weight_init(self.cbxFCWeightInit, self.spnFCStdDev)
+			bias_init, bias_val = self.return_bias_init(self.cbxFCBiasInit, self.spnFCBiasVal)
+			dropout, keep_rate = self.return_dropout(self.chkFCDropout, self.spnFCKeepRate)
 
-			layer = l.FullyConnectedLayer(FC_layer_name, act_function, num_output_nodes, weight_init, weight_std_dev, bias_init, bias_val,  normalize, dropout, keep_rate)
+			layer = l.FullyConnectedLayer(FC_layer_name, act_function, num_output_nodes, weight_init, weight_std_dev, bias_init, bias_val, dropout, keep_rate)
 			self.new_model.append(layer)
 
-			item = QListWidgetItem(("Fully Connected,  Num Output Nodes: {}, Activation Function: {}, Normalize: {}, Dropout: {}, Keep Rate: {}").format(layer.num_output_nodes, layer.act_function, layer.normalize, layer.dropout, layer.keep_rate))
+			item = QListWidgetItem(("Fully Connected,  Num Output Nodes: {}, Activation Function: {}, Dropout: {}, Keep Rate: {}").format(layer.num_output_nodes, layer.act_function, layer.dropout, layer.keep_rate))
 			self.lstModel.addItem(item)
 
 		except ValueError:
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
 
 	def create_output_layer_button_clicked(self):
+		if not self.txtOutputName.text():
+			self.txtOutputModelLog.append('Layer Must have a Name!')
+			return 0	
 		try:
 			output_layer_name = self.txtOutputName.text()
 
@@ -849,8 +878,8 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			elif self.cbxOutputActFunction.currentIndex() == 3:
 				act_function = 'Tanh'
 
-			weight_init, weight_std_dev = self.return_weight_init(self.cbxOutputWeightInit, self.txtOutputStdDev)
-			bias_init, bias_val = self.return_bias_init(self.cbxOutputBiasInit, self.txtOutputBiasVal)
+			weight_init, weight_std_dev = self.return_weight_init(self.cbxOutputWeightInit, self.spnOutputStdDev)
+			bias_init, bias_val = self.return_bias_init(self.cbxOutputBiasInit, self.spnOutputBiasVal)
 
 			layer = l.OutputLayer(output_layer_name, act_function, weight_init, weight_std_dev, bias_init, bias_val)
 			self.new_model.append(layer)
@@ -860,6 +889,15 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 		except ValueError:
 			self.txtOutputModelLog.append('A field has been incorrectly entered, must be numbers!')
+
+	def return_stride(self, comboBox):
+		if comboBox.currentIndex() == 0:
+			stride = 1
+		elif comboBox.currentIndex() == 1:
+			stride = 2
+		elif comboBox.currentIndex() == 2:
+			stride = 3
+		return stride
 
 	def return_act_function(self, comboBox):
 		if comboBox.currentIndex() == 0:
@@ -962,41 +1000,48 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.delete_model_button_clicked()
 		self.txtSaveModelAs.setText('')
 		self.txtConvName.setText('')
-		self.txtConvKernelSize.setText('')
-		self.txtConvStride.setText('')
+		self.cbxConvKernelSize.setCurrentIndex(0)
+		self.cbxConvStride.setCurrentIndex(0)
 		self.cbxConvActFunction.setCurrentIndex(0)
-		self.txtConvOutputFilters.setText('')
+		self.spnConvOutputFilters.setValue(64)
 		self.cbxConvWeightInit.setCurrentIndex(0)
 		self.cbxConvBiasInit.setCurrentIndex(0)
-		self.txtConvStdDev.setText('')
-		self.txtConvBiasVal.setText('')
+		self.spnConvStdDev.setValue(0.005)
+		self.spnConvBiasVal.setValue(0.005)
 		self.cbxConvPadding.setCurrentIndex(0)
 		self.chkConvNorm.setChecked(False)
 		self.chkConvDropout.setChecked(False)
-		self.txtConvKeepRate.setText('')
+		self.spnConvKeepRate.setValue(0.5)
 		self.txtPoolName.setText('')
-		self.txtPoolKernelSize.setText('')
-		self.txtPoolStride.setText('')
+		self.cbxPoolKernelSize.setCurrentIndex(0)
+		self.cbxPoolStride.setCurrentIndex(0)
 		self.cbxPoolPadding.setCurrentIndex(0)
 		self.chkPoolNorm.setChecked(False)
 		self.chkPoolDropout.setChecked(False)
-		self.txtPoolKeepRate.setText('')
+		self.spnPoolKeepRate.setValue(0.5)
 		self.txtFCName.setText('')
 		self.cbxFCActFunction.setCurrentIndex(0)
-		self.txtFCNumOutputNodes.setText('')
-		self.cbxFCWeightInit.setCurrentIndex(0)
-		self.cbxFCBiasInit.setCurrentIndex(0)
-		self.txtFCStdDev.setText('')
-		self.txtFCBiasVal.setText('')
+		self.spnFCNumOutputNodes.setValue(64)
+		self.cbxFCWeightInit.setValue(0.005)
+		self.cbxFCBiasInit.setValue(0.005)
+		self.spnFCStdDev.setValue(0.005)
+		self.spnFCBiasVal.setValue(0.005)
 		self.chkFCNorm.setChecked(False)
 		self.chkFCDropout.setChecked(False)
-		self.txtFCKeepRate.setText('')
+		self.spnFCKeepRate.setValue(0.5)
 		self.txtOutputName.setText('')
 		self.cbxOutputActFunction.setCurrentIndex(0)
 		self.cbxOutputWeightInit.setCurrentIndex(0)
-		self.txtOutputBiasVal.setText('')
-		self.txtOutputStdDev.setText('')
-		self.txtOutputBiasVal.setText('')
+		self.spnOutputBiasVal.setValue(0.005)
+		self.spnOutputStdDev.setValue(0.005)
+		self.spnOutputBiasVal.setValue(0.005)
+
+
+	def reset_visualizations(self):
+		self.lblTrainingConfusionMat.setText('Training Confusion Matrix for First Batch Will Appear When it has been Evaluated')
+		self.lblTestingConfusionMat.setText('Test Set Confusion Matrix Will Appear When Test Set has been Evaluated')
+		self.tabLayerWeights.clear()
+		self.tabLayerOutput.clear()
 
 	def delete_model_button_clicked(self):
 		if not self.new_model:
@@ -1012,16 +1057,19 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		except:
 			self.txtOutputModelLog.append("No More Layers to Delete!")
 
-	def bias_init_combo_changed(self, bias_init_combobox, bias_val_text_field, bias_val_label):
-		if bias_init_combobox.currentIndex() == 0 or bias_init_combobox.currentIndex() == 1:
-			bias_val_label.setText('Std Dev of Weights:')
-			bias_val_text_field.setFixedWidth(60)
-		elif bias_init_combobox.currentIndex() == 2:
+	def bias_init_combo_changed(self, bias_init_combobox, bias_val_spinner, bias_val_label, help_icon):
+		if bias_init_combobox.currentIndex() == 0:
 			bias_val_label.setText('')
-			bias_val_text_field.setFixedWidth(0)
+			bias_val_spinner.setFixedWidth(0)
+			help_icon.setFixedWidth(0)
+		elif bias_init_combobox.currentIndex() == 1 or bias_init_combobox.currentIndex() == 2:
+			bias_val_label.setText('Std Dev of Weights:')
+			bias_val_spinner.setFixedWidth(60)
+			help_icon.setFixedWidth(24)
 		elif bias_init_combobox.currentIndex() == 3:
 			bias_val_label.setText('Value:')
-			bias_val_text_field.setFixedWidth(60)
+			bias_val_spinner.setFixedWidth(60)
+			help_icon.setFixedWidth(24)
 
 	def change_directory_path(self, path_text_field, disable=False):
 		path = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -1037,40 +1085,47 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		if prima_head_pose == True:
 			self.chkValidationSet.setFixedWidth(0)
 			self.chkValidationSet.setChecked(False)
-			self.lblTestAccuracy.setText('Test Set RMSE:')
+			self.cbxPrimaTestPerson.setFixedWidth(41)
+			self.lblPrimaTest.setText('Use Person')
+			self.lblPrimaTest2.setText('as Testing Set')
 		else: 
 			self.chkValidationSet.setFixedWidth(110)
-			self.lblTestAccuracy.setText('Test Set Accuracy:')
+			self.cbxPrimaTestPerson.setFixedWidth(0)
+			self.lblPrimaTest.setText('')
+			self.lblPrimaTest2.setText('')
 
 	def current_data_set(self):
 		if self.radCIFAR10.isChecked():
 			return 'CIFAR10'
 		elif self.radMNIST.isChecked():
 			return 'MNIST'
-		elif self.radPrimaHeadPose.isChecked():
-			return 'PrimaHeadPose'
+		elif self.radPrimaHeadPosePitch.isChecked():
+			return 'PrimaHeadPosePitch'
+		elif self.radPrimaHeadPoseYaw.isChecked():
+			return 'PrimaHeadPoseYaw'
 
 	def optimizer_combo_box_changed(self):
 		if self.cbxOptimizer.currentIndex() == 4:
-			self.txtMomentum.setFixedWidth(60)
-			self.lblMomentum.setFixedWidth(60)
+			self.spnMomentum.setFixedWidth(50)
+			self.spnMomentum.setFixedHeight(20)
+			self.lblMomentum.setText('Momentum:')
 		else:
-			self.txtMomentum.setFixedWidth(0)
-			self.lblMomentum.setFixedWidth(0)   
+			self.spnMomentum.setFixedWidth(0)
+			self.lblMomentum.setText('')   
 
 	def l2_reg_checkbox_state_changed(self):
 		if self.chkL2Reg.isChecked():
-			self.txtL2Beta.setEnabled(True)
-		else: self.txtL2Beta.setEnabled(False)
+			self.spnRegBeta.setEnabled(True)
+		else: self.spnRegBeta.setEnabled(False)
 
 	def checkpoint_checkbox_state_changed(self):
 		if self.cbxSavePath.isChecked():
 			self.txtSavePath.setText(self.txtLoadCheckpoints.text())
 
-	def dropout_checkbox_state_changed(self, dropout_checkbox, keep_rate_text_field):
+	def dropout_checkbox_state_changed(self, dropout_checkbox, keep_rate_spinner):
 		if dropout_checkbox.isChecked():
-			keep_rate_text_field.setEnabled(True)
-		else: keep_rate_text_field.setEnabled(False)
+			keep_rate_spinner.setEnabled(True)
+		else: keep_rate_spinner.setEnabled(False)
 
 	def create_model_rad_clicked(self, enabled):
 		if enabled:
@@ -1092,12 +1147,6 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		if reply == QMessageBox.Yes:
 			event.accept()
 		else: event.ignore()
-	
-
-	@pyqtSlot(float)
-	def update_test_set_accuracy(self, accuracy: float):
-		self.txtTestAccuracy.setText(str(round(accuracy, 6)))
-		self.btnCancelTraining.setEnabled(False)
 
 	@pyqtSlot(float)
 	def update_progress_bar(self, progress: float):
@@ -1124,8 +1173,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			elif e.layer_type == 'Fully Connected':
 				self.txtOutputLog.append('Fully Connected Layer')
 				self.txtOutputLog.append("Num Output Nodes {0}".format(e.num_output_nodes))
-				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))  
-				self.txtOutputLog.append("Normalize: {0}".format(e.normalize))  
+				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))   
 				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keep_rate)) 
 			elif e.layer_type == 'Output':
 				self.txtOutputLog.append('Output Layer')
@@ -1172,7 +1220,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			plt.savefig('training_confusion_matrix.png', format='png')
 			pix_map = QPixmap("training_confusion_matrix.png")
 			self.lblTrainingConfusionMat.setPixmap(pix_map)
-			self.lblBatchConf.setText("Batch {0}".format(epoch))
+			self.lblBatchConf.setText("Training Batch {0}".format(epoch))
 		else:
 			plt.savefig('testing_confusion_matrix.png', format='png')
 			pix_map = QPixmap("testing_confusion_matrix.png")

@@ -67,7 +67,7 @@ def print_to_console(data_set, RMSE, RMSE_stdev, MAE, MAE_stdev):
 def main():
 
 	# variable params
-	total_epochs = 200
+	total_epochs = 20000
 	batch_size = 64
 	learning_rate = 0.005
 	trainingdropout_keep_rate = 0.5
@@ -80,7 +80,7 @@ def main():
 
 	# there are 15 files (15 people), each uses jack knife cross validation meaning in each file a different person is used for the testing set
 	# essentially this makes 15 separate networks, the final accuracy terms are the mean across all networks
-	for pickle_file in range(1, 16):
+	for pickle_file in range(6, 16):
 
 		print('\nRunning with Person {0} as the testing set\n'.format(str(pickle_file)))
 
@@ -115,19 +115,23 @@ def main():
 			keep_rate = tf.placeholder(tf.float32) 												  # keep probabilty for dropout
 
 			# define network weights and biases
-			# [kernel size, kernel size, num input channels, num output channels]
-			conv_1_weights = tf.Variable(tf.truncated_normal([3, 3, num_channels, 64], stddev=0.1), name='conv_1_weights')
-			conv_1_biases = tf.Variable(tf.zeros([64]), name='conv_1_biases')
+			# [kernel size, kernel size, num input channels, num output channels] 
+			conv_1_weights = tf.Variable(tf.truncated_normal([3, 3, num_channels, 64], stddev=0.1), name="conv_1_weights")
+			conv_1_biases = tf.Variable(tf.zeros([64]), name="conv_1_biases")
 
-			conv_2_weights = tf.Variable(tf.truncated_normal([3, 3, 64, 128], stddev=0.1), name='conv_2_weights')
-			conv_2_biases = tf.Variable(tf.zeros([128]), name='conv_2_biases')
+			conv_2_weights = tf.Variable(tf.truncated_normal([3, 3, 64, 128], stddev=0.1), name="conv_2_weights")
+			conv_2_biases = tf.Variable(tf.zeros([128]), name="conv_2_biases")
 
-			# 16 * 16 because of 2 max pooling layers with stride = 2 : 64 -> 32 -> 16
-			fully_conn_1_weights = tf.Variable(tf.truncated_normal([16 * 16 * 128, 128], stddev=0.1),name='fully_conn_1_weights') 
-			fully_conn_1_biases = tf.Variable(tf.zeros([128]), name='fully_conn_1_biases')
+			conv_3_weights = tf.Variable(tf.truncated_normal([3, 3, 128, 256], stddev=0.1), name="conv_3_weights")
+			conv_3_biases = tf.Variable(tf.zeros([256]), name="conv_3_biases")
 
-			output_weights = tf.Variable(tf.truncated_normal([128, num_classes], stddev=0.1), name='output_weights')
-			output_biases = tf.Variable(tf.zeros([num_classes]), name='output_biases')
+			# 8 * 8 because of 3 max pooling layers with stride = 2 : 64 -> 32 -> 16 -> 8
+			fully_conn_1_weights = tf.Variable(tf.truncated_normal([8 * 8 * 256, 256], stddev=0.1),name="fully_conn_1_weights") 
+			fully_conn_1_biases = tf.Variable(tf.zeros([256]), name="fully_conn_1_biases")
+
+			output_weights = tf.Variable(tf.truncated_normal([256, num_classes], stddev=0.1), name="output_weights")
+			output_biases = tf.Variable(tf.zeros([num_classes]), name="output_biases")
+
 
 			# define network architecture
 			#	@param data = data to be fed through network
@@ -140,7 +144,7 @@ def main():
 				# convolution layer                                 kernel stride = 1   padded with zeros
 				conv_1 = tf.sigmoid(tf.nn.conv2d(X, conv_1_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_1_biases)
 
-				# max pooling layer                 kernel size = 2     kernel stride = 2   padded with zeros
+				# max pooling layer                  kernel size = 2     kernel stride = 2   padded with zeros
 				max_pool_1 = tf.nn.max_pool(conv_1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
 				# normalize
@@ -161,12 +165,24 @@ def main():
 				# dropout layer
 				norm_2 = tf.nn.dropout(norm_2, dropout)
 
+				# convolution layer                                       kernel stride = 1   padded with zeros
+				conv_3 = tf.sigmoid(tf.nn.conv2d(norm_2, conv_3_weights, strides=[1, 1, 1, 1], padding='SAME') + conv_3_biases)
+
+				# max pooling layer                 kernel size = 2     kernel stride = 2   padded with zeros
+				max_pool_3 = tf.nn.max_pool(conv_3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
+				# normalize
+				norm_3 = tf.nn.lrn(max_pool_3, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
+
+				# dropout layer
+				norm_3 = tf.nn.dropout(norm_3, dropout)
+
 				# reshape convolution layer to feed into fully connected
-				layer_shape = norm_2.get_shape()
+				layer_shape = norm_3.get_shape()
 				# extract number of features from shape
 				num_features = layer_shape[1:4].num_elements()
 				# reshape layer using number of features
-				reshaped = tf.reshape(norm_2, [-1, num_features])
+				reshaped = tf.reshape(norm_3, [-1, num_features])
 
 				# fully connected layer
 				fully_conn_1 = tf.sigmoid(tf.matmul(reshaped, fully_conn_1_weights) + fully_conn_1_biases) 
@@ -174,11 +190,10 @@ def main():
 				# dropout layer
 				fully_conn_1 = tf.nn.dropout(fully_conn_1, dropout)
 
-				# Output layerS
+				# Output layer
 				output = tf.sigmoid(tf.matmul(fully_conn_1, output_weights) + output_biases)
 
 				return output
-
 
 			# calculate predictions
 			model_output = CNN_Model(x, keep_rate)
@@ -294,7 +309,7 @@ def main():
 
 					# save state every 10000 epochs in case of power failure or other unexpected event
 					# the > 0 part stops it from saving a checkpoint at epoch 0
-					if (epoch % 10000 == 0 and epoch > 0):
+					if (epoch % 5000 == 0 and epoch > 0):
 						saver.save(session, save_path=save_path, global_step=global_step)
 						print('Saved Checkpoint')
 

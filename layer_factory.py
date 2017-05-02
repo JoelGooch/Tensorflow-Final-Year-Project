@@ -31,7 +31,7 @@ class layer_factory():
                 input_layer = self.flatten_layer(input_layer)
             # create new fully connected layer from user defined params
             new_layer, num_outputs = self.new_fully_connected_layer(input_layer, input_dimension, layer.layer_name, layer.num_output_nodes, layer.weight_init, layer.weight_val, layer.bias_init, 
-                layer.bias_val, layer.act_function, layer.normalize, layer.dropout, layer.keep_rate)
+                layer.bias_val, layer.act_function, layer.dropout, layer.keep_rate)
             # increment number of fully connected layers present
             self.num_FC_layers += 1
 
@@ -143,7 +143,7 @@ class layer_factory():
         return layer_flat
 
     # helper func-tion to create a fully connected layer
-    def new_fully_connected_layer(self, input_layer, input_dimension, layer_name, num_outputs, weight_init, weight_val, bias_init, bias_val, act_function, normalize, dropout, keep_rate):
+    def new_fully_connected_layer(self, input_layer, input_dimension, layer_name, num_outputs, weight_init, weight_val, bias_init, bias_val, act_function, dropout, keep_rate):
 
         # if this is the first fully connected  layer in the network
         if self.num_FC_layers == 0:
@@ -168,9 +168,6 @@ class layer_factory():
 
         # select which activation function is present (if any)
         layer = self.select_activation_function(layer, act_function)
-
-        # add normalization if defined by user
-        layer = self.select_normalize(layer, normalize)
 
         # add dropout if defined by user
         layer = self.select_dropout(layer, dropout, keep_rate)

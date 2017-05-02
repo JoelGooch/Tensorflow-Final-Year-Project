@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1183</width>
-    <height>730</height>
+    <width>1190</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1183</width>
-    <height>730</height>
+    <width>1190</width>
+    <height>760</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1183</width>
-    <height>730</height>
+    <width>1190</width>
+    <height>760</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -39,9 +39,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>-30</y>
+      <y>-40</y>
       <width>1191</width>
-      <height>681</height>
+      <height>711</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -56,7 +56,7 @@
        <rect>
         <x>20</x>
         <y>30</y>
-        <width>261</width>
+        <width>311</width>
         <height>111</height>
        </rect>
       </property>
@@ -95,23 +95,23 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radPrimaHeadPose">
+      <widget class="QRadioButton" name="radPrimaHeadPosePitch">
        <property name="geometry">
         <rect>
          <x>10</x>
          <y>60</y>
-         <width>101</width>
+         <width>131</width>
          <height>17</height>
         </rect>
        </property>
        <property name="text">
-        <string>Prima Head Pose</string>
+        <string>Prima Head Pose Pitch</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="chkValidationSet">
        <property name="geometry">
         <rect>
-         <x>140</x>
+         <x>180</x>
          <y>20</y>
          <width>110</width>
          <height>20</height>
@@ -139,6 +139,167 @@
         <string>Use Validation Set</string>
        </property>
       </widget>
+      <widget class="QRadioButton" name="radPrimaHeadPoseYaw">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>131</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Prima Head Pose Yaw</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="grpPrimaTestPerson">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>50</y>
+         <width>121</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"> border: 0px solid gray; </string>
+       </property>
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QComboBox" name="cbxPrimaTestPerson">
+        <property name="geometry">
+         <rect>
+          <x>70</x>
+          <y>10</y>
+          <width>0</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>0</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"> border: 1px solid gray; </string>
+        </property>
+        <property name="maxVisibleItems">
+         <number>15</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>7</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>9</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>11</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>12</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>13</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>14</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>15</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QLabel" name="lblPrimaTest">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblPrimaTest2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>81</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="grpTrainNetwork">
       <property name="enabled">
@@ -149,7 +310,7 @@
         <x>20</x>
         <y>150</y>
         <width>1141</width>
-        <height>501</height>
+        <height>521</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -170,18 +331,18 @@
       <widget class="QTextEdit" name="txtOutputLog">
        <property name="geometry">
         <rect>
-         <x>460</x>
+         <x>480</x>
          <y>140</y>
-         <width>661</width>
-         <height>341</height>
+         <width>641</width>
+         <height>361</height>
         </rect>
        </property>
       </widget>
       <widget class="QPushButton" name="btnCancelTraining">
        <property name="geometry">
         <rect>
-         <x>220</x>
-         <y>340</y>
+         <x>250</x>
+         <y>370</y>
          <width>131</width>
          <height>41</height>
         </rect>
@@ -194,29 +355,220 @@
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>120</y>
-         <width>371</width>
+         <y>140</y>
+         <width>401</width>
          <height>211</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="8" column="0">
-         <widget class="QLabel" name="lblNormalize">
-          <property name="text">
-           <string>Normalize Train/Test Data?</string>
+        <item row="10" column="2">
+         <spacer name="horizontalSpacer_9">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>15</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="spnBatchSize">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>60</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="minimum">
+           <number>10</number>
+          </property>
+          <property name="maximum">
+           <number>500</number>
+          </property>
+          <property name="singleStep">
+           <number>32</number>
+          </property>
+          <property name="value">
+           <number>64</number>
           </property>
          </widget>
         </item>
-        <item row="8" column="2">
-         <widget class="QLabel" name="hlpNormalize">
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="spnNumEpochs">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="minimum">
+           <number>100</number>
+          </property>
+          <property name="maximum">
+           <number>100000</number>
+          </property>
+          <property name="singleStep">
+           <number>100</number>
+          </property>
+          <property name="value">
+           <number>1000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QComboBox" name="cbxOptimizer">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>110</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Gradient Descent</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Adam</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>AdaGrad</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>AdaDelta</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Momentum</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_10">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblMomentum">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>500</width>
+              <height>500</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spnMomentum">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>0</width>
+              <height>400</height>
+             </size>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.050000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.800000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="hlpBatchSize">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many training samples will be used for each batch during Training. Use a low number if your GPU does not have a lot of RAM. Typical values are 32, 64 and 128.&lt;/p&gt;&lt;p&gt;Range: 10 - 500&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string/>
@@ -226,14 +578,45 @@
           </property>
          </widget>
         </item>
-        <item row="8" column="1">
-         <widget class="QCheckBox" name="chkNormalize">
+        <item row="6" column="3">
+         <widget class="QLabel" name="hlpLearningRate">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the learning rate to use during Training. Typically, this will be a low number such as 0.0005. Too low a number will cause training to take too long. Too high a value will cause training to jump past optimal values and never converge at the global minimum. Note: Adaptive Gradient optimizers such as the ADAM optimizer will adjust the learning rate throughout training and therefore getting the perfect learning rate is not as important.&lt;/p&gt;&lt;p&gt;Range: 0.000001 - 1&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>Yes</string>
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>Icons/help.png</pixmap>
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
+        <item row="9" column="3">
+         <widget class="QLabel" name="hlpNormalize">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Perform a simple normalization of data. In some cases this is important as the network will produce a uniform distribution and the error will not decrease. Note: Performing this when using the MNIST dataset will cause the network to not train. &lt;/p&gt;&lt;p&gt;Training Set -= 127&lt;/p&gt;&lt;p&gt;Testing Set -= 127&lt;/p&gt;&lt;p&gt;Validation Set -= 127&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>Icons/help.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
          <widget class="QLabel" name="lblLearningRate">
           <property name="text">
            <string>Learning Rate:</string>
@@ -243,24 +626,18 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="2">
-         <widget class="QLabel" name="hlpLearningRate">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="9" column="0">
+         <widget class="QLabel" name="lblNormalize">
           <property name="text">
-           <string/>
+           <string>Normalize Data?</string>
           </property>
-          <property name="pixmap">
-           <pixmap>Icons/help.png</pixmap>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="hlpBatchSize">
+        <item row="2" column="3">
+         <widget class="QLabel" name="hlpNumEpochs">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -268,7 +645,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many training samples will be used for each batch during Training. Use a low number if your GPU does not have a lot of RAM.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many Epochs to train for.&lt;/p&gt;&lt;p&gt;Range: 100 - 100000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string/>
@@ -278,20 +655,74 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
-         <widget class="QCheckBox" name="chkVisualizations">
-          <property name="text">
-           <string>Yes</string>
+        <item row="10" column="3">
+         <widget class="QLabel" name="hlpL2Reg">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="checked">
-           <bool>false</bool>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether to add L2 Regularization term to the weights, keeping them low. Regularization typically provides a smoother decision boundary that in turn, reduces overfitting. The beta parameter dictates how significant the regularization effect is.&lt;/p&gt;&lt;p&gt;Range: 0.000001 - 1&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>Icons/help.png</pixmap>
           </property>
          </widget>
         </item>
-        <item row="9" column="1">
+        <item row="11" column="3">
+         <widget class="QLabel" name="hlpRunTime">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disabling Visualizations will make the training quicker because the program will not have to generate the visualizations at run time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>Icons/help.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="lblNumEpochs">
+          <property name="text">
+           <string>Number of Epochs:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0">
+         <widget class="QLabel" name="lblL2Reg">
+          <property name="text">
+           <string>Use L2 Regularization?</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QCheckBox" name="chkL2Reg">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Yes</string>
             </property>
@@ -303,11 +734,11 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Expanding</enum>
+             <enum>QSizePolicy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>30</width>
+              <width>110</width>
               <height>20</height>
              </size>
             </property>
@@ -327,7 +758,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="txtL2Beta">
+           <widget class="QDoubleSpinBox" name="spnRegBeta">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -336,21 +767,52 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>60</width>
-              <height>20</height>
+              <width>80</width>
+              <height>0</height>
              </size>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>60</width>
-              <height>20</height>
-             </size>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>0.000001000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.000500000000000</double>
+            </property>
+            <property name="value">
+             <double>0.000500000000000</double>
             </property>
            </widget>
           </item>
          </layout>
         </item>
-        <item row="10" column="0">
+        <item row="5" column="3">
+         <widget class="QLabel" name="hlpOptimizer">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select which optimizer to use during training.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>Icons/help.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="0">
          <widget class="QLabel" name="lblRunTime">
           <property name="text">
            <string>Run-Time Visualizations?</string>
@@ -360,54 +822,13 @@
           </property>
          </widget>
         </item>
-        <item row="9" column="0">
-         <widget class="QLabel" name="lblL2Reg">
+        <item row="5" column="0">
+         <widget class="QLabel" name="lblOptimizer">
           <property name="text">
-           <string>Use L2 Regularization?</string>
+           <string>Optimizer:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="txtBatchSize">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="2">
-         <widget class="QLabel" name="hlpRunTime">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disabling Visualizations will make the training quicker&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="pixmap">
-           <pixmap>Icons/help.png</pixmap>
           </property>
          </widget>
         </item>
@@ -421,24 +842,8 @@
           </property>
          </widget>
         </item>
-        <item row="9" column="2">
-         <widget class="QLabel" name="hlpL2Reg">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="pixmap">
-           <pixmap>Icons/help.png</pixmap>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="txtNumEpochs">
+        <item row="6" column="1">
+         <widget class="QDoubleSpinBox" name="spnLearningRate">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -447,230 +852,52 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="lblOptimizer">
-          <property name="text">
-           <string>Optimizer:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="lblNumEpochs">
-          <property name="text">
-           <string>Number of Epochs:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QComboBox" name="cbxOptimizer">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>130</width>
+            <width>80</width>
             <height>0</height>
            </size>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>130</width>
-            <height>16777215</height>
-           </size>
+          <property name="decimals">
+           <number>6</number>
           </property>
-          <item>
-           <property name="text">
-            <string>Gradient Descent</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Adam</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>AdaGrad</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>AdaDelta</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Momentum</string>
-           </property>
-          </item>
+          <property name="minimum">
+           <double>0.000001000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000500000000000</double>
+          </property>
+          <property name="value">
+           <double>0.000500000000000</double>
+          </property>
          </widget>
         </item>
-        <item row="4" column="2">
-         <widget class="QLabel" name="hlpOptimizer">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="9" column="1">
+         <widget class="QCheckBox" name="chkNormalize">
           <property name="text">
-           <string/>
-          </property>
-          <property name="pixmap">
-           <pixmap>Icons/help.png</pixmap>
+           <string>Yes</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QLabel" name="hlpNumEpochs">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="11" column="1">
+         <widget class="QCheckBox" name="chkVisualizations">
           <property name="text">
-           <string/>
+           <string>Yes</string>
           </property>
-          <property name="pixmap">
-           <pixmap>Icons/help.png</pixmap>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
-        </item>
-        <item row="5" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QLineEdit" name="txtLearningRate">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>60</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>60</width>
-              <height>20</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_6">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Expanding</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>7</width>
-              <height>22</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblMomentum">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>0</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Momentum:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="txtMomentum">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </item>
        </layout>
-      </widget>
-      <widget class="QLineEdit" name="txtTestAccuracy">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>470</y>
-         <width>91</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
       </widget>
       <widget class="QProgressBar" name="prgTrainingProgress">
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>400</y>
-         <width>361</width>
+         <y>440</y>
+         <width>421</width>
          <height>21</height>
         </rect>
        </property>
@@ -681,8 +908,8 @@
       <widget class="QLabel" name="lblTrainingProgress">
        <property name="geometry">
         <rect>
-         <x>150</x>
-         <y>430</y>
+         <x>180</x>
+         <y>470</y>
          <width>101</width>
          <height>16</height>
         </rect>
@@ -691,24 +918,11 @@
         <string>Training Progress</string>
        </property>
       </widget>
-      <widget class="QLabel" name="lblTestAccuracy">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>470</y>
-         <width>111</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Test Set Accuracy:</string>
-       </property>
-      </widget>
       <widget class="QPushButton" name="btnTrainNetwork">
        <property name="geometry">
         <rect>
-         <x>50</x>
-         <y>340</y>
+         <x>70</x>
+         <y>370</y>
          <width>131</width>
          <height>41</height>
         </rect>
@@ -720,7 +934,7 @@
       <widget class="QLabel" name="lblOutputLog">
        <property name="geometry">
         <rect>
-         <x>460</x>
+         <x>480</x>
          <y>120</y>
          <width>91</width>
          <height>16</height>
@@ -730,224 +944,11 @@
         <string>Output Log</string>
        </property>
       </widget>
-      <widget class="QWidget" name="horizontalLayoutWidget_4">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>60</y>
-         <width>1011</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_20">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_18">
-          <item>
-           <spacer name="horizontalSpacer_15">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>8</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblSavePath">
-            <property name="text">
-             <string>Checkpoint Save Path:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="txtSavePath">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>C:/tmp/</string>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnChangeSavePath">
-            <property name="text">
-             <string>Change</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_13">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_19">
-          <item>
-           <widget class="QLabel" name="lblSaveInterval">
-            <property name="text">
-             <string>Save Every 'X' epochs:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cbxSaveInterval">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>120</width>
-              <height>0</height>
-             </size>
-            </property>
-            <item>
-             <property name="text">
-              <string>Save When Finished</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>100</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>1000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>10000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>50000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>100000</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>30</y>
-         <width>931</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_22">
-        <item>
-         <widget class="QLabel" name="lblLoadCheckpoints">
-          <property name="text">
-           <string>Load Checkpoints From:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_16">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>2</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="txtLoadCheckpoints">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>C:/tmp/</string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnChangeLoadCheckpoints">
-          <property name="text">
-           <string>Change</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_14">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="cbxSavePath">
-          <property name="text">
-           <string>Set Save Path Same as Load</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
       <widget class="QPushButton" name="btnClearLog">
        <property name="geometry">
         <rect>
          <x>1020</x>
-         <y>440</y>
+         <y>460</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -959,9 +960,9 @@
       <widget class="Line" name="line_2">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>0</x>
          <y>100</y>
-         <width>1111</width>
+         <width>1141</width>
          <height>20</height>
         </rect>
        </property>
@@ -972,23 +973,280 @@
       <widget class="Line" name="line_3">
        <property name="geometry">
         <rect>
-         <x>420</x>
+         <x>450</x>
          <y>110</y>
          <width>20</width>
-         <height>371</height>
+         <height>411</height>
         </rect>
        </property>
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
       </widget>
+      <widget class="QWidget" name="verticalLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>30</y>
+         <width>1052</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_22">
+          <item>
+           <widget class="QLabel" name="lblLoadCheckpoints">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Load Checkpoints From:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>2</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="txtLoadCheckpoints">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>547</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>547</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>C:/tmp/</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnChangeLoadCheckpoints">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Change</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_14">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>32</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cbxSavePath">
+            <property name="text">
+             <string>Set Save Path Same as Load</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_20">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_18">
+            <item>
+             <spacer name="horizontalSpacer_15">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>8</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblSavePath">
+              <property name="text">
+               <string>Checkpoint Save Path:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtSavePath">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>547</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>547</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>C:/tmp/</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnChangeSavePath">
+              <property name="text">
+               <string>Change</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_13">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>34</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_19">
+            <item>
+             <widget class="QLabel" name="lblSaveInterval">
+              <property name="text">
+               <string>Save Every 'X' epochs:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cbxSaveInterval">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>0</height>
+               </size>
+              </property>
+              <item>
+               <property name="text">
+                <string>Save When Finished</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>10000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>50000</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100000</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="grpNetworkModel">
       <property name="geometry">
        <rect>
-        <x>300</x>
+        <x>360</x>
         <y>30</y>
-        <width>861</width>
+        <width>801</width>
         <height>111</height>
        </rect>
       </property>
@@ -1029,7 +1287,7 @@
         <rect>
          <x>30</x>
          <y>40</y>
-         <width>681</width>
+         <width>731</width>
          <height>31</height>
         </rect>
        </property>
@@ -1100,7 +1358,7 @@
         <x>20</x>
         <y>30</y>
         <width>1151</width>
-        <height>611</height>
+        <height>631</height>
        </rect>
       </property>
       <property name="title">
@@ -1109,10 +1367,10 @@
       <widget class="QWidget" name="layoutWidget_2">
        <property name="geometry">
         <rect>
-         <x>540</x>
-         <y>150</y>
-         <width>591</width>
-         <height>421</height>
+         <x>550</x>
+         <y>160</y>
+         <width>581</width>
+         <height>451</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1359,7 +1617,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>80</y>
+         <y>90</y>
          <width>501</width>
          <height>381</height>
         </rect>
@@ -1423,13 +1681,13 @@
            <widget class="QWidget" name="gridLayoutWidget_2">
             <property name="geometry">
              <rect>
-              <x>10</x>
+              <x>20</x>
               <y>10</y>
-              <width>476</width>
+              <width>461</width>
               <height>291</height>
              </rect>
             </property>
-            <layout class="QGridLayout" name="gridLayout_8">
+            <layout class="QGridLayout" name="grdConv">
              <item row="4" column="0">
               <widget class="QLabel" name="lblConvOutputFilters">
                <property name="text">
@@ -1448,6 +1706,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Perform Local Response Normalization on Convolution Layer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1463,6 +1724,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard Deviation of initialised weight values. A small value around 0.1 is recommended.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 3.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -1480,6 +1744,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The Activation Function to be used after Convolution. Rectified Linear units are common in classification tasks and are recommended for MNIST and CIFAR. Sigmoid is recommended for the Prima Regression data set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1495,6 +1762,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of filters that will be created during Convolution. The output of the Convolution layer will be of size: Width x Height x Number of Filters.&lt;/p&gt;&lt;p&gt;Range: 1 - 1024&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -1517,28 +1787,6 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
-              <widget class="QLineEdit" name="txtConvOutputFilters">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="9" column="6">
               <widget class="QLabel" name="hlpConvKeepRate">
                <property name="sizePolicy">
@@ -1546,6 +1794,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Probability of keeping a neuron when performing dropout. This value is between 0 and 1 where 1 means no chance of dropping a neuron.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 1.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -1565,28 +1816,6 @@
                </property>
               </widget>
              </item>
-             <item row="9" column="5">
-              <widget class="QLineEdit" name="txtConvKeepRate">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="6">
               <widget class="QLabel" name="hlpConvStride">
                <property name="sizePolicy">
@@ -1594,6 +1823,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many pixels the moving window jumps during each iteration of Convolution. Note: Stride values larger than 1 reduce the size of the input image. Due to the small image size of data sets included, 3 is the maximum suitable value. MNIST = 28x28, CIFAR10 = 32x32, Prima = 64x64.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -1633,28 +1865,6 @@
                </item>
               </widget>
              </item>
-             <item row="5" column="5">
-              <widget class="QLineEdit" name="txtConvStdDev">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="7" column="1">
               <widget class="QComboBox" name="cbxConvPadding">
                <property name="sizePolicy">
@@ -1691,28 +1901,6 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="txtConvKernelSize">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="8" column="1">
               <widget class="QCheckBox" name="chkConvNorm">
                <property name="text">
@@ -1737,6 +1925,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dropout is a regularization technique used to reduce overfitting and spread responsibility across neurons. Typically, during training certain weights will hold high importance, whilst others will have little significance. Dropout adds a probability chance to drop certain neurons so the network trains more evenly.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -1807,6 +1998,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The size of the moving window used during Convolution. Typical sizes are 3x3, 5x5 and 7x7. Using larger values than these would not be suitable due to the image sizes of included data sets. MNIST = 28x28, CIFAR10 = 32x32, Prima = 64x64.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1874,6 +2068,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose how to initalise the weight values of Convolution Layer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1890,33 +2087,14 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SAME = Padded with zeros (the input size remains the same after convolution).&lt;/p&gt;&lt;p&gt;VALID = No padding. The input size is reduced by an amount dictated by the convolution kernel size (shrinks by kernel size - 1).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
                <property name="pixmap">
                 <pixmap>Icons/help.png</pixmap>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="5">
-              <widget class="QLineEdit" name="txtConvStride">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
                </property>
               </widget>
              </item>
@@ -1944,17 +2122,17 @@
               <widget class="QComboBox" name="cbxConvBiasInit">
                <item>
                 <property name="text">
+                 <string>Zeros</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
                  <string>Random Normal</string>
                 </property>
                </item>
                <item>
                 <property name="text">
                  <string>Truncated Normal</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Zeros</string>
                 </property>
                </item>
                <item>
@@ -1966,33 +2144,17 @@
              </item>
              <item row="6" column="4">
               <widget class="QLabel" name="lblConvBiasVal">
+               <property name="maximumSize">
+                <size>
+                 <width>500</width>
+                 <height>500</height>
+                </size>
+               </property>
                <property name="text">
-                <string>Std Dev of Weights:</string>
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="5">
-              <widget class="QLineEdit" name="txtConvBiasVal">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
                </property>
               </widget>
              </item>
@@ -2004,6 +2166,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose how to initalise the bias values of Convolution Layer. A common convention is to initiate the bias values at zero, or very close to zero.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -2013,18 +2178,183 @@
               </widget>
              </item>
              <item row="6" column="6">
-              <widget class="QLabel" name="hlpConvStdDev_2">
+              <widget class="QLabel" name="hlpConvBiasVal">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="maximumSize">
+                <size>
+                 <width>0</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard Deviation of initialised bias values. A small value around 0.1 is recommended.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 3.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
                <property name="pixmap">
                 <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="5">
+              <widget class="QComboBox" name="cbxConvStride">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="9" column="5">
+              <widget class="QDoubleSpinBox" name="spnConvKeepRate">
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.500000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="5">
+              <widget class="QDoubleSpinBox" name="spnConvStdDev">
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>3.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.050000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="5">
+              <widget class="QDoubleSpinBox" name="spnConvBiasVal">
+               <property name="maximumSize">
+                <size>
+                 <width>0</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>3.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.050000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="cbxConvKernelSize">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>7</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSpinBox" name="spnConvOutputFilters">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>60</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1024</number>
+               </property>
+               <property name="singleStep">
+                <number>32</number>
+               </property>
+               <property name="value">
+                <number>64</number>
                </property>
               </widget>
              </item>
@@ -2040,11 +2370,11 @@
              <rect>
               <x>17</x>
               <y>10</y>
-              <width>441</width>
-              <height>191</height>
+              <width>461</width>
+              <height>161</height>
              </rect>
             </property>
-            <layout class="QGridLayout" name="gridLayout_3">
+            <layout class="QGridLayout" name="grdPool">
              <item row="5" column="2">
               <widget class="QLabel" name="hlpPoolDropout">
                <property name="sizePolicy">
@@ -2052,6 +2382,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dropout is a regularization technique used to reduce overfitting and spread responsibility across neurons. Typically, during training certain weights will hold high importance, whilst others will have little significance. Dropout adds a probability chance to drop certain neurons so the network trains more evenly.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -2078,6 +2411,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SAME = Padded with zeros (the input size remains the same after convolution).&lt;/p&gt;&lt;p&gt;VALID = No padding. The input size is reduced by an amount dictated by the pooling kernel size (shrinks by kernel size - 1).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -2131,6 +2467,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The size of the moving window used during Pooling. Typically a 2x2 kernel size is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -2165,28 +2504,6 @@
                </property>
               </spacer>
              </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="txtPoolKernelSize">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="0">
               <widget class="QLabel" name="lblPoolNorm">
                <property name="enabled">
@@ -2194,16 +2511,6 @@
                </property>
                <property name="text">
                 <string>Normalize:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="lblPoolStride">
-               <property name="text">
-                <string>Pooling Stride:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2220,28 +2527,6 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="txtPoolStride">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="2">
               <widget class="QLabel" name="hlpPoolNorm">
                <property name="sizePolicy">
@@ -2250,21 +2535,8 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>Icons/help.png</pixmap>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QLabel" name="hlpPoolStride">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Perform Local Response Normalization on Pooling Layer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -2296,33 +2568,14 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Probability of keeping a neuron when performing dropout. This value is between 0 and 1 where 1 means no chance of dropping a neuron.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 1.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
                <property name="pixmap">
                 <pixmap>Icons/help.png</pixmap>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="5">
-              <widget class="QLineEdit" name="txtPoolKeepRate">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
                </property>
               </widget>
              </item>
@@ -2352,13 +2605,137 @@
                </property>
               </widget>
              </item>
+             <item row="1" column="4">
+              <widget class="QLabel" name="lblPoolStride">
+               <property name="text">
+                <string>Pooling Stride:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="5">
+              <widget class="QComboBox" name="cbxPoolStride">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="6">
+              <widget class="QLabel" name="hlpPoolStride">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many pixels the pooling moving window jumps at each iteration of pooling. Typically, a stride of 2 is used (down samples the image by a factor of 2). Due to the small size of images in available data sets, a stride of 3 is the max value. MNIST = 28x28, CIFAR10 = 32x32, Prima = 64x64.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="pixmap">
+                <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="5">
+              <widget class="QDoubleSpinBox" name="spnPoolKeepRate">
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.500000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="cbxPoolKernelSize">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </item>
+              </widget>
+             </item>
             </layout>
            </widget>
            <widget class="QPushButton" name="btnAddMaxPool">
             <property name="geometry">
              <rect>
               <x>170</x>
-              <y>220</y>
+              <y>190</y>
               <width>150</width>
               <height>30</height>
              </rect>
@@ -2389,11 +2766,50 @@
              <rect>
               <x>15</x>
               <y>10</y>
-              <width>476</width>
-              <height>231</height>
+              <width>463</width>
+              <height>201</height>
              </rect>
             </property>
-            <layout class="QGridLayout" name="gridLayout_6">
+            <layout class="QGridLayout" name="grdFC">
+             <item row="2" column="2">
+              <widget class="QLabel" name="hlpFCNumOutputs">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of output neurons of the Fully Connected Layer. More neurons means more parameters to train and more degrees of freedom in the decision boundary.&lt;/p&gt;&lt;p&gt;Range 1 - 1024&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="pixmap">
+                <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="lblFCDropout">
+               <property name="text">
+                <string>Dropout:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="lblFCNumOutputNodes">
+               <property name="text">
+                <string>Num Output Nodes:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="3">
               <spacer name="horizontalSpacer_3">
                <property name="orientation">
@@ -2410,6 +2826,42 @@
                </property>
               </spacer>
              </item>
+             <item row="6" column="4">
+              <widget class="QLabel" name="lblFCKeepRate">
+               <property name="text">
+                <string>Keep Rate:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QCheckBox" name="chkFCDropout">
+               <property name="text">
+                <string>Yes</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="2">
+              <widget class="QLabel" name="hlpFCDropout">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dropout is a regularization technique used to reduce overfitting and spread responsibility across neurons. Typically, during training certain weights will hold high importance, whilst others will have little significance. Dropout adds a probability chance to drop certain neurons so the network trains more evenly.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="pixmap">
+                <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="2">
               <widget class="QLabel" name="hlpFCActFunc">
                <property name="sizePolicy">
@@ -2418,110 +2870,8 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>Icons/help.png</pixmap>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="lblFCNumOutputNodes">
-               <property name="text">
-                <string>Num Output Nodes:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QComboBox" name="cbxFCWeightInit">
-               <item>
-                <property name="text">
-                 <string>Truncated Normal</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Random Normal</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="lblFCWeightInit">
-               <property name="text">
-                <string>Weight Initialization:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="5">
-              <widget class="QLineEdit" name="txtFCStdDev">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="1">
-              <widget class="QCheckBox" name="chkFCDropout">
-               <property name="text">
-                <string>Yes</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="0">
-              <widget class="QLabel" name="lblFCDropout">
-               <property name="text">
-                <string>Dropout:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="txtFCNumOutputNodes">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="2">
-              <widget class="QLabel" name="hlpFCNorm">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The Activation Function to be used after performing weighted sum on Fully Connected Layer. Rectified Linear units are common in classification tasks and are recommended for MNIST and CIFAR. Sigmoid is recommended for the Prima Regression data set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -2531,19 +2881,13 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="2">
-              <widget class="QLabel" name="hlpFCNumOutputs">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
+             <item row="1" column="0">
+              <widget class="QLabel" name="lblFCActFunction">
                <property name="text">
-                <string/>
+                <string>Activation Function:</string>
                </property>
-               <property name="pixmap">
-                <pixmap>Icons/help.png</pixmap>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
@@ -2566,22 +2910,6 @@
                </item>
               </widget>
              </item>
-             <item row="4" column="2">
-              <widget class="QLabel" name="hlpFCWeightInit">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>Icons/help.png</pixmap>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="6">
               <widget class="QLabel" name="hlpFCStdDev">
                <property name="sizePolicy">
@@ -2590,89 +2918,14 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="pixmap">
-                <pixmap>Icons/help.png</pixmap>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="5">
-              <widget class="QLineEdit" name="txtFCKeepRate">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1">
-              <widget class="QCheckBox" name="chkFCNorm">
-               <property name="text">
-                <string>Yes</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="4">
-              <widget class="QLabel" name="lblFCKeepRate">
-               <property name="text">
-                <string>Keep Rate:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="lblFCActFunction">
-               <property name="text">
-                <string>Activation Function:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="2">
-              <widget class="QLabel" name="hlpFCDropout">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard Deviation of initialised weight values. A small value around 0.1 is recommended.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 3.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
                </property>
                <property name="pixmap">
                 <pixmap>Icons/help.png</pixmap>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="lblFCNorm">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="text">
-                <string>Normalize:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
@@ -2686,13 +2939,45 @@
                </property>
               </widget>
              </item>
-             <item row="7" column="6">
+             <item row="6" column="6">
               <widget class="QLabel" name="hlpFCKeepRate">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Probability of keeping a neuron when performing dropout. This value is between 0 and 1 where 1 means no chance of dropping a neuron.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 1.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="pixmap">
+                <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="lblFCWeightInit">
+               <property name="text">
+                <string>Weight Initialization:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QLabel" name="hlpFCWeightInit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose how to initalise the weight values of Fully Connected Layer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -2718,10 +3003,111 @@
                </property>
               </widget>
              </item>
+             <item row="4" column="1">
+              <widget class="QComboBox" name="cbxFCWeightInit">
+               <item>
+                <property name="text">
+                 <string>Truncated Normal</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Random Normal</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="spnFCNumOutputNodes">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>60</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1024</number>
+               </property>
+               <property name="singleStep">
+                <number>32</number>
+               </property>
+               <property name="value">
+                <number>64</number>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QComboBox" name="cbxFCBiasInit">
+               <item>
+                <property name="text">
+                 <string>Zeros</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Random Normal</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Truncated Normal</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Constant</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="5" column="5">
+              <widget class="QDoubleSpinBox" name="spnFCBiasVal">
+               <property name="maximumSize">
+                <size>
+                 <width>0</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="maximum">
+                <double>3.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.050000000000000</double>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="lblFCName">
                <property name="text">
                 <string>Layer Name:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="4">
+              <widget class="QLabel" name="lblFCBiasVal">
+               <property name="maximumSize">
+                <size>
+                 <width>500</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2738,62 +3124,6 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="4">
-              <widget class="QLabel" name="lblFCBiasVal">
-               <property name="text">
-                <string>Std Dev of Weights:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="5">
-              <widget class="QLineEdit" name="txtFCBiasVal">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="1">
-              <widget class="QComboBox" name="cbxFCBiasInit">
-               <item>
-                <property name="text">
-                 <string>Random Normal</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Truncated Normal</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Zeros</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Constant</string>
-                </property>
-               </item>
-              </widget>
-             </item>
              <item row="5" column="2">
               <widget class="QLabel" name="hlpFCBiasInit">
                <property name="sizePolicy">
@@ -2802,11 +3132,27 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose how to initalise the bias values of Fully Connected Layer. A common convention is to initiate the bias values at zero, or very close to zero.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
                <property name="pixmap">
                 <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="5">
+              <widget class="QDoubleSpinBox" name="spnFCStdDev">
+               <property name="maximum">
+                <double>3.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.050000000000000</double>
                </property>
               </widget>
              </item>
@@ -2818,11 +3164,36 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="maximumSize">
+                <size>
+                 <width>0</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard Deviation of initialised bias values. A small value around 0.1 is recommended. Maximum value allowed = 3.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 3.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
                <property name="pixmap">
                 <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="5">
+              <widget class="QDoubleSpinBox" name="spnFCKeepRate">
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.500000000000000</double>
                </property>
               </widget>
              </item>
@@ -2832,7 +3203,7 @@
             <property name="geometry">
              <rect>
               <x>170</x>
-              <y>260</y>
+              <y>230</y>
               <width>150</width>
               <height>30</height>
              </rect>
@@ -2861,13 +3232,13 @@
            <widget class="QWidget" name="gridLayoutWidget_7">
             <property name="geometry">
              <rect>
-              <x>10</x>
+              <x>20</x>
               <y>10</y>
-              <width>476</width>
+              <width>463</width>
               <height>131</height>
              </rect>
             </property>
-            <layout class="QGridLayout" name="gridLayout_7">
+            <layout class="QGridLayout" name="grdOutput">
              <item row="0" column="1">
               <widget class="QLineEdit" name="txtOutputName">
                <property name="minimumSize">
@@ -2901,7 +3272,7 @@
               </spacer>
              </item>
              <item row="3" column="4">
-              <widget class="QLabel" name="lblOutputStDev">
+              <widget class="QLabel" name="lblOutputStdDev">
                <property name="text">
                 <string>Std Dev of Weights:</string>
                </property>
@@ -2930,28 +3301,6 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="5">
-              <widget class="QLineEdit" name="txtOutputStdDev">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </widget>
-             </item>
              <item row="3" column="6">
               <widget class="QLabel" name="hlpOutputStdDev">
                <property name="sizePolicy">
@@ -2959,6 +3308,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard Deviation of initialised weight values. A small value around 0.1 is recommended. Maximum value allowed = 3.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 3.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -2975,6 +3327,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose how to initalise the weight values of Output Layer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -3040,6 +3395,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The Activation Function to be used after performing weighted sum on Output Layer. Rectified Linear units are common in classification tasks, however on the output layer No activation function is recommended. Sigmoid is recommended for the Prima Regression data set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -3062,17 +3420,17 @@
               <widget class="QComboBox" name="cbxOutputBiasInit">
                <item>
                 <property name="text">
+                 <string>Zeros</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
                  <string>Random Normal</string>
                 </property>
                </item>
                <item>
                 <property name="text">
                  <string>Truncated Normal</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Zeros</string>
                 </property>
                </item>
                <item>
@@ -3084,33 +3442,17 @@
              </item>
              <item row="4" column="4">
               <widget class="QLabel" name="lblOutputBiasVal">
+               <property name="maximumSize">
+                <size>
+                 <width>500</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
-                <string>Std Dev of Weights:</string>
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="5">
-              <widget class="QLineEdit" name="txtOutputBiasVal">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>20</height>
-                </size>
                </property>
               </widget>
              </item>
@@ -3121,6 +3463,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose how to initalise the bias values of Output Layer. A common convention is to initiate the bias values at zero, or very close to zero.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
                 <string/>
@@ -3138,11 +3483,58 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="maximumSize">
+                <size>
+                 <width>0</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard Deviation of initialised bias values. A small value around 0.1 is recommended. Maximum value allowed = 3.&lt;/p&gt;&lt;p&gt;Range: 0.01 - 3.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
                <property name="pixmap">
                 <pixmap>Icons/help.png</pixmap>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="5">
+              <widget class="QDoubleSpinBox" name="spnOutputStdDev">
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>3.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.050000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="5">
+              <widget class="QDoubleSpinBox" name="spnOutputBiasVal">
+               <property name="maximumSize">
+                <size>
+                 <width>0</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>3.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.050000000000000</double>
                </property>
               </widget>
              </item>
@@ -3181,9 +3573,9 @@
       <widget class="QTextEdit" name="txtOutputModelLog">
        <property name="geometry">
         <rect>
-         <x>540</x>
-         <y>40</y>
-         <width>591</width>
+         <x>550</x>
+         <y>50</y>
+         <width>581</width>
          <height>81</height>
         </rect>
        </property>
@@ -3191,8 +3583,8 @@
       <widget class="QLabel" name="lblOutputLogModel">
        <property name="geometry">
         <rect>
-         <x>540</x>
-         <y>20</y>
+         <x>550</x>
+         <y>30</y>
          <width>61</width>
          <height>16</height>
         </rect>
@@ -3205,7 +3597,7 @@
        <property name="geometry">
         <rect>
          <x>1030</x>
-         <y>90</y>
+         <y>100</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -3217,8 +3609,8 @@
       <widget class="QLabel" name="lblNewModel">
        <property name="geometry">
         <rect>
-         <x>540</x>
-         <y>130</y>
+         <x>550</x>
+         <y>140</y>
          <width>81</width>
          <height>20</height>
         </rect>
@@ -3299,17 +3691,17 @@
      <widget class="QTabWidget" name="tabNetworkWeights">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>20</x>
         <y>30</y>
-        <width>1161</width>
-        <height>571</height>
+        <width>1141</width>
+        <height>621</height>
        </rect>
       </property>
       <property name="tabPosition">
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabLoss">
        <attribute name="title">
@@ -3318,21 +3710,53 @@
        <widget class="QWidget" name="grphBatchLoss" native="true">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>30</y>
+          <x>20</x>
+          <y>50</y>
           <width>541</width>
-          <height>451</height>
+          <height>471</height>
          </rect>
         </property>
        </widget>
        <widget class="QWidget" name="grphBatchAcc" native="true">
         <property name="geometry">
          <rect>
-          <x>570</x>
-          <y>30</y>
-          <width>571</width>
-          <height>451</height>
+          <x>580</x>
+          <y>50</y>
+          <width>541</width>
+          <height>471</height>
          </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblBatchConf_2">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>20</y>
+          <width>191</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Batch Loss Over Epochs</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblBatchConf_3">
+        <property name="geometry">
+         <rect>
+          <x>740</x>
+          <y>20</y>
+          <width>251</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Batch Accuracy Over Epochs</string>
         </property>
        </widget>
       </widget>
@@ -3340,13 +3764,13 @@
        <attribute name="title">
         <string>Training / Validation</string>
        </attribute>
-       <widget class="QWidget" name="grphTrainValidError" native="true">
+       <widget class="QWidget" name="grphTrainValidLoss" native="true">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>30</y>
-          <width>551</width>
-          <height>451</height>
+          <x>20</x>
+          <y>50</y>
+          <width>541</width>
+          <height>421</height>
          </rect>
         </property>
        </widget>
@@ -3354,10 +3778,90 @@
         <property name="geometry">
          <rect>
           <x>580</x>
-          <y>30</y>
-          <width>551</width>
-          <height>451</height>
+          <y>50</y>
+          <width>541</width>
+          <height>421</height>
          </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblLossLegend">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>460</y>
+          <width>191</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>legend.png</pixmap>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblAccuracyLegend">
+        <property name="geometry">
+         <rect>
+          <x>770</x>
+          <y>460</y>
+          <width>191</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>legend.png</pixmap>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblTrainingValidInfo">
+        <property name="geometry">
+         <rect>
+          <x>110</x>
+          <y>550</y>
+          <width>881</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Note: As Prima Head Pose uses Jack-Knife Validation (or Leave one-out Vaildation), These Visualizations are not present when using the Prima Data Set.</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblBatchConf_4">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>20</y>
+          <width>321</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Training/Validation Loss Over Epochs</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblBatchConf_5">
+        <property name="geometry">
+         <rect>
+          <x>680</x>
+          <y>20</y>
+          <width>361</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Training/Validation Accuracy Over Epochs</string>
         </property>
        </widget>
       </widget>
@@ -3368,10 +3872,10 @@
        <widget class="QLabel" name="lblTestingConfusionMat">
         <property name="geometry">
          <rect>
-          <x>579</x>
-          <y>50</y>
+          <x>580</x>
+          <y>60</y>
           <width>541</width>
-          <height>450</height>
+          <height>461</height>
          </rect>
         </property>
         <property name="text">
@@ -3384,10 +3888,10 @@
        <widget class="QLabel" name="lblTrainingConfusionMat">
         <property name="geometry">
          <rect>
-          <x>20</x>
+          <x>10</x>
           <y>60</y>
-          <width>550</width>
-          <height>450</height>
+          <width>551</width>
+          <height>461</height>
          </rect>
         </property>
         <property name="text">
@@ -3400,9 +3904,9 @@
        <widget class="QLabel" name="lblBatchConf">
         <property name="geometry">
          <rect>
-          <x>230</x>
-          <y>10</y>
-          <width>181</width>
+          <x>210</x>
+          <y>20</y>
+          <width>191</width>
           <height>41</height>
          </rect>
         </property>
@@ -3410,14 +3914,14 @@
          <string notr="true">font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
         </property>
         <property name="text">
-         <string> Training Batch</string>
+         <string> Training Batch 0</string>
         </property>
        </widget>
        <widget class="QLabel" name="lblTestSetConf">
         <property name="geometry">
          <rect>
-          <x>800</x>
-          <y>20</y>
+          <x>790</x>
+          <y>30</y>
           <width>121</width>
           <height>31</height>
          </rect>
@@ -3429,6 +3933,22 @@
          <string>Testing Set</string>
         </property>
        </widget>
+       <widget class="QLabel" name="lblConfusionInfo">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>550</y>
+          <width>1061</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Note: As Prima Head Pose is a Regression Task (Non-Classification, with Single Continuous Output Value), Class Confusion Matrixes are not generated when using the Prima Data Set.</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabConvWeights">
        <attribute name="title">
@@ -3437,10 +3957,10 @@
        <widget class="QTabWidget" name="tabLayerWeights">
         <property name="geometry">
          <rect>
-          <x>40</x>
-          <y>29</y>
-          <width>1061</width>
-          <height>471</height>
+          <x>10</x>
+          <y>60</y>
+          <width>1111</width>
+          <height>511</height>
          </rect>
         </property>
         <property name="layoutDirection">
@@ -3456,6 +3976,22 @@
          <number>-1</number>
         </property>
        </widget>
+       <widget class="QLabel" name="lblConvWeightInfo">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>30</y>
+          <width>621</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Visualizations of the Convolution Layers Weights will appear shortly after the Testing Set has been Evaluated</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabConvOutputs">
        <attribute name="title">
@@ -3464,10 +4000,10 @@
        <widget class="QTabWidget" name="tabLayerOutput">
         <property name="geometry">
          <rect>
-          <x>40</x>
-          <y>30</y>
-          <width>1061</width>
-          <height>471</height>
+          <x>10</x>
+          <y>60</y>
+          <width>1111</width>
+          <height>511</height>
          </rect>
         </property>
         <property name="layoutDirection">
@@ -3481,6 +4017,22 @@
         </property>
         <property name="currentIndex">
          <number>-1</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblConvOutputInfo">
+        <property name="geometry">
+         <rect>
+          <x>250</x>
+          <y>30</y>
+          <width>631</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Visualizations of the Output of Convolution Layers will appear shortly after the Testing Set has been Evaluated</string>
         </property>
        </widget>
       </widget>
@@ -3493,10 +4045,10 @@
      <widget class="QGroupBox" name="grpTestValidSplit">
       <property name="geometry">
        <rect>
-        <x>940</x>
+        <x>830</x>
         <y>30</y>
-        <width>221</width>
-        <height>101</height>
+        <width>281</width>
+        <height>151</height>
        </rect>
       </property>
       <property name="title">
@@ -3508,30 +4060,60 @@
       <widget class="QWidget" name="gridLayoutWidget_4">
        <property name="geometry">
         <rect>
-         <x>30</x>
+         <x>50</x>
          <y>30</y>
-         <width>160</width>
+         <width>186</width>
          <height>51</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="1" column="0">
-         <widget class="QLineEdit" name="txtTestSplit"/>
-        </item>
-        <item row="0" column="2">
+        <item row="0" column="4">
          <widget class="QLabel" name="lblValidSplit">
           <property name="text">
-           <string>Validation</string>
+           <string>Validation:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
+        <item row="1" column="5">
+         <widget class="QLabel" name="lblPercent2">
+          <property name="text">
+           <string>%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
          <widget class="QLabel" name="lblTestSplit">
           <property name="text">
-           <string>Testing</string>
+           <string>Testing:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QLineEdit" name="txtValidSplit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>40</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="txtTestSplit">
+          <property name="text">
+           <string>60</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -3539,95 +4121,79 @@
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QLineEdit" name="txtValidSplit"/>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="lblPercent">
+         <widget class="QLabel" name="lblPercent1">
           <property name="text">
-           <string>    %    </string>
+           <string>%</string>
           </property>
          </widget>
         </item>
+        <item row="1" column="3">
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>30</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
+      </widget>
+      <widget class="QLabel" name="lblTestValidSplit">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>100</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Enter Percentage of Test Set to use for Final</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lblTestValidSplit2">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>120</y>
+         <width>221</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Testing. The rest will be used for Validation.</string>
+       </property>
       </widget>
      </widget>
      <widget class="QGroupBox" name="grpRunTime">
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>150</y>
-        <width>431</width>
-        <height>231</height>
+        <y>250</y>
+        <width>301</width>
+        <height>291</height>
        </rect>
       </property>
       <property name="title">
-       <string>Active Run Time Visualizations</string>
+       <string>Active Visualizations</string>
       </property>
       <widget class="QWidget" name="gridLayoutWidget_5">
        <property name="geometry">
         <rect>
          <x>20</x>
          <y>30</y>
-         <width>391</width>
-         <height>172</height>
+         <width>201</width>
+         <height>186</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="4">
-         <widget class="QLabel" name="lblEpochs_2">
-          <property name="text">
-           <string>Epochs</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QCheckBox" name="chkBatchLoss">
-          <property name="text">
-           <string>Batch Loss</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="4">
-         <widget class="QLabel" name="lblEpochs_5">
-          <property name="text">
-           <string>Epochs</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="4">
-         <widget class="QLabel" name="lblEpochs_3">
-          <property name="text">
-           <string>Epochs</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="4">
-         <widget class="QLabel" name="lblEpochs">
-          <property name="text">
-           <string>Epochs</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QCheckBox" name="chkTrainValidError">
-          <property name="text">
-           <string>Training / Validation Error</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="4">
-         <widget class="QLabel" name="lblEpochs_4">
-          <property name="text">
-           <string>Epochs</string>
-          </property>
-         </widget>
-        </item>
         <item row="4" column="0">
          <widget class="QCheckBox" name="chkBatchAcc">
           <property name="text">
@@ -3635,54 +4201,6 @@
           </property>
           <property name="checked">
            <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
-         <widget class="QLineEdit" name="txtTrainConfInterval">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QLineEdit" name="txtTrainConfInterval_2">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QLineEdit" name="txtTrainConfInterval_3">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
           </property>
          </widget>
         </item>
@@ -3696,43 +4214,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="lblUpdateEvery">
-          <property name="text">
-           <string>Update Every</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="lblUpdateEvery_2">
-          <property name="text">
-           <string>Update Every</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="2">
-         <widget class="QLabel" name="lblUpdateEvery_5">
-          <property name="text">
-           <string>Update Every</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="3">
-         <widget class="QLineEdit" name="txtTrainConfInterval_5">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
          <widget class="QCheckBox" name="chkTrainConf">
           <property name="text">
@@ -3743,46 +4224,23 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <spacer name="horizontalSpacer_7">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="2">
-         <widget class="QLabel" name="lblUpdateEvery_3">
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="chkTrainValidError">
           <property name="text">
-           <string>Update Every</string>
+           <string>Training / Validation Error</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="4" column="2">
-         <widget class="QLabel" name="lblUpdateEvery_4">
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="chkBatchLoss">
           <property name="text">
-           <string>Update Every</string>
+           <string>Batch Loss</string>
           </property>
-         </widget>
-        </item>
-        <item row="3" column="3">
-         <widget class="QLineEdit" name="txtTrainConfInterval_4">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -3808,14 +4266,62 @@
         </item>
        </layout>
       </widget>
+      <widget class="QLabel" name="lblUpdateEvery">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>240</y>
+         <width>141</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Update Visualizations Every</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="txtUpdateVis">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>240</y>
+         <width>60</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>20</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lblVisEpochs">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>240</y>
+         <width>34</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Epochs</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="grpDataSetLocate">
       <property name="geometry">
        <rect>
         <x>20</x>
         <y>30</y>
-        <width>901</width>
-        <height>101</height>
+        <width>771</width>
+        <height>151</height>
        </rect>
       </property>
       <property name="title">
@@ -3827,7 +4333,7 @@
          <x>10</x>
          <y>30</y>
          <width>731</width>
-         <height>58</height>
+         <height>101</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -3843,7 +4349,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>37</width>
+              <width>62</width>
               <height>20</height>
              </size>
             </property>
@@ -3893,14 +4399,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_9">
           <item>
-           <widget class="QLabel" name="lblPrimaPath">
+           <widget class="QLabel" name="lblPrimaPitchPath">
             <property name="text">
-             <string>Prima Head Pose:</string>
+             <string>Prima Head Pose Pitch:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="txtPrimaPath">
+           <widget class="QLineEdit" name="txtPrimaPitchPath">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -3917,7 +4423,7 @@
              </size>
             </property>
             <property name="text">
-             <string>C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/</string>
+             <string>C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/Prima Head Pose/pitch/</string>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -3925,7 +4431,66 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnChangePrimaPath">
+           <widget class="QPushButton" name="btnChangePrimaPitchPath">
+            <property name="text">
+             <string>Change</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>4</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblPrimaYawPath">
+            <property name="text">
+             <string>Prima Head Pose Yaw:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="txtPrimaYawPath">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>C:/Users/Joel Gooch/Desktop/Final Year/PRCO304/data/Prima Head Pose/yaw/</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnChangePrimaYawPath">
             <property name="text">
              <string>Change</string>
             </property>
@@ -3935,27 +4500,14 @@
         </item>
        </layout>
       </widget>
-      <widget class="QCheckBox" name="cbxPrimaPath">
-       <property name="geometry">
-        <rect>
-         <x>770</x>
-         <y>40</y>
-         <width>121</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Use Same for Prima</string>
-       </property>
-      </widget>
      </widget>
      <widget class="QGroupBox" name="grpSaveVis">
       <property name="geometry">
        <rect>
-        <x>470</x>
-        <y>150</y>
-        <width>691</width>
-        <height>111</height>
+        <x>360</x>
+        <y>250</y>
+        <width>751</width>
+        <height>81</height>
        </rect>
       </property>
       <property name="title">
@@ -3968,8 +4520,8 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>21</y>
-         <width>531</width>
+         <y>31</y>
+         <width>571</width>
          <height>20</height>
         </rect>
        </property>
@@ -3995,8 +4547,8 @@
       <widget class="QPushButton" name="btnChangeCIFARPath_2">
        <property name="geometry">
         <rect>
-         <x>610</x>
-         <y>20</y>
+         <x>660</x>
+         <y>30</y>
          <width>71</width>
          <height>23</height>
         </rect>
@@ -4009,7 +4561,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>30</y>
          <width>51</width>
          <height>23</height>
         </rect>
@@ -4019,56 +4571,17 @@
        </property>
       </widget>
      </widget>
-     <widget class="QGroupBox" name="grpSaveMode">
+     <widget class="Line" name="line_4">
       <property name="geometry">
        <rect>
-        <x>470</x>
-        <y>270</y>
-        <width>431</width>
-        <height>111</height>
+        <x>-3</x>
+        <y>210</y>
+        <width>1211</width>
+        <height>20</height>
        </rect>
       </property>
-      <property name="title">
-       <string>Check Point Save Mode</string>
-      </property>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>30</y>
-         <width>341</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>User can select whether to save checkpoints by name or global step</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>60</x>
-         <y>50</y>
-         <width>211</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>IF I CANT DO BOTH</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="grpLogOptions">
-      <property name="geometry">
-       <rect>
-        <x>920</x>
-        <y>270</y>
-        <width>241</width>
-        <height>111</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Log Options</string>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </widget>
