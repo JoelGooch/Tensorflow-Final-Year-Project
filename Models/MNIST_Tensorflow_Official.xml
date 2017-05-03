@@ -35,8 +35,8 @@
 		<BiasVal>1.0</BiasVal>
 		<Padding>SAME</Padding>
 		<Normalize>False</Normalize>
-		<Dropout>True</Dropout>
-		<KeepRate>0.5</KeepRate>
+		<Dropout>False</Dropout>
+		<KeepRate>1.0</KeepRate>
 	</Layer>
 	<Layer Type="Max Pool">
 		<LayerName>pool2</LayerName>

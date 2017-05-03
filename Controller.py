@@ -7,13 +7,15 @@ import datetime
 import cv2
 import xml.etree.ElementTree as ET
 import matplotlib as mpl
+mpl.use('Qt5Agg')
 
 # import files that I have created myself
-import CNN_GUI_V16 as design
+import CNN_GUI_V17 as design
 import input_data as data
 import xml_parser as pp
 import Layer as l
 import layer_factory as factory
+import urllib.error
 
 from functools import partial
 from math import ceil, sqrt
@@ -24,8 +26,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
-
-mpl.use('Qt5Agg')
 rcParams.update({'figure.autolayout': True})
 
 
@@ -42,13 +42,16 @@ class Worker(QObject):
 	train_valid_loss = pyqtSignal(float, float, int)
 	train_valid_acc = pyqtSignal(float, float, int)
 	confusion_mat = pyqtSignal(bool, int)
-	network_weights_outputs = pyqtSignal(list, list)
+	network_weights = pyqtSignal(list, list)
+	network_outputs = pyqtSignal(list, list)
 
 	# signal to inform main thread that worker thread has finished work
 	work_complete = pyqtSignal()
 
-	def __init__(self, data_set: str, data_location: str, prima_test_person_out:int, validation: bool, num_epochs: int, batch_size: int, learning_rate: float, momentum: float, 
-		optimizer: int, normalize: bool, l2_reg: bool, beta: float, save_directory: str, save_interval: int, model_path: str, run_time: bool):
+	def __init__(self, data_set: str, data_location: str, prima_test_person_out:int, validation: bool, test_split: int, num_epochs: int, batch_size: int, 
+		learning_rate: float, momentum: float, optimizer: int, normalize: bool, l2_reg: bool, beta: float, save_directory: str, save_interval: int, update_interval: int, 
+		model_path: str, vis_save_path: str, run_time: bool, train_confusion_active: bool, test_confusion_active: bool, conv_weights_active: bool, conv_outputs_active: bool):
+
 		super().__init__()
 		self.end_training = False
 		self.data_set = data_set
@@ -56,6 +59,7 @@ class Worker(QObject):
 		self.data_location = data_location
 		self.regression = False
 		self.validation = validation
+		self.test_split = test_split
 		self.num_epochs = num_epochs
 		self.batch_size = batch_size
 		self.learning_rate = learning_rate
@@ -66,13 +70,20 @@ class Worker(QObject):
 		self.beta = beta
 		self.save_directory = save_directory
 		self.save_interval = save_interval
+		self.update_interval = update_interval
 		self.model_path = model_path
+		self.vis_save_path = vis_save_path
 		self.run_time = run_time
+		self.train_confusion_active = train_confusion_active
+		self.test_confusion_active = test_confusion_active
+		self.conv_weights_active = conv_weights_active
+		self.conv_outputs_active = conv_outputs_active
 		
 	@pyqtSlot()
 	def work(self):
-		self.train_network(self.data_set, self.data_location, self.prima_test_person_out, self.validation, self.num_epochs, self.batch_size, self.learning_rate, self.momentum, self.optimizer, 
-			self.normalize, self.l2_reg, self.beta, self.save_directory, self.save_interval, self.model_path, self.run_time)
+		self.train_network(self.data_set, self.data_location, self.prima_test_person_out, self.validation, self.test_split, self.num_epochs, self.batch_size, 
+			self.learning_rate, self.momentum, self.optimizer, self.normalize, self.l2_reg, self.beta, self.save_directory, self.save_interval, self.update_interval, 
+			self.model_path, self.vis_save_path, self.run_time, self.train_confusion_active, self.test_confusion_active, self.conv_weights_active, self.conv_outputs_active)
 
 	# this function calculates the accuracy measurements from the predicted labels and actual labels
 	# 	@param predictions = numpy array containing predicted values by network
@@ -96,14 +107,16 @@ class Worker(QObject):
 		return RMSE, RMSE_stdev, MAE, MAE_stdev
 
 
-	def train_network(self, data_set, data_location, prima_test_person_out, validation, num_epochs, batch_size, learning_rate, momentum, learning_algo, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time):
+	def train_network(self, data_set, data_location, prima_test_person_out, validation, test_split, num_epochs, batch_size, learning_rate, momentum, learning_algo, 
+		normalize, l2_reg, beta, save_path, save_interval, update_interval, model_path, vis_save_path, run_time, train_confusion_active, test_confusion_active, 
+		conv_weights_active, conv_outputs_active):
 
 		try:
 			# load selected data set
 			if (data_set == 'CIFAR10'):
-				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10(data_location, validation)
+				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_CIFAR_10(data_location, validation, test_split)
 			if (data_set == 'MNIST'):
-				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST(validation)
+				training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_MNIST(data_location, validation, test_split)
 			if (data_set == 'PrimaHeadPosePitch'):
 				training_set, training_labels, testing_set, testing_labels, image_size, num_channels, num_classes = data.load_prima_head_pose_pitch(data_location, prima_test_person_out)
 				self.regression = True
@@ -114,6 +127,11 @@ class Worker(QObject):
 			self.log_message.emit('File Not Found In Location, Please Select Valid Location in Settings')
 			self.work_complete.emit()
 			return 0
+		except urllib.error.URLError:
+			self.log_message.emit('MNIST Not Found In Location, No Internet Connection detected to download data set')
+			self.work_complete.emit()
+			return 0
+
 
 		# normalize data, if user requires
 		if normalize == True:
@@ -126,7 +144,11 @@ class Worker(QObject):
 			# get array of layers from XML file
 			layers = pp.get_layers(model_path)
 		except FileNotFoundError:
-			self.log_message.emit('Error reading XML file')
+			self.log_message.emit('Error Reading XML File. Could Not Locate XML File')
+			self.work_complete.emit()
+			return 0
+		except ET.ParseError:
+			self.log_message.emit('Error Reading XML File. XML File is badly formed')
 			self.work_complete.emit()
 			return 0
 
@@ -161,10 +183,14 @@ class Worker(QObject):
 
 				input_dimension = image_size
 
-				# create as many layers as are stored in XML file
-				for e in range(len(layers)):
-					layer, input_dimension = layer_factory.create_layer(layer, layers[e], input_dimension)
-					network_layers.append(layer)
+				try:
+					# create as many layers as are stored in XML file
+					for e in range(len(layers)):
+						layer, input_dimension = layer_factory.create_layer(layer, layers[e], input_dimension)
+						network_layers.append(layer)
+
+				except:
+					self.log_message.emit('Error Reading XML File.')
 
 				# return last element of layers array (output layer)
 				return network_layers[-1]
@@ -255,14 +281,14 @@ class Worker(QObject):
 							_, batch_loss, batch_pred_angles = session.run([optimizer, loss, model_output], feed_dict=feed_dict)
 
 						# print information to output log
-						if (epoch % 100 == 0):
+						if (epoch % self.update_interval == 0):
 							self.log_message.emit('')
 							self.log_message.emit('Loss at epoch: {} of {} is {}'.format(epoch, str(num_epochs), batch_loss))
 							self.log_message.emit('Global Step: {}'.format(str(global_step.eval())))
 
 							if self.regression == False:
-								self.log_message.emit('Batch Accuracy = {}'.format(str(batch_accuracy)))
-								self.batch_acc.emit(batch_accuracy, epoch)
+								self.log_message.emit('Batch Accuracy = {}%'.format(str(batch_accuracy * 100)))
+								self.batch_acc.emit((batch_accuracy * 100), epoch)
 							else: 
 								RMSE, RMSE_stdev, MAE, MAE_stdev = self.evaluate_accuracy(batch_pred_angles, batch_labels)
 								self.log_message.emit('Batch Root Mean Squared Error = {}'.format(str(RMSE)))
@@ -279,10 +305,11 @@ class Worker(QObject):
 							if run_time == True:
 
 								if self.regression == False:
-									# create confusion matrix for current batch
-									batch_confusion = tf.contrib.metrics.confusion_matrix(batch_classes, batch_pred_class).eval()
-									self.create_confusion_matrix(batch_confusion, False)
-									self.confusion_mat.emit(True, epoch)
+									if train_confusion_active == True:
+										# create confusion matrix for current batch
+										batch_confusion = tf.contrib.metrics.confusion_matrix(batch_classes, batch_pred_class).eval()
+										self.create_confusion_matrix(batch_confusion, vis_save_path, True, epoch)
+										self.confusion_mat.emit(True, epoch)
 
 								if validation == True:
 
@@ -306,7 +333,7 @@ class Worker(QObject):
 
 									# run validation set at current batch
 									valid_accuracy, valid_loss = session.run([accuracy, loss], feed_dict={x: validation_set, y: validation_labels})
-									self.train_valid_acc.emit(train_accuracy, valid_accuracy, epoch)
+									self.train_valid_acc.emit((train_accuracy * 100), valid_accuracy, epoch)
 									self.train_valid_loss.emit(train_loss_total, valid_loss, epoch)
 
 
@@ -316,20 +343,25 @@ class Worker(QObject):
 
 						# check save interval to avoid divide by zero
 						if save_interval != 0:
-							# save at interval define by user
-							if (epoch % save_interval == 0):
-								saver.save(sess=session, save_path=save_path, global_step=global_step)
-								self.log_message.emit('Saved Checkpoint \n')
+							try:
+								# save at interval define by user
+								if (epoch % save_interval == 0):
+									saver.save(sess=session, save_path=save_path, global_step=global_step)
+									self.log_message.emit('Saved Checkpoint \n')
+							except ValueError:
+								self.log_message.emit('Directory to save checkpoints to does not exist. Please Change. Checkpoint NOT Saved.')
 
 				self.log_message.emit('\nTraining Complete')
 				train_end = datetime.datetime.now()
 				training_time = train_end - train_start
 				self.log_message.emit(('Training Took ' + str(training_time)) + '\n')
 
-				# save network state when complete
-				saver.save(sess=session, save_path=save_path, global_step=global_step)
-
-				self.log_message.emit('Saved Checkpoint')
+				try:
+					# save network state when complete
+					saver.save(sess=session, save_path=save_path, global_step=global_step)
+					self.log_message.emit('Saved Checkpoint')
+				except ValueError:
+					self.log_message.emit('Directory to save checkpoints to does not exist. Please Change. Checkpoint NOT Saved.')
 
 				# set progress bar to 100% (if training was not interrupted)
 				if (self.end_training == False):
@@ -343,7 +375,7 @@ class Worker(QObject):
 				if self.regression == False:
 					# if classification, grab accuracy from tensorflow graph
 					test_acc, testing_pred_class, testing_classes = session.run([accuracy, network_pred_class, class_labels], feed_dict=feed_dict)
-					self.log_message.emit('Test Set Accuracy = {}'.format(str(test_acc)))
+					self.log_message.emit('Test Set Accuracy = {}%'.format(str(test_acc * 100)))
 				else: 
 					# otherwise calculate RMSE using function
 					batch_pred_angles = session.run(model_output, feed_dict=feed_dict)
@@ -354,39 +386,51 @@ class Worker(QObject):
 					self.log_message.emit('Test Set Mean Absolute Error Standard Deviation = {}'.format(str(MAE_stdev)))
 
 				self.log_message.emit('Test Set Evaluated \n')
-
 				self.log_message.emit('Loading Visualizations...')
 
-				# lists to hold file names of each plot
+				# generate test set confusion matrix
+				if self.regression == False:
+					if test_confusion_active == True:
+						# create confusion matrix from predicted and actual classes
+						test_set_confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
+						self.create_confusion_matrix(test_set_confusion, vis_save_path, False, 0)
+						self.confusion_mat.emit(False, 0)
+
 				layer_weights_file_names = []
 				layer_outputs_file_names = []
 
-				# create convolution weight plots for each convolution layer
-				for e in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
-					if 'Cweights' in e.name:
-						file_name = self.plot_conv_weights(weights=e, name=e.name, session=session)
-						layer_weights_file_names.append(file_name)
+				conv_layer_names = []
 
-				# grab random image from test set
-				random = np.random.randint(0, testing_set.shape[0])
-				image = testing_set[random]
-				layer_count = 0
-				# create convolution output plots for each convolution layer
-				for layer in network_layers:
-					if layers[layer_count].layer_type == 'Convolution':
-						file_name = self.plot_conv_layer(layer=layer, name=layers[layer_count].layer_name, image=image, session=session, x=x)
-						layer_outputs_file_names.append(file_name)
-					layer_count += 1
+				for layer in layers:
+					if layer.layer_type == 'Convolution':
+						conv_layer_names.append(layer.layer_name)
 
+				# generate visualization of convolution layer weights (if user requested)
+				if conv_weights_active == True:
+	
+					for e in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+						if 'Cweights' in e.name:
+							file_name = self.plot_conv_weights(weights=e, vis_save_path=vis_save_path, name=e.name, session=session)
+							layer_weights_file_names.append(file_name)
 
-				# send file paths for newly created plots to GUI to load on screen
-				self.network_weights_outputs.emit(layer_weights_file_names, layer_outputs_file_names)
+					self.network_weights.emit(layer_weights_file_names, conv_layer_names)
 
-				if self.regression == False:
-					# create confusion matrix from predicted and actual classes
-					test_set_confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
-					self.create_confusion_matrix(test_set_confusion, False)
-					self.confusion_mat.emit(False, 0)
+				# generate visualization of convolution layer outputs (if user requested)
+				if conv_outputs_active == True:
+					
+					# grab random image from test set
+					random = np.random.randint(0, testing_set.shape[0])
+					image = testing_set[random]
+					layer_count = 0
+					# create convolution output plots for each convolution layer
+					for layer in network_layers:
+						if layers[layer_count].layer_type == 'Convolution':
+							file_name = self.plot_conv_layer(layer=layer, vis_save_path=vis_save_path, name=layers[layer_count].layer_name, image=image, session=session, x=x)
+							layer_outputs_file_names.append(file_name)
+						layer_count += 1
+
+					self.network_outputs.emit(layer_outputs_file_names, conv_layer_names)				
+				
 
 				self.log_message.emit('Visualizations Loaded\n')
 
@@ -397,88 +441,95 @@ class Worker(QObject):
 	def cancel_training(self):
 		self.end_training = True
 
-	def plot_conv_layer(self, layer, name, image, session, x):
+	def plot_conv_layer(self, layer, vis_save_path, name, image, session, x):
+		try:
+			feed_dict = {x: [image]}
 
-		feed_dict = {x: [image]}
+			# Calculate and retrieve the output values of the layer
+			# when inputting that image.
+			values = session.run(layer, feed_dict=feed_dict)
 
-		# Calculate and retrieve the output values of the layer
-		# when inputting that image.
-		values = session.run(layer, feed_dict=feed_dict)
+			values_min = np.min(values)
+			values_max = np.max(values)
 
-		values_min = np.min(values)
-		values_max = np.max(values)
+			# Number of filters used in the conv. layer.
+			num_filters = values.shape[3]
 
-		# Number of filters used in the conv. layer.
-		num_filters = values.shape[3]
-
-		# Number of grids to plot.
-		# Rounded-up, square-root of the number of filters.
-		num_grids = ceil(sqrt(num_filters))
-		
-		# Create figure with a grid of sub-plots.
-		fig, axes = plt.subplots(num_grids, num_grids)
-
-		# Plot the output images of all the filters.
-		for i, ax in enumerate(axes.flat):
-			# Only plot the images for valid filters.
-			if i < num_filters:
-				# Get the output image of using the i'th filter.
-				# See new_conv_layer() for details on the format
-				# of this 4-dim tensor.
-				img = values[0, :, :, i]
-
-			# Plot image.
-			ax.imshow(img, vmin=values_min, vmax=values_max, interpolation='nearest', cmap='binary')
+			# Number of grids to plot.
+			# Rounded-up, square-root of the number of filters.
+			num_grids = ceil(sqrt(num_filters))
 			
-			# Remove ticks from the plot.
-			ax.set_xticks([])
-			ax.set_yticks([])
+			# Create figure with a grid of sub-plots.
+			fig, axes = plt.subplots(num_grids, num_grids)
 
-		file_name = name + "_output.png"
-		plt.savefig(file_name, format='png')
-		plt.close()
-		return file_name
-
-	def plot_conv_weights(self, weights, name, session, input_channel=0):
-		w = session.run(weights)
-
-		w_min = np.min(w)
-		w_max = np.max(w)
-		abs_max = max(abs(w_min), abs(w_max))
-
-		# Number of filters used in the conv. layer.
-		num_filters = w.shape[3]
-
-		# Number of grids to plot.
-		# Rounded-up, square-root of the number of filters.
-		num_grids = ceil(sqrt(num_filters))
-		
-		# Create figure with a grid of sub-plots.
-		fig, axes = plt.subplots(num_grids, num_grids)
-
-		# Plot all the filter-weights.
-		for i, ax in enumerate(axes.flat):
-			# Only plot the valid filter-weights.
-			if i < num_filters:
-				# Get the weights for the i'th filter of the input channel.
-				# See new_conv_layer() for details on the format
-				# of this 4-dim tensor.
-				img = w[:, :, input_channel, i]
+			# Plot the output images of all the filters.
+			for i, ax in enumerate(axes.flat):
+				# Only plot the images for valid filters.
+				if i < num_filters:
+					# Get the output image of using the i'th filter.
+					# See new_conv_layer() for details on the format
+					# of this 4-dim tensor.
+					img = values[0, :, :, i]
 
 				# Plot image.
-				ax.imshow(img, vmin=-abs_max, vmax=abs_max, interpolation='nearest', cmap='seismic')
+				ax.imshow(img, vmin=values_min, vmax=values_max, interpolation='nearest', cmap='binary')
+				
+				# Remove ticks from the plot.
+				ax.set_xticks([])
+				ax.set_yticks([])
+
+			file_name = vis_save_path + name + "_output.png"
+			plt.savefig(file_name, format='png')
+			plt.close()
+			return file_name
+		except FileNotFoundError:
+			self.log_message.emit('Directory chosen to save visualizations was not found. Please amend in Settings.')
+
+	def plot_conv_weights(self, weights, vis_save_path, name, session, input_channel=0):
+		try:
+			w = session.run(weights)
+
+			w_min = np.min(w)
+			w_max = np.max(w)
+			abs_max = max(abs(w_min), abs(w_max))
+
+			# Number of filters used in the conv. layer.
+			num_filters = w.shape[3]
+
+			# Number of grids to plot.
+			# Rounded-up, square-root of the number of filters.
+			num_grids = ceil(sqrt(num_filters))
 			
-			# Remove ticks from the plot.
-			ax.set_xticks([])
-			ax.set_yticks([])
+			# Create figure with a grid of sub-plots.
+			fig, axes = plt.subplots(num_grids, num_grids)
 
-		name = name[:-2]
-		file_name = name + ".png"
-		plt.savefig(file_name, format='png')
-		plt.close()
-		return file_name
+			# Plot all the filter-weights.
+			for i, ax in enumerate(axes.flat):
+				# Only plot the valid filter-weights.
+				if i < num_filters:
+					# Get the weights for the i'th filter of the input channel.
+					# See new_conv_layer() for details on the format
+					# of this 4-dim tensor.
+					img = w[:, :, input_channel, i]
 
-	def create_confusion_matrix(self, confusion, training):
+					# Plot image.
+					ax.imshow(img, vmin=-abs_max, vmax=abs_max, interpolation='nearest', cmap='seismic')
+				
+				# Remove ticks from the plot.
+				ax.set_xticks([])
+				ax.set_yticks([])
+
+			name = name[:-2]
+			file_name = vis_save_path + name + ".png"
+			print(file_name)
+			plt.savefig(file_name, format='png')
+			plt.close()
+			return file_name
+
+		except FileNotFoundError:
+			return 0
+
+	def create_confusion_matrix(self, confusion, vis_save_path, training, batch):
 
 		norm_conf = []
 
@@ -514,12 +565,15 @@ class Worker(QObject):
 			plt.yticks(range(height), alphabet[:height])
 
 			if training == True:
-				plt.savefig('training_confusion_matrix.png', format='png')
+				plt.savefig(vis_save_path + 'training_confusion_matrix_batch_' + str(batch) + '.png', format='png')
 			else:
-				plt.savefig('testing_confusion_matrix.png', format='png')
+				plt.savefig(vis_save_path + 'testing_confusion_matrix.png', format='png')
 		# sometimes get a division by zero error, this just skips creating that matrix
 		except ZeroDivisionError:
-			doNothing = 0
+			return 0
+		except FileNotFoundError:
+			return 0
+
 
 # this is a simple custom canvas that i can embed into a pyqt5 widget.
 class MyMplCanvas(FigureCanvas):
@@ -634,6 +688,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 		self.cbxSavePath.stateChanged.connect(self.checkpoint_checkbox_state_changed)
 		self.radCreateModel.toggled.connect(self.create_model_rad_clicked)
+		self.spnTestSplit.valueChanged.connect(self.testing_validation_split_spinner_changed)
 
 		# events for checking/unchecking dropout when creating model
 		self.chkConvDropout.stateChanged.connect(partial(self.dropout_checkbox_state_changed, dropout_checkbox=self.chkConvDropout, keep_rate_spinner=self.spnConvKeepRate))
@@ -643,19 +698,23 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.cbxOptimizer.currentIndexChanged.connect(self.optimizer_combo_box_changed)
 		self.chkL2Reg.stateChanged.connect(self.l2_reg_checkbox_state_changed)
 
-		self.cbxConvBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxConvBiasInit, bias_val_spinner= self.spnConvBiasVal, bias_val_label= self.lblConvBiasVal, help_icon=self.hlpConvBiasVal))
-		self.cbxFCBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxFCBiasInit, bias_val_spinner= self.spnFCBiasVal, bias_val_label= self.lblFCBiasVal, help_icon=self.hlpFCBiasVal))
-		self.cbxOutputBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxOutputBiasInit, bias_val_spinner= self.spnOutputBiasVal, bias_val_label= self.lblOutputBiasVal, help_icon=self.hlpOutputBiasVal))
+		self.cbxConvBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxConvBiasInit, 
+			bias_val_spinner= self.spnConvBiasVal, bias_val_label= self.lblConvBiasVal, help_icon=self.hlpConvBiasVal))
+		self.cbxFCBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxFCBiasInit, 
+			bias_val_spinner= self.spnFCBiasVal, bias_val_label= self.lblFCBiasVal, help_icon=self.hlpFCBiasVal))
+		self.cbxOutputBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxOutputBiasInit, 
+			bias_val_spinner= self.spnOutputBiasVal, bias_val_label= self.lblOutputBiasVal, help_icon=self.hlpOutputBiasVal))
 
 		# buttons to change file paths 
 		self.btnChangeSavePath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtSavePath))
 		self.btnChangeLoadCheckpoints.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtLoadCheckpoints, disable=True))
 		self.btnChangeModelPath.clicked.connect(self.change_file_path)
 		self.btnChangeModelSavePath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtModelSavePath))
+		self.btnChangeMNISTPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtMNISTPath))
 		self.btnChangeCIFARPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtCIFARPath))
 		self.btnChangePrimaPitchPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtPrimaPitchPath))
 		self.btnChangePrimaYawPath.clicked.connect(partial(self.change_directory_path, path_text_field=self.txtPrimaYawPath))
-	
+
 		# train/cancel training buttons
 		self.btnTrainNetwork.clicked.connect(self.train_button_clicked)
 		self.btnCancelTraining.clicked.connect(self.cancel_train)
@@ -682,8 +741,8 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 		# create graph instances
 		self.batch_loss_graph = DynamicGraph(self.grphBatchLoss, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Loss')
-		self.batch_acc_graph = DynamicGraph(self.grphBatchAcc, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Accuracy')
-		self.train_valid_accuracy = DynamicDoubleGraph(self.grphTrainValidAcc, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Accuracy')
+		self.batch_acc_graph = DynamicGraph(self.grphBatchAcc, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Accuracy (%)')
+		self.train_valid_accuracy = DynamicDoubleGraph(self.grphTrainValidAcc, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Accuracy (%)')
 		self.train_valid_loss = DynamicDoubleGraph(self.grphTrainValidLoss, width=5, height=4, dpi=100, xAxisTitle='Epoch', yAxisTitle='Loss')
 
 		
@@ -699,11 +758,12 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 			if self.current_data_set() == 'CIFAR10':
 				data_location = self.txtCIFARPath.text()
+			elif self.current_data_set() == 'MNIST':
+				data_location = self.txtMNISTPath.text()
 			elif self.current_data_set() == 'PrimaHeadPosePitch':
 				data_location = self.txtPrimaPitchPath.text()
 			elif self.current_data_set() == 'PrimaHeadPoseYaw':
 				data_location = self.txtPrimaYawPath.text()
-			else: data_location = 'None'
 			
 			
 			# obtain model file path and checkpoint save path from user text fields
@@ -714,7 +774,10 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 			if self.chkValidationSet.isChecked():
 				validation = True
-			else: validation = False
+				test_split = int(self.spnTestSplit.text())
+			else: 
+				validation = False
+				test_split = 0
 
 			if self.cbxOptimizer.currentIndex == 4:
 				momentum = float(self.spnMomentum.text())
@@ -738,6 +801,26 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			if self.cbxSaveInterval.currentIndex() == 0:
 				save_interval = 0
 			else: save_interval = int(self.cbxSaveInterval.currentText())
+
+			update_interval = int(self.spnUpdateInterval.text())
+
+			vis_save_path = self.txtVisSavePath.text()
+
+			if self.chkTrainConf.isChecked():
+				train_confusion_active = True
+			else: train_confusion_active = False
+
+			if self.chkTestConf.isChecked():
+				test_confusion_active = True
+			else: test_confusion_active = False
+
+			if self.chkConvWeights.isChecked():
+				conv_weights_active = True
+			else: conv_weights_active = False
+
+			if self.chkConvOutputs.isChecked():
+				conv_outputs_active = True
+			else: conv_outputs_active = False
 	
 		except ValueError:
 			self.txtOutputLog.append('Number of Epochs, Batch Size and Learning Rate, Momentum and L2 Beta must be a Numerical Value!')
@@ -751,7 +834,10 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			self.prgTrainingProgress.setValue(0)
 
 			# create worker object and thread
-			worker = Worker(self.current_data_set(), data_location, prima_test_person_out, validation, num_epochs, batch_size, learning_rate, momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, model_path, run_time)
+			worker = Worker(self.current_data_set(), data_location, prima_test_person_out, validation, test_split, num_epochs, batch_size, learning_rate, 
+				momentum, optimizer, normalize, l2_reg, beta, save_path, save_interval, update_interval, model_path, vis_save_path, run_time, train_confusion_active, 
+				test_confusion_active, conv_weights_active, conv_outputs_active)
+
 			thread = QThread()
 
 			# connect cancel button in main thread to background thread
@@ -773,7 +859,8 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			worker.train_valid_loss.connect(self.train_valid_loss.update_figure)
 			worker.train_valid_acc.connect(self.train_valid_accuracy.update_figure)
 			worker.confusion_mat.connect(self.update_confusion_plot)
-			worker.network_weights_outputs.connect(self.embed_network_weights_outputs)
+			worker.network_weights.connect(self.embed_network_weights)
+			worker.network_outputs.connect(self.embed_network_outputs)
 
 			# connect and start thread
 			thread.started.connect(worker.work)
@@ -1036,7 +1123,6 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		self.spnOutputStdDev.setValue(0.005)
 		self.spnOutputBiasVal.setValue(0.005)
 
-
 	def reset_visualizations(self):
 		self.lblTrainingConfusionMat.setText('Training Confusion Matrix for First Batch Will Appear When it has been Evaluated')
 		self.lblTestingConfusionMat.setText('Test Set Confusion Matrix Will Appear When Test Set has been Evaluated')
@@ -1070,6 +1156,11 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			bias_val_label.setText('Value:')
 			bias_val_spinner.setFixedWidth(60)
 			help_icon.setFixedWidth(24)
+
+	def testing_validation_split_spinner_changed(self):
+		test_split = self.spnTestSplit.text()
+		valid_split = 100 - int(test_split)
+		self.txtValidSplit.setText(str(valid_split))
 
 	def change_directory_path(self, path_text_field, disable=False):
 		path = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -1182,35 +1273,40 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
  
 	@pyqtSlot(list, list)
-	def embed_network_weights_outputs(self, weight_file_names: list, output_file_names: list):
+	def embed_network_weights(self, weight_file_names: list, conv_layer_names: list):
+		try:
+			count = 0
+			for file_name in weight_file_names:
+				self.tab = QWidget()
+				tab_name = conv_layer_names[count]
+				self.tabLayerWeights.addTab(self.tab, tab_name)
+				self.image = QLabel()
+				self.vbox = QVBoxLayout()
+				self.vbox.addWidget(self.image)
+				pix_map = QPixmap(file_name)
+				self.image.setPixmap(pix_map)
+				self.tab.setLayout(self.vbox)
+				count += 1
+		except AttributeError:
+			return 0
 
-		# clears tabs from previous runs
-		self.tabLayerWeights.clear()
-		self.tabLayerOutput.clear()
-
-		# cycle 
-		for file_name in weight_file_names:
-			self.tab = QWidget()
-			tab_name = file_name.split('_')
-			self.tabLayerWeights.addTab(self.tab, tab_name[0])
-			self.image = QLabel()
-			self.vbox = QVBoxLayout()
-			self.vbox.addWidget(self.image)
-			pix_map = QPixmap(file_name)
-			self.image.setPixmap(pix_map)
-			self.tab.setLayout(self.vbox)
-
-		for file_name in output_file_names:
-			self.tab = QWidget()
-			tab_name = file_name.split('_')
-			self.tabLayerOutput.addTab(self.tab, tab_name[0])
-			self.image = QLabel()
-			self.vbox = QVBoxLayout()
-			self.vbox.addWidget(self.image)
-			pix_map = QPixmap(file_name)
-			self.image.setPixmap(pix_map)
-			self.tab.setLayout(self.vbox)
-
+	@pyqtSlot(list, list)
+	def embed_network_outputs(self, output_file_names: list, conv_layer_names: list):
+		try:
+			count = 0
+			for file_name in output_file_names:
+				self.tab = QWidget()
+				tab_name = conv_layer_names[count]
+				self.tabLayerOutput.addTab(self.tab, tab_name)
+				self.image = QLabel()
+				self.vbox = QVBoxLayout()
+				self.vbox.addWidget(self.image)
+				pix_map = QPixmap(file_name)
+				self.image.setPixmap(pix_map)
+				self.tab.setLayout(self.vbox)	
+				count += 1
+		except AttributeError:
+			return 0
 
 	# this function loads the created confusion matrix from disk and loads into GUI
 	@pyqtSlot(bool, int)

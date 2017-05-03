@@ -54,7 +54,7 @@ def load_prima_head_pose_yaw(data_path, prima_test_person_out):
 
 
 # function to load data set and parameters for CIFAR10
-def load_CIFAR_10(data_path, validation=True):
+def load_CIFAR_10(data_path, validation, test_split):
     num_channels = 3 # RGB
     image_size = 32 # 32x32 images
     num_classes = 10 # 10 possible classes. info @ https://www.cs.toronto.edu/~kriz/cifar.html
@@ -117,20 +117,20 @@ def load_CIFAR_10(data_path, validation=True):
     testing_set = testing_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
 
     if validation == True:
-        testing_set, testing_labels, validation_set, validation_labels = create_validation_set(testing_set, testing_labels)
+        testing_set, testing_labels, validation_set, validation_labels = create_validation_set(testing_set, testing_labels, test_split)
     else: validation_set, validation_labels = np.empty(shape=(2, 2))
         
     return training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes
 
 
 # function to loead data set and parameters for MNIST
-def load_MNIST(validation=False):
+def load_MNIST(data_path, validation, test_split):
     num_channels = 1 # Monocolour images
     image_size = 28 # 28x28 images
     num_classes = 10 # characters 0-9
 
     # 55,000 training, 10,000 test, 5,000 validation
-    mnist = input_data.read_data_sets("/tmp/data/", one_hot=True) # DONT WANT THIS TO BE HARDCODED
+    mnist = input_data.read_data_sets(data_path, one_hot=True)
 
     training_set = mnist.train.images
     training_labels = mnist.train.labels
@@ -141,13 +141,24 @@ def load_MNIST(validation=False):
     testing_set = testing_set.reshape(-1, image_size, image_size, num_channels).astype(np.float32)
 
     if validation == True:
-        testing_set, testing_labels, validation_set, validation_labels = create_validation_set(testing_set, testing_labels)
+        testing_set, testing_labels, validation_set, validation_labels = create_validation_set(testing_set, testing_labels, test_split)
     else: validation_set, validation_labels = np.empty(shape=(2, 2))
         
     return training_set, training_labels, validation_set, validation_labels, testing_set, testing_labels, image_size, num_channels, num_classes
 
 
-def create_validation_set(testing_set, testing_labels):
-    testing_set, validation_set = np.split(testing_set, 2)
-    testing_labels, validation_labels = np.split(testing_labels, 2)
-    return testing_set, testing_labels, validation_set, validation_labels
+def create_validation_set(testing_set, testing_labels, test_split):
+    rows = testing_set.shape[0]
+    valid_start = int(rows * test_split/100)
+
+    test_set = testing_set[:valid_start]
+    valid_set = testing_set[valid_start:]
+
+    test_labels = testing_labels[:valid_start]
+    valid_labels = testing_labels[valid_start:]
+
+    # garbage collect these
+    del testing_set
+    del testing_labels
+
+    return test_set, test_labels, valid_set, valid_labels
