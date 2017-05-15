@@ -333,7 +333,7 @@ class Worker(QObject):
 
 									# run validation set at current batch
 									valid_accuracy, valid_loss = session.run([accuracy, loss], feed_dict={x: validation_set, y: validation_labels})
-									self.train_valid_acc.emit((train_accuracy * 100), valid_accuracy, epoch)
+									self.train_valid_acc.emit((train_accuracy * 100), (valid_accuracy * 100), epoch)
 									self.train_valid_loss.emit(train_loss_total, valid_loss, epoch)
 
 
@@ -388,16 +388,8 @@ class Worker(QObject):
 				self.log_message.emit('Test Set Evaluated \n')
 				self.log_message.emit('Loading Visualizations...')
 
-				# generate test set confusion matrix
-				if self.regression == False:
-					if test_confusion_active == True:
-						# create confusion matrix from predicted and actual classes
-						test_set_confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
-						self.create_confusion_matrix(test_set_confusion, vis_save_path, False, 0)
-						self.confusion_mat.emit(False, 0)
 
-				layer_weights_file_names = []
-				layer_outputs_file_names = []
+				
 
 				conv_layer_names = []
 
@@ -407,6 +399,7 @@ class Worker(QObject):
 
 				# generate visualization of convolution layer weights (if user requested)
 				if conv_weights_active == True:
+					layer_weights_file_names = []
 	
 					for e in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
 						if 'Cweights' in e.name:
@@ -417,6 +410,7 @@ class Worker(QObject):
 
 				# generate visualization of convolution layer outputs (if user requested)
 				if conv_outputs_active == True:
+					layer_outputs_file_names = []
 					
 					# grab random image from test set
 					random = np.random.randint(0, testing_set.shape[0])
@@ -429,8 +423,17 @@ class Worker(QObject):
 							layer_outputs_file_names.append(file_name)
 						layer_count += 1
 
-					self.network_outputs.emit(layer_outputs_file_names, conv_layer_names)				
-				
+					self.network_outputs.emit(layer_outputs_file_names, conv_layer_names)	
+
+				# generate test set confusion matrix
+				if self.regression == False:
+
+					if test_confusion_active == True:
+						# create confusion matrix from predicted and actual classes
+						test_set_confusion = tf.contrib.metrics.confusion_matrix(testing_classes, testing_pred_class).eval()
+						self.create_confusion_matrix(test_set_confusion, vis_save_path, False, 0)
+						self.confusion_mat.emit(False, 0)
+							
 
 				self.log_message.emit('Visualizations Loaded\n')
 
@@ -521,7 +524,6 @@ class Worker(QObject):
 
 			name = name[:-2]
 			file_name = vis_save_path + name + ".png"
-			print(file_name)
 			plt.savefig(file_name, format='png')
 			plt.close()
 			return file_name
@@ -1317,12 +1319,12 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			pix_map = QPixmap("training_confusion_matrix.png")
 			self.lblTrainingConfusionMat.setPixmap(pix_map)
 			self.lblBatchConf.setText("Training Batch {0}".format(epoch))
+			plt.close()
 		else:
 			plt.savefig('testing_confusion_matrix.png', format='png')
 			pix_map = QPixmap("testing_confusion_matrix.png")
 			self.lblTestingConfusionMat.setPixmap(pix_map)
-
-		plt.close()
+			plt.close()
 
 
 	# called when thread(s) have finished, i.e. training has finished or been cancelled
