@@ -1,4 +1,7 @@
 	
+	# this file contains the architectures used for testing in Python format that i can copy and paste into script quickly. this file 
+	# cannot be run standalone.
+
   def CNN_Architecture_A():
 
 			# define network weights and biases

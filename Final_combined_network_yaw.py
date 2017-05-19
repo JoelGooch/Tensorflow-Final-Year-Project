@@ -6,7 +6,11 @@ import datetime
 import sys
 import cv2
 
-np.set_printoptions(threshold=np.inf)
+
+
+# This script was used for testing the combined network, *AWFL and McGill of Training, AFW for Testing*
+# it combines the data sets and follows a standard procedure.
+
 
 # this function calculates the accuracy measurements from the predicted labels and actual labels
 # it also writes results to a .csv file if requested
@@ -65,7 +69,8 @@ def print_to_console(data_set, RMSE, RMSE_stdev, MAE, MAE_stdev):
 
 def main():
 
-	for test in range (2, 6):
+	# perform the entire test 6 times
+	for test in range (1, 6):
 
 		# variable params
 		total_epochs = 30000
@@ -215,6 +220,7 @@ def main():
 		graph = tf.Graph()
 		with graph.as_default():
 			
+			 # print some example images and labels to check all is in order
 			'''
 			for i in range(0, 500):
 				# select and print random image from testing set 
@@ -229,8 +235,6 @@ def main():
 				cv2.destroyAllWindows()
 			'''
 		 
-			
-				
 
 			# define placeholder variables
 			x = tf.placeholder(tf.float32, shape=(None, image_size, image_size, num_channels))    # for input data
@@ -265,7 +269,6 @@ def main():
 			#output_weights = tf.Variable(tf.truncated_normal([512, num_classes], stddev=0.1), name="outy_w")
 			output_weights = tf.get_variable(name="outy_w", shape=[512, num_classes], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer())
 			output_biases = tf.Variable(tf.zeros([num_classes]), name="outp_b")
-
 
 
 
@@ -437,11 +440,14 @@ def main():
 						print('--------------------------------------------------------------------')
 						print('Global Step: {0} \n'.format(str(global_step.eval())))
 						print('Loss at epoch: {0} of {1} is {2} \n'.format(epoch, str(total_epochs), batch_loss))
+
+						''' # print some example tests
 						print('predicted {0}, actual {1}'.format(batch_predictions[0],batch_labels[0]))
 						print('predicted {0}, actual {1}'.format(batch_predictions[10],batch_labels[10]))
 						print('predicted {0}, actual {1}'.format(batch_predictions[11],batch_labels[11]))
 						print('predicted {0}, actual {1}'.format(batch_predictions[13],batch_labels[13]))
 						print('predicted {0}, actual {1}'.format(batch_predictions[15],batch_labels[15]))
+						'''
 						
 						# evaluate batch accuracy and print to console
 						batch_RMSE, batch_RMSE_stdev, batch_MAE, batch_MAE_stdev = evaluate_accuracy(batch_predictions, batch_labels, 'Training', test, False)
@@ -464,7 +470,7 @@ def main():
 						
 						
 
-					# save state every 5000 epochs in case of power failure or other unexpected event
+					# save state every 10000 epochs in case of power failure or other unexpected event
 					# the > 0 part stops it from saving a checkpoint at epoch 0
 					#if (epoch % 10000 == 0 and epoch > 0):
 					#	saver.save(session, save_path=save_path, global_step=global_step)

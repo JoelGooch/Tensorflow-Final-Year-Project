@@ -2,15 +2,19 @@ import xml.etree.ElementTree as ET
 import Layer as l
 
 
+# this parses the .xml and returns all layers in the Layer class format
+# @param file_path = string file directory where to load .xml
 def get_layers(file_path):
 	tree = ET.parse(file_path)
 	root = tree.getroot()
 
 	layers = []
 
+	# cycle all elements in .xml
 	for layer in root.iter('Layer'):
 		layer_type = layer.attrib['Type']
 
+		# branch depending on attribute found
 		for attribute in layer.getchildren():
 			if attribute.tag == 'LayerName':
 				layer_name = attribute.text
@@ -41,7 +45,7 @@ def get_layers(file_path):
 			if attribute.tag == 'KeepRate':
 				keep_rate = attribute.text
 
-
+		# create Layer and add to list of layers
 		if layer_type == 'Convolution':
 			layer = l.ConvLayer(layer_name, kernel_size, stride, act_function, num_output_filters, weight_init, weight_val, bias_init, bias_val, padding, normalize, dropout, keep_rate)
 		if layer_type == 'Max Pool':
@@ -55,11 +59,16 @@ def get_layers(file_path):
 
 	return layers
 
+
+# this parses the the layers in Layer class format into an .xml file
+# @param file_name = string of name to save new .xml file as
+# @param file_path = string file directory where to save .xml
 def create_XML_model(layers, file_name, file_path):
 
 	try:
 		model = ET.Element('Model')
 
+		# branch depending on which type the current layer is
 		for e in layers:
 			layer = ET.SubElement(model, 'Layer', Type=e.layer_type)
 			if e.layer_type == 'Convolution':

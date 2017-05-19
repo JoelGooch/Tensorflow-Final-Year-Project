@@ -105,9 +105,6 @@ def main():
 		training_data -= 127 
 		testing_data -= 127
 
-		cv.imshow('image', training_data[10])
-		cv.waitKey(0)
-		cv.destroyAllWindows()
 
 		# create and define Tensorflow computational graph
 		graph = tf.Graph()

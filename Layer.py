@@ -1,8 +1,10 @@
 
+# base Layer class that others will inherit from
 class Layer:
 	def __init__(self, layer_name):
 		self.layer_name = layer_name
 
+# contains all the parameters that a convolution layer will have
 class ConvLayer(Layer):
 	def __init__(self, layer_name, kernel_size, stride, act_function, num_output_filters, weight_init, weight_val, bias_init, bias_val, padding, normalize, dropout , keep_rate):
 		Layer.__init__(self, layer_name)
@@ -20,6 +22,7 @@ class ConvLayer(Layer):
 		self.dropout = dropout
 		self.keep_rate = float(keep_rate)
 
+# contains all the parameters that a max pooling layer will have
 class MaxPoolingLayer(Layer):
 	def __init__(self, layer_name, kernel_size, stride, padding, normalize, dropout, keep_rate):
 		Layer.__init__(self, layer_name)
@@ -31,6 +34,7 @@ class MaxPoolingLayer(Layer):
 		self.dropout = dropout
 		self.keep_rate = float(keep_rate)
 
+# contains all the parameters that a fully connected layer will have
 class FullyConnectedLayer(Layer):
 	def __init__(self, layer_name, act_function, num_output_nodes, weight_init, weight_val, bias_init, bias_val, dropout, keep_rate):
 		Layer.__init__(self, layer_name)
@@ -44,6 +48,7 @@ class FullyConnectedLayer(Layer):
 		self.dropout = dropout
 		self.keep_rate = float(keep_rate)
 
+# contains all the parameters that an output layer will have
 class OutputLayer(Layer):
 	def __init__(self, layer_name, act_function, weight_init, weight_val, bias_init, bias_val):
 		Layer.__init__(self, layer_name)

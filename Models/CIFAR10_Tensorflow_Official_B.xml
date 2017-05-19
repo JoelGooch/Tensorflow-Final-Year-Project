@@ -4,7 +4,7 @@
 <KernelSize>5</KernelSize>
 <Stride>1</Stride>
 <ActFunction>ReLu</ActFunction><NumOutputFilters>64</NumOutputFilters>
-<WeightInit>Random Normal</WeightInit>
+<WeightInit>Truncated Normal</WeightInit>
 <WeightVal>0.05</WeightVal>
 <BiasInit>Constant</BiasInit>
 <BiasVal>0.0</BiasVal>
@@ -26,7 +26,7 @@
 <KernelSize>5</KernelSize>
 <Stride>1</Stride>
 <ActFunction>ReLu</ActFunction><NumOutputFilters>64</NumOutputFilters>
-<WeightInit>Random Normal</WeightInit>
+<WeightInit>Truncated Normal</WeightInit>
 <WeightVal>0.05</WeightVal>
 <BiasInit>Constant</BiasInit>
 <BiasVal>0.1</BiasVal>
@@ -47,7 +47,7 @@
 <Layer Type="Fully Connected">
 <LayerName>fully_conn_1</LayerName>
 <ActFunction>ReLu</ActFunction><NumOutputNodes>192</NumOutputNodes>
-<WeightInit>Random Normal</WeightInit>
+<WeightInit>Truncated Normal</WeightInit>
 <WeightVal>0.04</WeightVal>
 <BiasInit>Constant</BiasInit>
 <BiasVal>0.1</BiasVal>
@@ -57,7 +57,7 @@
 <Layer Type="Output">
 <LayerName>output</LayerName>
 <ActFunction>None</ActFunction>
-<WeightInit>Random Normal</WeightInit><WeightVal>0.005</WeightVal>
+<WeightInit>Truncated Normal</WeightInit><WeightVal>0.005</WeightVal>
 <BiasInit>Constant</BiasInit>
 <BiasVal>0.0</BiasVal>
 </Layer>

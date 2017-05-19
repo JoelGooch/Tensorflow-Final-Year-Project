@@ -119,6 +119,9 @@ def main():
 		training_data /= 255 
 		testing_data /= 255
 
+		print('Mean of labels {0}'.format(np.mean(testing_labels)))
+		print('STD of labels {0}'.format(np.std(testing_labels)))
+
 		training_labels /= 90
 		testing_labels /= 90
 
