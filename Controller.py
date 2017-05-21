@@ -103,6 +103,9 @@ class Worker(QObject):
 		except ValueError:
 			self.log_message.emit('\nAn Unexpected Error has Occured. Please check the .XML file.\n')
 			self.work_complete.emit()
+		except IndexError:
+			self.log_message.emit('\nAn Unexpected Error has Occured. Please check the .XML file.\n')
+			self.work_complete.emit()
 
 
 	# this function calculates the accuracy measurements from the predicted labels and actual labels
@@ -317,20 +320,21 @@ class Worker(QObject):
 			# intitialise Tensorflow optiimiser in computational graph, dependent upon previous user selection
 			if (learning_algo == 0):
 				optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.log_message.emit('Optimizer: Gradient Descent\n')
+				self.log_message.emit('Optimizer: Gradient Descent')
 			elif (learning_algo == 1):
 				optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.log_message.emit('Optimizer: Adam\n')
+				self.log_message.emit('Optimizer: Adam')
 			elif (learning_algo == 2):
 				optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.log_message.emit('Optimizer: Ada Grad\n')
+				self.log_message.emit('Optimizer: Ada Grad')
 			elif (learning_algo == 3):
 				optimizer = tf.train.AdadeltaOptimizer(learning_rate).minimize(loss, global_step=global_step)
-				self.log_message.emit('Optimizer: Ada Delta\n')
+				self.log_message.emit('Optimizer: Ada Delta')
 			elif (learning_algo == 4):
 				optimizer = tf.train.MomentumOptimizer(learning_rate, momentum).minimize(loss, global_step=global_step)
-				self.log_message.emit('Optimizer: Momentum, Momentum Value: {0}\n'.format(str(momentum)))
+				self.log_message.emit('Optimizer: Momentum, Momentum Value: {0}'.format(str(momentum)))
 
+			self.log_message.emit('Learning Rate: {0}\n'.format(str(learning_rate)))
 
 			if self.regression == False:
 				# convert one hot encoded array to single prediction value
@@ -426,7 +430,7 @@ class Worker(QObject):
 										self.log_message.emit('Permission Denied opening log file, please close the file or change the permissions')
 
 								# send batch accuracy to update accuracy graph (MAE for regression)
-								self.batch_acc.emit(batch_accuracy, epoch)
+								self.batch_acc.emit((batch_accuracy * 100), epoch)
 								self.train_valid_acc.emit(RMSE, 0, epoch)
 								self.train_valid_loss.emit(MAE, 0, epoch)
 							
@@ -577,7 +581,7 @@ class Worker(QObject):
 						file.write('\n\nTesting Set Performance\nTest Accuracy = ' + str(testing_accuracy_total * 100) + ' %\n')
 						file.write('Predicted Class, Actual Class\n')
 						for i in range(0, num_rows):
-							file.write(str(predicted_classes[i]) + ',' + str(testing_classes[i]) + '\n')
+							file.write(str(predicted_classes[i]) + ',' + str(actual_classes[i]) + '\n')
 						file.close()
 
 					# print test set accuracy to log
@@ -1131,6 +1135,14 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 		# makes beta value enabled or disabled when selecting whether to use L2 reg
 		self.chkL2Reg.stateChanged.connect(self.l2_reg_checkbox_state_changed)
 
+		# changes the text field and hides/shows spinner when choosing method of initialization for weights
+		self.cbxConvWeightInit.currentIndexChanged.connect(partial(self.weight_init_combo_changed, weight_init_combobox=self.cbxConvWeightInit, 
+			weight_val_spinner= self.spnConvStdDev, weight_val_label= self.lblConvStdDev, help_icon=self.hlpConvStdDev))
+		self.cbxFCWeightInit.currentIndexChanged.connect(partial(self.weight_init_combo_changed, weight_init_combobox=self.cbxFCWeightInit, 
+			weight_val_spinner= self.spnFCStdDev, weight_val_label= self.lblFCStdDev, help_icon=self.hlpFCStdDev))
+		self.cbxOutputWeightInit.currentIndexChanged.connect(partial(self.weight_init_combo_changed, weight_init_combobox=self.cbxOutputWeightInit, 
+			weight_val_spinner= self.spnOutputStdDev, weight_val_label= self.lblOutputStdDev, help_icon=self.hlpOutputStdDev))
+
 		# changes the text field and hides/shows spinner when choosing method of initialization for biases
 		self.cbxConvBiasInit.currentIndexChanged.connect(partial(self.bias_init_combo_changed, bias_init_combobox=self.cbxConvBiasInit, 
 			bias_val_spinner= self.spnConvBiasVal, bias_val_label= self.lblConvBiasVal, help_icon=self.hlpConvBiasVal))
@@ -1519,11 +1531,14 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 	# @param spinner = reference to spinner GUI element to grab standard deviation from
 	def return_weight_init(self, comboBox, spinner):
 		if comboBox.currentIndex() == 0:
-			weight_init = "Random Normal"
-			weight_std_dev = float(spinner.text())
-		elif comboBox.currentIndex() == 1:
 			weight_init = "Truncated Normal"
 			weight_std_dev = float(spinner.text())
+		elif comboBox.currentIndex() == 1:
+			weight_init = "Random Normal"
+			weight_std_dev = float(spinner.text())
+		elif comboBox.currentIndex() == 2:
+			weight_init = "Xavier"
+			weight_std_dev = 0
 		return weight_init, weight_std_dev
 
 	# returns bias initialization configuration depending on combo box index and spinner value
@@ -1582,9 +1597,8 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 
 		# check first layer is either a convolution or max pooling
 		if self.new_model[0].layer_type != 'Convolution':
-			if self.new_model[0].layer_type != 'Max Pool':
-				self.txtOutputModelLog.append('First layer must be Convolution or Pooling layer')
-				return
+			self.txtOutputModelLog.append('First layer must be a Convolution layer')
+			return
 
 		# variables used to validate network
 		fully_conn_count = 0
@@ -1751,6 +1765,23 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 	# @param bias_val_spinner = reference to spinner GUI element to take keep rate value from
 	# @param bias_val_label = reference to label GUI element that says which bias value measure is in use
 	# @param help_icon = reference to help icon GUI element that gives information about bias value measure
+	def weight_init_combo_changed(self, weight_init_combobox, weight_val_spinner, weight_val_label, help_icon):
+		# if random or truncated normal is used, show standard deviation option
+		if weight_init_combobox.currentIndex() == 0 or weight_init_combobox.currentIndex() == 1:
+			weight_val_label.setText('Std Dev:')
+			weight_val_spinner.setFixedWidth(60)
+			help_icon.setFixedWidth(24)
+			# if constant is used, show constant val option
+		elif weight_init_combobox.currentIndex() == 2:
+			weight_val_label.setText('')
+			weight_val_spinner.setFixedWidth(0)
+			help_icon.setFixedWidth(0)
+
+	# called when a combo box index is changed by user
+	# @param bias_init_comboBox = reference to GUI element that states bias initiliazation method
+	# @param bias_val_spinner = reference to spinner GUI element to take keep rate value from
+	# @param bias_val_label = reference to label GUI element that says which bias value measure is in use
+	# @param help_icon = reference to help icon GUI element that gives information about bias value measure
 	def bias_init_combo_changed(self, bias_init_combobox, bias_val_spinner, bias_val_label, help_icon):
 		if bias_init_combobox.currentIndex() == 0:
 			# if zeros init is used, hide all fields relating to a bias value
@@ -1759,7 +1790,7 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 			help_icon.setFixedWidth(0)
 			# if random or truncated normal is used, show standard deviation option
 		elif bias_init_combobox.currentIndex() == 1 or bias_init_combobox.currentIndex() == 2:
-			bias_val_label.setText('Std Dev of Weights:')
+			bias_val_label.setText('Std Dev:')
 			bias_val_spinner.setFixedWidth(60)
 			help_icon.setFixedWidth(24)
 			# if constant is used, show constant val option
@@ -1889,12 +1920,14 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 				self.txtOutputLog.append("Num Output Filters {0}".format(e.num_output_filters))
 				self.txtOutputLog.append("Kernel Size: [1,{0},{1},1], Stride: [1,{2},{3},1]".format(e.kernel_size, e.kernel_size, e.stride, e.stride))
 				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))  
-				self.txtOutputLog.append("Weight Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))
+				if e.weight_init == 'Xavier':
+					self.txtOutputLog.append("Weight Initialization: {0}".format(e.weight_init))
+				else: self.txtOutputLog.append("Weight Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))
 				if e.bias_init == 'Random Normal' or e.bias_init == 'Truncated Normal':
-					self.txtOutputLog.append("Bias Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))
+					self.txtOutputLog.append("Bias Initialization: {0}, Standard Deviation: {1}".format(e.bias_init, e.bias_val))
 				elif e.bias_init == 'Constant':
-					self.txtOutputLog.append("Bias Initialization: {0}, Value: {1}".format(e.weight_init, e.weight_val))
-				else: self.txtOutputLog.append("Bias Initialization: {0}".format(e.weight_init))
+					self.txtOutputLog.append("Bias Initialization: {0}, Value: {1}".format(e.bias_init, e.bias_val))
+				else: self.txtOutputLog.append("Bias Initialization: {0}".format(e.bias_init))
 				self.txtOutputLog.append("Padding: {0}".format(e.padding))  
 				self.txtOutputLog.append("Normalize: {0}".format(e.normalize))  
 				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keep_rate)) 
@@ -1908,22 +1941,26 @@ class CNNApp(QMainWindow, design.Ui_MainWindow):
 				self.txtOutputLog.append('Type: Fully Connected')
 				self.txtOutputLog.append("Num Output Nodes {0}".format(e.num_output_nodes))
 				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))
-				self.txtOutputLog.append("Weight Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))   
+				if e.weight_init == 'Xavier':
+					self.txtOutputLog.append("Weight Initialization: {0}".format(e.weight_init))
+				else: self.txtOutputLog.append("Weight Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))  
 				if e.bias_init == 'Random Normal' or e.bias_init == 'Truncated Normal':
-					self.txtOutputLog.append("Bias Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))
+					self.txtOutputLog.append("Bias Initialization: {0}, Standard Deviation: {1}".format(e.bias_init, e.bias_val))
 				elif e.bias_init == 'Constant':
-					self.txtOutputLog.append("Bias Initialization: {0}, Value: {1}".format(e.weight_init, e.weight_val))
-				else: self.txtOutputLog.append("Bias Initialization: {0}".format(e.weight_init))
+					self.txtOutputLog.append("Bias Initialization: {0}, Value: {1}".format(e.bias_init, e.bias_val))
+				else: self.txtOutputLog.append("Bias Initialization: {0}".format(e.bias_init))
 				self.txtOutputLog.append("Dropout: {0}, Keep Rate {1} \n".format(e.dropout, e.keep_rate)) 
 			elif e.layer_type == 'Output':
 				self.txtOutputLog.append('Type: Output')
 				self.txtOutputLog.append("Activation Function: {0}".format(e.act_function))  
-				self.txtOutputLog.append("Weight Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))
+				if e.weight_init == 'Xavier':
+					self.txtOutputLog.append("Weight Initialization: {0}".format(e.weight_init))
+				else: self.txtOutputLog.append("Weight Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))
 				if e.bias_init == 'Random Normal' or e.bias_init == 'Truncated Normal':
-					self.txtOutputLog.append("Bias Initialization: {0}, Standard Deviation: {1}".format(e.weight_init, e.weight_val))
+					self.txtOutputLog.append("Bias Initialization: {0}, Standard Deviation: {1}".format(e.bias_init, e.bias_val))
 				elif e.bias_init == 'Constant':
-					self.txtOutputLog.append("Bias Initialization: {0}, Value: {1}".format(e.weight_init, e.weight_val))
-				else: self.txtOutputLog.append("Bias Initialization: {0}".format(e.weight_init))
+					self.txtOutputLog.append("Bias Initialization: {0}, Value: {1}".format(e.bias_init, e.bias_val))
+				else: self.txtOutputLog.append("Bias Initialization: {0}".format(e.bias_init))
 		self.txtOutputLog.append('\n------------------------------------------------------------------------------------------------------------- \n')
 
 	# called when switching between regression and classification tasks, changes title of accuracy grapg

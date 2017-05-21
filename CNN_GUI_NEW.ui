@@ -482,7 +482,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many Epochs to train for.&lt;/p&gt;&lt;p&gt;Range: 100 - 100000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many Epochs to train for. This value can be set to Zero to just perform the Testing phase.&lt;/p&gt;&lt;p&gt;Range: 100 - 100000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string/>
@@ -2091,10 +2091,22 @@
              <item row="5" column="1">
               <widget class="QComboBox" name="cbxConvWeightInit">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
                </property>
                <item>
                 <property name="text">
@@ -2104,6 +2116,11 @@
                <item>
                 <property name="text">
                  <string>Random Normal</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Xavier</string>
                 </property>
                </item>
               </widget>
@@ -2271,6 +2288,24 @@
              </item>
              <item row="6" column="1">
               <widget class="QComboBox" name="cbxConvBiasInit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <item>
                 <property name="text">
                  <string>Zeros</string>
@@ -2315,10 +2350,22 @@
              <item row="3" column="1">
               <widget class="QComboBox" name="cbxConvActFunction">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
                </property>
                <item>
                 <property name="text">
@@ -2328,11 +2375,6 @@
                <item>
                 <property name="text">
                  <string>Sigmoid</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Tanh</string>
                 </property>
                </item>
               </widget>
@@ -2357,7 +2399,7 @@
              <item row="5" column="4">
               <widget class="QLabel" name="lblConvStdDev">
                <property name="text">
-                <string>Std Dev of Weights:</string>
+                <string>Std Dev:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2392,6 +2434,12 @@
              </item>
              <item row="1" column="1">
               <widget class="QLineEdit" name="txtConvName">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>120</width>
@@ -2639,6 +2687,12 @@
              </item>
              <item row="0" column="1">
               <widget class="QLineEdit" name="txtPoolName">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>120</width>
@@ -2810,9 +2864,9 @@
            <widget class="QWidget" name="gridLayoutWidget_6">
             <property name="geometry">
              <rect>
-              <x>15</x>
+              <x>17</x>
               <y>10</y>
-              <width>463</width>
+              <width>461</width>
               <height>201</height>
              </rect>
             </property>
@@ -2939,6 +2993,24 @@
              </item>
              <item row="1" column="1">
               <widget class="QComboBox" name="cbxFCActFunction">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <item>
                 <property name="text">
                  <string>Rectified Linear</string>
@@ -2947,11 +3019,6 @@
                <item>
                 <property name="text">
                  <string>Sigmoid</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Tanh</string>
                 </property>
                </item>
               </widget>
@@ -2978,7 +3045,7 @@
              <item row="4" column="4">
               <widget class="QLabel" name="lblFCStdDev">
                <property name="text">
-                <string>Std Dev of Weights:</string>
+                <string>Std Dev:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -3051,6 +3118,24 @@
              </item>
              <item row="4" column="1">
               <widget class="QComboBox" name="cbxFCWeightInit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <item>
                 <property name="text">
                  <string>Truncated Normal</string>
@@ -3059,6 +3144,11 @@
                <item>
                 <property name="text">
                  <string>Random Normal</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Xavier</string>
                 </property>
                </item>
               </widget>
@@ -3093,6 +3183,18 @@
              </item>
              <item row="5" column="1">
               <widget class="QComboBox" name="cbxFCBiasInit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <item>
                 <property name="text">
                  <string>Zeros</string>
@@ -3246,6 +3348,22 @@
                </property>
               </widget>
              </item>
+             <item row="2" column="4">
+              <spacer name="horizontalSpacer_20">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>95</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </widget>
            <widget class="QPushButton" name="btnAddFullyConn">
@@ -3281,9 +3399,9 @@
            <widget class="QWidget" name="gridLayoutWidget_7">
             <property name="geometry">
              <rect>
-              <x>20</x>
+              <x>17</x>
               <y>10</y>
-              <width>463</width>
+              <width>461</width>
               <height>131</height>
              </rect>
             </property>
@@ -3323,7 +3441,7 @@
              <item row="3" column="4">
               <widget class="QLabel" name="lblOutputStdDev">
                <property name="text">
-                <string>Std Dev of Weights:</string>
+                <string>Std Dev:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -3390,6 +3508,24 @@
              </item>
              <item row="3" column="1">
               <widget class="QComboBox" name="cbxOutputWeightInit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <item>
                 <property name="text">
                  <string>Truncated Normal</string>
@@ -3398,6 +3534,11 @@
                <item>
                 <property name="text">
                  <string>Random Normal</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Xavier</string>
                 </property>
                </item>
               </widget>
@@ -3414,6 +3555,24 @@
              </item>
              <item row="1" column="1">
               <widget class="QComboBox" name="cbxOutputActFunction">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <item>
                 <property name="text">
                  <string>None</string>
@@ -3427,11 +3586,6 @@
                <item>
                 <property name="text">
                  <string>Sigmoid</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Tanh</string>
                 </property>
                </item>
               </widget>
@@ -3467,6 +3621,24 @@
              </item>
              <item row="4" column="1">
               <widget class="QComboBox" name="cbxOutputBiasInit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <item>
                 <property name="text">
                  <string>Zeros</string>
@@ -3586,6 +3758,54 @@
                 <double>0.050000000000000</double>
                </property>
               </widget>
+             </item>
+             <item row="1" column="4">
+              <spacer name="horizontalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>85</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="1" column="5">
+              <spacer name="horizontalSpacer_12">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>45</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="1" column="6">
+              <spacer name="horizontalSpacer_19">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>30</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </widget>
@@ -4363,7 +4583,7 @@ font: 75 11pt &quot;MS Shell Dlg 2&quot;;</string>
      <widget class="QGroupBox" name="grpTestValidSplit">
       <property name="geometry">
        <rect>
-        <x>840</x>
+        <x>850</x>
         <y>40</y>
         <width>281</width>
         <height>151</height>
@@ -4481,7 +4701,7 @@ font: 75 11pt &quot;MS Shell Dlg 2&quot;;</string>
            <number>10</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>90</number>
           </property>
           <property name="singleStep">
            <number>10</number>

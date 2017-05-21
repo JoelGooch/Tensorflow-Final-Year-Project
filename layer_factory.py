@@ -71,6 +71,8 @@ class layer_factory():
             return tf.Variable(tf.random_normal(shape=shape, stddev=val), name=weight_name)
         elif init == 'Truncated Normal':
             return tf.Variable(tf.truncated_normal(shape=shape, stddev=val), name=weight_name)
+        elif init == 'Xavier':
+            return tf.get_variable(name=name, shape=shape, dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer())
 
     # helper function to create biases defined by user
     #   @param length = number of bias values to be created
@@ -275,8 +277,7 @@ class layer_factory():
             layer = tf.nn.relu(layer)
         elif act_function == 'Sigmoid':
             layer = tf.sigmoid(layer)
-        elif act_function == "Tanh":
-            layer = tf.tanh(layer)
+
         return layer
 
     # function that adds normalization, if user requires

@@ -4,12 +4,44 @@ import pickle
 
 # this file abstracts away the preparing and loading of data sets
 
+
+# loads the annotated facial landmarks in the wild files for the yaw measurement
+#   @param data_path = string containing where to load data set from
+#   @param prima_test_person_out = int value that states which person to use for testing
+def load_AFLW_yaw(data_path, test_person_out):
+
+    image_size = 64 # images are 64x64x3
+    num_channels = 3 # RGB
+    num_classes = 1 # regression problem
+
+    pickle_directory = data_path + "afwl_f" + str(test_person_out) + ".pickle"
+    print(pickle_directory)
+    
+    with open(pickle_directory, mode='rb') as file:
+        data = pickle.load(file, encoding='bytes')
+        training_data = data[b'training_dataset']
+        training_labels = data[b'training_label_yaw']
+        testing_data = data[b'test_dataset']
+        testing_labels = data[b'test_label_yaw']
+        # garbage collect unused data
+        del data
+
+    # reshape data
+    training_data = training_data.reshape((-1, image_size, image_size, num_channels)).astype(np.float32)
+    training_labels = training_labels.reshape((-1, 1)).astype(np.float32)
+
+    testing_data = testing_data.reshape((-1, image_size, image_size, num_channels)).astype(np.float32)
+    testing_labels = testing_labels.reshape((-1, 1)).astype(np.float32)
+
+    return training_data, training_labels, testing_data, testing_labels, image_size, num_channels, num_classes
+
+
 # loads the prima head pose files for the pitch measurement
 #   @param data_path = string containing where to load data set from
 #   @param prima_test_person_out = int value that states which person to use for testing
 def load_prima_head_pose_pitch(data_path, prima_test_person_out):
 
-    image_size = 64 # images are 32x32x3
+    image_size = 64 # images are 64x64x3
     num_channels = 3 # RGB
     num_classes = 1 # regression problem
 
@@ -38,7 +70,7 @@ def load_prima_head_pose_pitch(data_path, prima_test_person_out):
 #   @param prima_test_person_out = int value that states which person to use for testing
 def load_prima_head_pose_yaw(data_path, prima_test_person_out):
 
-    image_size = 64 # images are 32x32x3
+    image_size = 64 # images are 64x64x3
     num_channels = 3 # RGB
     num_classes = 1 # regression problem
 
